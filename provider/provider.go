@@ -1,4 +1,4 @@
-package provider
+package main
 
 import (
 	"github.com/hashicorp/terraform/helper/schema"
