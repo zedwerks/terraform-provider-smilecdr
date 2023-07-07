@@ -12,7 +12,7 @@ import (
 
 func Provider() *schema.Provider {
 	return &schema.Provider{
-		ResourcesMap: map[string]*schema.Resource{
+		Schema: map[string]*schema.Schema{
 			"host": &schema.Schema{
 				Type:        schema.TypeString,
 				Optional:    true,
@@ -37,6 +37,7 @@ func Provider() *schema.Provider {
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 			"smilecdr_openid_client": dataSourceOpenIdClient(),
+			"smilecdr_openid_server": dataSourceOpenIdServer(),
 		},
 		ConfigureContextFunc: providerConfigure,
 	}
@@ -46,10 +47,5 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}
 
 	var diags diag.Diagnostics
 
-	username := d.Get("username").(string)
-	password := d.Get("password").(string)
-
-	var host *string
-
-	return c, diags
+	return nil, diags
 }
