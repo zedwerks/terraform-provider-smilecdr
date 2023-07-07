@@ -19,6 +19,12 @@ func Provider() *schema.Provider {
 				Default:     "localhost",
 				DefaultFunc: schema.EnvDefaultFunc("SMILECDR_HOST", nil),
 			},
+			"port": &schema.Schema{
+				Type:        schema.TypeInt,
+				Optional:    true,
+				Default:     9000,
+				DefaultFunc: schema.EnvDefaultFunc("SMILECDR_PORT", nil),
+			},
 			"username": &schema.Schema{
 				Type:        schema.TypeString,
 				Optional:    true,
@@ -36,7 +42,7 @@ func Provider() *schema.Provider {
 			"smilecdr_openid_server": resourceOpenIdServer(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
-			"smilecdr_openid_client": dataSourceOpenIdClient(),
+			"smilecdr_openid_client": dataSourceOpenIdClients(),
 			"smilecdr_openid_server": dataSourceOpenIdServer(),
 		},
 		ConfigureContextFunc: providerConfigure,

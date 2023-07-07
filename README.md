@@ -1,10 +1,31 @@
 # terraform-provider-smilecdr
 
 An initial cut at creating a Terraform provider for Smile CDR. Focus early days on security module configurations:
-  - Identity Providers,
-  - Inbound Security Module
-  - Clients
-  - Authorization and Permissions.
+
+- OpenID Identity Providers
+- OIDC Clients
+- Authorization and Permissions.
 
 Then later on, add more comprehensive configurations for Smile CDR.
 
+## Build
+
+Run the following command to build the provider
+
+```shell
+go build -o terraform-provider-smilecdr
+```
+
+## Test sample configuration
+
+First, build and install the provider.
+
+```shell
+make install
+```
+
+Then, run the following command to initialize the workspace and apply the example configuration.
+
+```shell
+terraform init && terraform apply
+```
