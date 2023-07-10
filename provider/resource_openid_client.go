@@ -38,7 +38,7 @@ func resourceOpenIdClient() *schema.Resource {
 				Default:  300,
 			},
 			"allowedGrantTypes": &schema.Schema{
-				Type:     schema.TypeList,
+				Type:     schema.TypeSet,
 				Required: false,
 				Elem: &schema.Schema{
 					Type:     schema.TypeString,
@@ -46,14 +46,14 @@ func resourceOpenIdClient() *schema.Resource {
 				},
 			},
 			"autoApproveScopes": &schema.Schema{
-				Type:     schema.TypeList,
+				Type:     schema.TypeSet,
 				Required: false,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
 			},
 			"autoGrantScopes": &schema.Schema{
-				Type:     schema.TypeList,
+				Type:     schema.TypeSet,
 				Required: false,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
@@ -69,7 +69,7 @@ func resourceOpenIdClient() *schema.Resource {
 				Default:  "Some Client",
 			},
 			"clientSecrets": &schema.Schema{
-				Type:     schema.TypeList,
+				Type:     schema.TypeSet,
 				Required: false,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
@@ -113,7 +113,7 @@ func resourceOpenIdClient() *schema.Resource {
 				Default:  86400,
 			},
 			"registeredRedirectUris": &schema.Schema{
-				Type:     schema.TypeList,
+				Type:     schema.TypeSet,
 				Required: false,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
@@ -162,7 +162,7 @@ func resourceOpenIdClient() *schema.Resource {
 				Default:  false,
 			},
 			"permissions": &schema.Schema{
-				Type:     schema.TypeList,
+				Type:     schema.TypeSet,
 				Required: false,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
