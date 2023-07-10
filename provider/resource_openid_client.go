@@ -1,7 +1,7 @@
 // Copyright (c) Zed Werks Inc.
 // SPDX-License-Identifier: APACHE-2.0
 
-package smilecdr
+package provider
 
 import (
 	"context"

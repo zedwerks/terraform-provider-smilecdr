@@ -1,7 +1,7 @@
 // Copyright (c) Zed Werks Inc.
 // SPDX-License-Identifier: APACHE-2.0
 
-package smilecdr
+package provider
 
 import (
 	"context"
@@ -11,9 +11,12 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func dataSourceOpenIdServer() *schema.Resource {
+func resourceOpenIdServer() *schema.Resource {
 	return &schema.Resource{
-		ReadContext: dataSourceOpenIdServerRead,
+		CreateContext: resourceOpenIdServerCreate,
+		ReadContext:   resourceOpenIdServerRead,
+		UpdateContext: resourceOpenIdServerUpdate,
+		DeleteContext: resourceOpenIdServerDelete,
 		Schema: map[string]*schema.Schema{
 			"pid": &schema.Schema{
 				Type:     schema.TypeInt,
@@ -130,7 +133,28 @@ func dataSourceOpenIdServer() *schema.Resource {
 	}
 }
 
-func dataSourceOpenIdServerRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceOpenIdServerCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+
+	var diags diag.Diagnostics
+
+	return diags
+}
+
+func resourceOpenIdServerRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+
+	var diags diag.Diagnostics
+
+	return diags
+}
+
+func resourceOpenIdServerUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+
+	var diags diag.Diagnostics
+
+	return diags
+}
+
+func resourceOpenIdServerDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 
 	var diags diag.Diagnostics
 
