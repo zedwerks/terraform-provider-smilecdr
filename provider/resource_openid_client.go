@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/zed-werks/terraform-smilecdr/provider/util"
 )
 
 var (
@@ -211,8 +212,9 @@ func resourceOpenIdClient() *schema.Resource {
 				},
 			},
 			"clientId": {
-				Type:     schema.TypeString,
-				Required: true,
+				Type:         schema.TypeString,
+				Required:     true,
+				ValidateFunc: util.ValidateClientId,
 			},
 			"clientName": {
 				Type:     schema.TypeString,
@@ -360,12 +362,17 @@ func resourceOpenIdClient() *schema.Resource {
 				Default:  false,
 			},
 		},
+		Importer: &schema.ResourceImporter{
+			State: schema.ImportStatePassthrough,
+		},
 	}
 }
 
 func resourceOpenIdClientCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 
 	var diags diag.Diagnostics
+
+	apiClient := m.(*apiclient.Client)
 
 	return diags
 

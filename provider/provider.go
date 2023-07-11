@@ -5,9 +5,11 @@ package provider
 
 import (
 	"context"
+	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/zed-werks/terraform-smilecdr/client"
 )
 
 func SmileCdrProvider() *schema.Provider {
@@ -45,6 +47,46 @@ func SmileCdrProvider() *schema.Provider {
 func providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}, diag.Diagnostics) {
 
 	var diags diag.Diagnostics
+
+	username := d.Get("username").(string)
+	password := d.Get("password").(string)
+
+	var baseUrl *string
+
+	uVal, ok = d.GetOk("baseUrl")
+
+	if ok {
+		base := uVal.(string)
+		if !strings.HasSuffix(base, "/") {
+			base += "/"
+		}
+		baseUrl = &base
+	}
+
+	if (username != "") && (password != "") {
+		c, err := client.NewClient(baseUrl, &username, &password)
+		if err != nil {
+			diags = append(diags, diag.Diagnostic{
+				Severity: diag.Error,
+				Summary:  "Unable to create Smile CDR client",
+				Detail:   "Unable to authenticate user for authenticated Smile CDR client",
+			})
+
+			return nil, diags
+		}
+
+		return c, diags
+	}
+
+	c, err := client.NewClient(baseUrl, nil, nil)
+	if err != nil {
+		diags = append(diags, diag.Diagnostic{
+			Severity: diag.Error,
+			Summary:  "Unable to create Smile CDR client",
+			Detail:   "Unable to create  Smile CDR  client",
+		})
+		return nil, diags
+	}
 
 	return nil, diags
 }
