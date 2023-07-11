@@ -11,6 +11,155 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
+var (
+	smileCdrUserPermissionTypes = []string{"ACCESS_ADMIN_JSON", "ACCESS_ADMIN_WEB",
+		"ACCESS_FHIRWEB",
+		"ACCESS_FHIR_ENDPOINT",
+		"AG_ADMIN_CONSOLE_READ",
+		"AG_ADMIN_CONSOLE_WRITE",
+		"AG_DEV_PORTAL_READ",
+		"AG_DEV_PORTAL_WRITE",
+		"ARCHIVE_MODULE",
+		"BLOCK_FHIR_READ_UNLESS_CODE_IN_VS",
+		"BLOCK_FHIR_READ_UNLESS_CODE_NOT_IN_VS",
+		"CDA_IMPORT",
+		"CHANGE_OWN_DEFAULT_LAUNCH_CONTEXTS",
+		"CHANGE_OWN_PASSWORD",
+		"CHANGE_OWN_TFA_KEY",
+		"CONTROL_MODULE",
+		"CREATE_CDA_TEMPLATE",
+		"CREATE_MODULE",
+		"CREATE_USER",
+		"DELETE_CDA_TEMPLATE",
+		"DOCREF",
+		"DQM_QPP_BUILD",
+		"EMPI_ADMIN",
+		"EMPI_UPDATE_MATCH_RULES",
+		"EMPI_VIEW_MATCH_RULES",
+		"ETL_IMPORT_PROCESS_FILE",
+		"FHIR_ACCESS_PARTITION_ALL",
+		"FHIR_ACCESS_PARTITION_NAME",
+		"FHIR_ALL_DELETE",
+		"FHIR_ALL_READ",
+		"FHIR_ALL_WRITE",
+		"FHIR_AUTO_MDM",
+		"FHIR_BATCH",
+		"FHIR_CAPABILITIES",
+		"FHIR_DELETE_ALL_IN_COMPARTMENT",
+		"FHIR_DELETE_ALL_OF_TYPE",
+		"FHIR_DELETE_CASCADE_ALLOWED",
+		"FHIR_DELETE_EXPUNGE",
+		"FHIR_DELETE_TYPE_IN_COMPARTMENT",
+		"FHIR_DTR_USER",
+		"FHIR_EMPI_ADMIN",
+		"FHIR_EXPUNGE_DELETED",
+		"FHIR_EXPUNGE_EVERYTHING",
+		"FHIR_EXPUNGE_PREVIOUS_VERSIONS",
+		"FHIR_EXTENDED_OPERATION_ON_ANY_INSTANCE",
+		"FHIR_EXTENDED_OPERATION_ON_ANY_INSTANCE_OF_TYPE",
+		"FHIR_EXTENDED_OPERATION_ON_SERVER",
+		"FHIR_EXTENDED_OPERATION_ON_TYPE",
+		"FHIR_GET_RESOURCE_COUNTS",
+		"FHIR_GRAPHQL",
+		"FHIR_LIVEBUNDLE",
+		"FHIR_MANAGE_PARTITIONS",
+		"FHIR_MANUAL_VALIDATION",
+		"FHIR_MDM_ADMIN",
+		"FHIR_META_OPERATIONS_SUPERUSER",
+		"FHIR_MODIFY_SEARCH_PARAMETERS",
+		"FHIR_OP_APPLY",
+		"FHIR_OP_BINARY_ACCESS_READ",
+		"FHIR_OP_BINARY_ACCESS_WRITE",
+		"FHIR_OP_CQL_EVALUATE_MEASURE",
+		"FHIR_OP_EMPI_CLEAR",
+		"FHIR_OP_EMPI_DUPLICATE_PERSONS",
+		"FHIR_OP_EMPI_MERGE_PERSONS",
+		"FHIR_OP_EMPI_QUERY_LINKS",
+		"FHIR_OP_EMPI_SUBMIT",
+		"FHIR_OP_EMPI_UPDATE_LINK",
+		"FHIR_OP_ENCOUNTER_EVERYTHING",
+		"FHIR_OP_EXTRACT",
+		"FHIR_OP_INITIATE_BULK_DATA_EXPORT",
+		"FHIR_OP_INITIATE_BULK_DATA_EXPORT_GROUP",
+		"FHIR_OP_INITIATE_BULK_DATA_EXPORT_PATIENT",
+		"FHIR_OP_INITIATE_BULK_DATA_EXPORT_SYSTEM",
+		"FHIR_OP_INITIATE_BULK_DATA_IMPORT",
+		"FHIR_OP_MDM_CLEAR",
+		"FHIR_OP_MDM_CREATE_LINK",
+		"FHIR_OP_MDM_DUPLICATE_GOLDEN_RESOURCES",
+		"FHIR_OP_MDM_LINK_HISTORY",
+		"FHIR_OP_MDM_MERGE_GOLDEN_RESOURCES",
+		"FHIR_OP_MDM_NOT_DUPLICATE",
+		"FHIR_OP_MDM_QUERY_LINKS",
+		"FHIR_OP_MDM_SUBMIT",
+		"FHIR_OP_MDM_UPDATE_LINK",
+		"FHIR_OP_MEMBER_MATCH",
+		"FHIR_OP_PACKAGE",
+		"FHIR_OP_PATIENT_EVERYTHING",
+		"FHIR_OP_PATIENT_MATCH",
+		"FHIR_OP_PATIENT_SUMMARY",
+		"FHIR_OP_POPULATE",
+		"FHIR_OP_PREPOPULATE",
+		"FHIR_OP_STRUCTUREDEFINITION_SNAPSHOT",
+		"FHIR_PATCH",
+		"FHIR_PROCESS_MESSAGE",
+		"FHIR_READ_ALL_IN_COMPARTMENT",
+		"FHIR_READ_ALL_OF_TYPE",
+		"FHIR_READ_INSTANCE",
+		"FHIR_READ_SEARCH_PARAMETERS",
+		"FHIR_READ_TYPE_IN_COMPARTMENT",
+		"FHIR_TRANSACTION",
+		"FHIR_TRIGGER_SUBSCRIPTION",
+		"FHIR_UPDATE_REWRITE_HISTORY",
+		"FHIR_UPLOAD_EXTERNAL_TERMINOLOGY",
+		"FHIR_WRITE_ALL_IN_COMPARTMENT",
+		"FHIR_WRITE_ALL_OF_TYPE",
+		"FHIR_WRITE_INSTANCE",
+		"FHIR_WRITE_TYPE_IN_COMPARTMENT",
+		"INVOKE_CDS_HOOKS",
+		"MANAGE_BATCH_JOBS",
+		"MDM_ADMIN",
+		"MDM_UPDATE_MATCH_RULES",
+		"MDM_VIEW_MATCH_RULES",
+		"MODULE_ADMIN",
+		"OIDC_CLIENT_PRESET_PERMISSION",
+		"OPENID_CONNECT_ADD_CLIENT",
+		"OPENID_CONNECT_ADD_SERVER",
+		"OPENID_CONNECT_EDIT_CLIENT",
+		"OPENID_CONNECT_EDIT_SERVER",
+		"OPENID_CONNECT_MANAGE_GLOBAL_SESSIONS",
+		"OPENID_CONNECT_VIEW_CLIENT_LIST",
+		"OPENID_CONNECT_VIEW_SERVER_LIST",
+		"PACKAGE_REGISTRY_READ",
+		"PACKAGE_REGISTRY_WRITE",
+		"REINSTATE_MODULE",
+		"ROLE_ANONYMOUS",
+		"ROLE_FHIR_CLIENT",
+		"ROLE_FHIR_CLIENT_SUPERUSER",
+		"ROLE_FHIR_CLIENT_SUPERUSER_RO",
+		"ROLE_FHIR_TERMINOLOGY_READ_CLIENT",
+		"ROLE_SUPERUSER",
+		"ROLE_SYSTEM",
+		"ROLE_SYSTEM_INITIALIZATION",
+		"SAVE_USER",
+		"START_STOP_MODULE",
+		"SUBMIT_ATTACHMENT",
+		"UPDATE_MODULE_CONFIG",
+		"UPDATE_USER",
+		"USE_CDA_TEMPLATE",
+		"VIEW_AUDIT_LOG",
+		"VIEW_BATCH_JOBS",
+		"VIEW_CDA_TEMPLATE",
+		"VIEW_METRICS",
+		"VIEW_MODULE_CONFIG",
+		"VIEW_MODULE_STATUS",
+		"VIEW_TRANSACTION_LOG",
+		"VIEW_TRANSACTION_LOG_EVENT",
+		"VIEW_USERS"}
+	smilecdrOpenidClientAccessTypes        = []string{"CONFIDENTIAL", "PUBLIC", "BEARER-ONLY"}
+	smilecdrOpenidClientAuthenticatorTypes = []string{"client-secret", "client-jwt", "client-x509", "client-secret-jwt"}
+)
+
 func resourceOpenIdClient() *schema.Resource {
 	return &schema.Resource{
 		CreateContext: resourceOpenIdClientCreate,
@@ -18,26 +167,26 @@ func resourceOpenIdClient() *schema.Resource {
 		UpdateContext: resourceOpenIdClientUpdate,
 		DeleteContext: resourceOpenIdClientDelete,
 		Schema: map[string]*schema.Schema{
-			"pid": &schema.Schema{
+			"pid": {
 				Type:     schema.TypeInt,
 				Required: false,
 			},
-			"nodeId": &schema.Schema{
+			"nodeId": {
 				Type:     schema.TypeString,
 				Required: false,
 				Default:  "Master",
 			},
-			"moduleId": &schema.Schema{
+			"moduleId": {
 				Type:     schema.TypeString,
 				Required: false,
 				Default:  "smart_auth",
 			},
-			"accessTokenValiditySeconds": &schema.Schema{
+			"accessTokenValiditySeconds": {
 				Type:     schema.TypeInt,
 				Required: false,
 				Default:  300,
 			},
-			"allowedGrantTypes": &schema.Schema{
+			"allowedGrantTypes": {
 				Type:     schema.TypeSet,
 				Required: false,
 				Elem: &schema.Schema{
@@ -45,55 +194,55 @@ func resourceOpenIdClient() *schema.Resource {
 					Required: false,
 				},
 			},
-			"autoApproveScopes": &schema.Schema{
+			"autoApproveScopes": {
 				Type:     schema.TypeSet,
 				Required: false,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
 			},
-			"autoGrantScopes": &schema.Schema{
+			"autoGrantScopes": {
 				Type:     schema.TypeSet,
 				Required: false,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
 			},
-			"clientId": &schema.Schema{
+			"clientId": {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"clientName": &schema.Schema{
+			"clientName": {
 				Type:     schema.TypeString,
 				Required: false,
 				Default:  "Some Client",
 			},
-			"clientSecrets": &schema.Schema{
+			"clientSecrets": {
 				Type:     schema.TypeSet,
 				Required: false,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 
-						"pid": &schema.Schema{
+						"pid": {
 							Type:     schema.TypeInt,
 							Required: false,
 						},
-						"secret": &schema.Schema{
+						"secret": {
 							Type:     schema.TypeString,
 							Required: true,
 						},
-						"description": &schema.Schema{
+						"description": {
 							Type:     schema.TypeString,
 							Required: false,
 							Default:  "",
 						},
-						"activation": &schema.Schema{
+						"activation": {
 							Type:         schema.TypeString,
 							Required:     false,
 							Default:      "",
 							ValidateFunc: validation.IsRFC3339Time,
 						},
-						"expiration": &schema.Schema{
+						"expiration": {
 							Type:         schema.TypeString,
 							Required:     false,
 							Default:      "",
@@ -102,98 +251,108 @@ func resourceOpenIdClient() *schema.Resource {
 					},
 				},
 			},
-			"fixedScope": &schema.Schema{
+			"fixedScope": {
 				Type:     schema.TypeBool,
 				Required: false,
 				Default:  false,
 			},
-			"refreshTokenValiditySeconds": &schema.Schema{
+			"refreshTokenValiditySeconds": {
 				Type:     schema.TypeInt,
 				Required: false,
 				Default:  86400,
 			},
-			"registeredRedirectUris": &schema.Schema{
+			"registeredRedirectUris": {
 				Type:     schema.TypeSet,
 				Required: false,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
 			},
-			"scopes": &schema.Schema{
+			"scopes": {
 				Type:     schema.TypeList,
 				Required: false,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
 			},
-			"secretRequired": &schema.Schema{
+			"secretRequired": {
 				Type:     schema.TypeBool,
 				Required: false,
 				Default:  false,
 			},
-			"secretClientCanChange": &schema.Schema{
+			"secretClientCanChange": {
 				Type:     schema.TypeBool,
 				Required: false,
 				Default:  false,
 			},
-			"enabled": &schema.Schema{
+			"enabled": {
 				Type:     schema.TypeBool,
 				Required: false,
 				Default:  true,
 			},
-			"canIntrospectAnyTokens": &schema.Schema{
+			"canIntrospectAnyTokens": {
 				Type:     schema.TypeBool,
 				Required: false,
 				Default:  false,
 			},
-			"canIntrospectOwnTokens": &schema.Schema{
+			"canIntrospectOwnTokens": {
 				Type:     schema.TypeBool,
 				Required: false,
 				Default:  false,
 			},
-			"alwaysRequireApproval": &schema.Schema{
+			"alwaysRequireApproval": {
 				Type:     schema.TypeBool,
 				Required: false,
 				Default:  false,
 			},
-			"canReissueTokens": &schema.Schema{
+			"canReissueTokens": {
 				Type:     schema.TypeBool,
 				Required: false,
 				Default:  false,
 			},
-			"permissions": &schema.Schema{
+			"permissions": {
 				Type:     schema.TypeSet,
 				Required: false,
-				Elem: &schema.Schema{
-					Type: schema.TypeString,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"permission": {
+							Type:         schema.TypeString,
+							Required:     true,
+							ValidateFunc: schema.SchemaValidateFunc(validation.StringInSlice(smileCdrUserPermissionTypes, false)),
+						},
+						"argument": {
+							Type:     schema.TypeString,
+							Required: false,
+						},
+					},
 				},
 			},
-			"rememberApprovedScopes": &schema.Schema{
+			"rememberApprovedScopes": {
 				Type:     schema.TypeBool,
 				Required: false,
 				Default:  false,
 			},
-			"attestationAccepted": &schema.Schema{
+			"attestationAccepted": {
 				Type:     schema.TypeBool,
 				Required: false,
 				Default:  false,
 			},
-			"publicJwks": &schema.Schema{
+			"publicJwks": {
 				Type:     schema.TypeString,
 				Required: false,
 				Default:  "",
 			},
-			"jwksUrl": &schema.Schema{
+			"jwksUrl": {
 				Type:     schema.TypeString,
 				Required: false,
 				Default:  "",
 			},
-			"archivedAt": &schema.Schema{
+			"archivedAt": {
 				Type:         schema.TypeString,
 				Required:     false,
 				ValidateFunc: validation.IsRFC3339Time,
 			},
-			"createdByAppSphere": &schema.Schema{
+			"createdByAppSphere": {
 				Type:     schema.TypeBool,
 				Required: false,
 				Default:  false,
