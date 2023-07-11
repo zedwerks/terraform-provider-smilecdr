@@ -156,8 +156,7 @@ var (
 		"VIEW_TRANSACTION_LOG",
 		"VIEW_TRANSACTION_LOG_EVENT",
 		"VIEW_USERS"}
-	smilecdrOpenidClientAccessTypes        = []string{"CONFIDENTIAL", "PUBLIC", "BEARER-ONLY"}
-	smilecdrOpenidClientAuthenticatorTypes = []string{"client-secret", "client-jwt", "client-x509", "client-secret-jwt"}
+	smileCdrOpenIdAuthorizationFlows = []string{"AUTHORIZATION_CODE", "CLIENT_CREDENTIALS", "IMPLICIT", "JWT_BEARER", "PASSWORD", "REFRESH_TOKEN"}
 )
 
 func resourceOpenIdClient() *schema.Resource {
@@ -190,22 +189,25 @@ func resourceOpenIdClient() *schema.Resource {
 				Type:     schema.TypeSet,
 				Required: false,
 				Elem: &schema.Schema{
-					Type:     schema.TypeString,
-					Required: false,
+					Type:         schema.TypeString,
+					Required:     false,
+					ValidateFunc: schema.SchemaValidateFunc(validation.StringInSlice(smileCdrOpenIdAuthorizationFlows, false)),
 				},
 			},
 			"autoApproveScopes": {
 				Type:     schema.TypeSet,
 				Required: false,
 				Elem: &schema.Schema{
-					Type: schema.TypeString,
+					Type:     schema.TypeString,
+					Required: false,
 				},
 			},
 			"autoGrantScopes": {
 				Type:     schema.TypeSet,
 				Required: false,
 				Elem: &schema.Schema{
-					Type: schema.TypeString,
+					Type:     schema.TypeString,
+					Required: false,
 				},
 			},
 			"clientId": {
