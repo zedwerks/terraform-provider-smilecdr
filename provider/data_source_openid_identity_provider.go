@@ -11,9 +11,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func dataSourceOpenIdServer() *schema.Resource {
+func dataSourceOpenIdIdentityProvider() *schema.Resource {
 	return &schema.Resource{
-		ReadContext: dataSourceOpenIdServerRead,
+		ReadContext: dataSourceOpenIdIdentityProviderRead,
 		Schema: map[string]*schema.Schema{
 			"pid": &schema.Schema{
 				Type:     schema.TypeInt,
@@ -130,7 +130,7 @@ func dataSourceOpenIdServer() *schema.Resource {
 	}
 }
 
-func dataSourceOpenIdServerRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func dataSourceOpenIdIdentityProviderRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 
 	var diags diag.Diagnostics
 

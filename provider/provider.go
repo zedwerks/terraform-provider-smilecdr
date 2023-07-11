@@ -13,24 +13,18 @@ import (
 func SmileCdrProvider() *schema.Provider {
 	return &schema.Provider{
 		Schema: map[string]*schema.Schema{
-			"host": &schema.Schema{
+			"baseUrl": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Default:     "localhost",
-				DefaultFunc: schema.EnvDefaultFunc("SMILECDR_HOST", nil),
+				Default:     "http://localhost:9000",
+				DefaultFunc: schema.EnvDefaultFunc("SMILECDR_BASE_URL", nil),
 			},
-			"port": &schema.Schema{
-				Type:        schema.TypeInt,
-				Optional:    true,
-				Default:     9000,
-				DefaultFunc: schema.EnvDefaultFunc("SMILECDR_PORT", nil),
-			},
-			"username": &schema.Schema{
+			"username": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				DefaultFunc: schema.EnvDefaultFunc("SMILECDR_USERNAME", nil),
 			},
-			"password": &schema.Schema{
+			"password": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Sensitive:   true,
@@ -38,12 +32,11 @@ func SmileCdrProvider() *schema.Provider {
 			},
 		},
 		ResourcesMap: map[string]*schema.Resource{
-			"smilecdr_openid_client": resourceOpenIdClient(),
-			"smilecdr_openid_server": resourceOpenIdServer(),
+			"smilecdr_openid_client":            resourceOpenIdClient(),
+			"smilecdr_openid_identity_provider": resourceOpenIdIdentityProvider(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 			"smilecdr_openid_client": dataSourceOpenIdClients(),
-			"smilecdr_openid_server": dataSourceOpenIdServer(),
 		},
 		ConfigureContextFunc: providerConfigure,
 	}

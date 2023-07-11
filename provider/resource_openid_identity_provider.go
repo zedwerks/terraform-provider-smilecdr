@@ -11,117 +11,117 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func resourceOpenIdServer() *schema.Resource {
+func resourceOpenIdIdentityProvider() *schema.Resource {
 	return &schema.Resource{
-		CreateContext: resourceOpenIdServerCreate,
-		ReadContext:   resourceOpenIdServerRead,
-		UpdateContext: resourceOpenIdServerUpdate,
-		DeleteContext: resourceOpenIdServerDelete,
+		CreateContext: resourceOpenIdIdentityProviderCreate,
+		ReadContext:   resourceOpenIdIdentityProviderRead,
+		UpdateContext: resourceOpenIdIdentityProviderUpdate,
+		DeleteContext: resourceOpenIdIdentityProviderDelete,
 		Schema: map[string]*schema.Schema{
-			"pid": &schema.Schema{
+			"pid": {
 				Type:     schema.TypeInt,
 				Required: false,
 			},
-			"name": &schema.Schema{
+			"name": {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"issuer": &schema.Schema{
+			"issuer": {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"tokenIntrospectionClientId": &schema.Schema{
+			"tokenIntrospectionClientId": {
 				Type:     schema.TypeString,
 				Required: false,
 			},
-			"tokenIntrospectionClientSecret": &schema.Schema{
+			"tokenIntrospectionClientSecret": {
 				Type:     schema.TypeString,
 				Required: false,
 			},
-			"nodeId": &schema.Schema{
+			"nodeId": {
 				Type:     schema.TypeString,
 				Required: false,
 				Default:  "Master",
 			},
-			"moduleId": &schema.Schema{
+			"moduleId": {
 				Type:     schema.TypeString,
 				Required: false,
 				Default:  "smart_auth",
 			},
-			"validationJwkText": &schema.Schema{
+			"validationJwkText": {
 				Type:     schema.TypeString,
 				Required: false,
 			},
-			"validationJwkFile": &schema.Schema{
+			"validationJwkFile": {
 				Type:     schema.TypeString,
 				Required: false,
 			},
-			"federationRegistrationId": &schema.Schema{
+			"federationRegistrationId": {
 				Type:     schema.TypeString,
 				Required: false,
 			},
-			"federationRequestScopes": &schema.Schema{
+			"federationRequestScopes": {
 				Type:     schema.TypeString,
 				Required: false,
 				Default:  "openid profile",
 			},
-			"federationAuthorizationUrl": &schema.Schema{
+			"federationAuthorizationUrl": {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"federationTokenUrl": &schema.Schema{
+			"federationTokenUrl": {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"federationUserInfoUrl": &schema.Schema{
+			"federationUserInfoUrl": {
 				Type:     schema.TypeString,
 				Required: false,
 			},
-			"federationJwkSetUrl": &schema.Schema{
+			"federationJwkSetUrl": {
 				Type:     schema.TypeString,
 				Required: false,
 			},
-			"federationAuthScriptText": &schema.Schema{
+			"federationAuthScriptText": {
 				Type:     schema.TypeString,
 				Required: false,
 			},
-			"federationAuthScriptFile": &schema.Schema{
+			"federationAuthScriptFile": {
 				Type:     schema.TypeString,
 				Required: false,
 			},
-			"federationUserMappingScriptText": &schema.Schema{
+			"federationUserMappingScriptText": {
 				Type:     schema.TypeString,
 				Required: false,
 			},
-			"fhirEndpointUrl": &schema.Schema{
+			"fhirEndpointUrl": {
 				Type:     schema.TypeString,
 				Required: false,
 			},
-			"authWellKnownConfigUrl": &schema.Schema{
+			"authWellKnownConfigUrl": {
 				Type:     schema.TypeString,
 				Required: false,
 			},
-			"notes": &schema.Schema{
+			"notes": {
 				Type:     schema.TypeString,
 				Required: false,
 			},
-			"customTokenParams": &schema.Schema{
+			"customTokenParams": {
 				Type:     schema.TypeString,
 				Required: false,
 			},
-			"responseType": &schema.Schema{
+			"responseType": {
 				Type:     schema.TypeString,
 				Required: false,
 			},
-			"organizationId": &schema.Schema{
+			"organizationId": {
 				Type:     schema.TypeString,
 				Required: false,
 			},
-			"audience": &schema.Schema{
+			"audience": {
 				Type:     schema.TypeString,
 				Required: false,
 			},
-			"archivedAt": &schema.Schema{
+			"archivedAt": {
 				Type:         schema.TypeString,
 				Required:     false,
 				ValidateFunc: validation.IsRFC3339Time,
@@ -133,28 +133,28 @@ func resourceOpenIdServer() *schema.Resource {
 	}
 }
 
-func resourceOpenIdServerCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceOpenIdIdentityProviderCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 
 	var diags diag.Diagnostics
 
 	return diags
 }
 
-func resourceOpenIdServerRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceOpenIdIdentityProviderRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 
 	var diags diag.Diagnostics
 
 	return diags
 }
 
-func resourceOpenIdServerUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceOpenIdIdentityProviderUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 
 	var diags diag.Diagnostics
 
 	return diags
 }
 
-func resourceOpenIdServerDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceOpenIdIdentityProviderDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 
 	var diags diag.Diagnostics
 
