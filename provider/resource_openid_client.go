@@ -5,7 +5,6 @@ package provider
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -429,17 +428,37 @@ func resourceOpenIdClientRead(ctx context.Context, d *schema.ResourceData, m int
 	nodeId := d.Get("nodeId").(string)
 	moduleId := d.Get("moduleId").(string)
 
-	endpoint := fmt.Sprintf("/openid-connect-clients/%s/%s/%s", nodeId, moduleId, clientId)
-	clientResource, err := c.Get(endpoint)
+	openIdClient, err := c.GetOpenIdClient(clientId, nodeId, moduleId)
 
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	if clientResource == nil {
-		// Now set the Resource Data from what was returned from the API
-	}
-
+	d.SetId(openIdClient.ClientId)
+	d.Set("clientName", openIdClient.ClientName)
+	d.Set("nodeId", openIdClient.NodeId)
+	d.Set("moduleId", openIdClient.ModuleId)
+	d.Set("accessTokenValiditySeconds", openIdClient.AccessTokenValiditySeconds)
+	d.Set("allowedGrantTypes", openIdClient.AllowedGrantTypes)
+	d.Set("autoApproveScopes", openIdClient.AutoApproveScopes)
+	d.Set("autoGrantScopes", openIdClient.AutoGrantScopes)
+	d.Set("clientSecrets", openIdClient.ClientSecrets)
+	d.Set("fixedScope", openIdClient.FixedScope)
+	d.Set("refreshTokenValiditySeconds", openIdClient.RefreshTokenValiditySeconds)
+	d.Set("registeredRedirectUris", openIdClient.RegisteredRedirectUris)
+	d.Set("scopes", openIdClient.Scopes)
+	d.Set("secretRequired", openIdClient.SecretRequired)
+	d.Set("secretClientCanChange", openIdClient.SecretClientCanChange)
+	d.Set("enabled", openIdClient.Enabled)
+	d.Set("canIntrospectAnyTokens", openIdClient.CanIntrospectAnyTokens)
+	d.Set("canIntrospectOwnTokens", openIdClient.CanIntrospectOwnTokens)
+	d.Set("alwaysRequireApproval", openIdClient.AlwaysRequireApproval)
+	d.Set("canReissueTokens", openIdClient.CanReissueTokens)
+	d.Set("permissions", openIdClient.Permissions)
+	d.Set("attestationAccepted", openIdClient.AttestationAccepted)
+	d.Set("publicJwksUri", openIdClient.PublicJwksUri)
+	d.Set("archivedAt", openIdClient.ArchivedAt)
+	d.Set("createdByAppSphere", openIdClient.CreatedByAppSphere)
 	return diags
 
 }
