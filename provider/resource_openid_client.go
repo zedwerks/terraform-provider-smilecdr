@@ -369,11 +369,7 @@ func resourceOpenIdClient() *schema.Resource {
 	}
 }
 
-func resourceOpenIdClientCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-
-	var diags diag.Diagnostics
-
-	c := m.(*smilecdr.Client)
+func resourceDataToOpenIdClient(d *schema.ResourceData) *smilecdr.OpenIdClient {
 
 	secrets := d.Get("clientSecrets").(*schema.Set).List()
 	clientSecrets := make([]smilecdr.ClientSecret, len(secrets))
@@ -407,8 +403,19 @@ func resourceOpenIdClientCreate(ctx context.Context, d *schema.ResourceData, m i
 		PublicJwksUri:               d.Get("publicJwksUri").(string),
 		ArchivedAt:                  d.Get("archivedAt").(string),
 	}
+	return openidClient
 
-	_, err := c.PostOpenIdClient(*openidClient)
+}
+
+func resourceOpenIdClientCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+
+	var diags diag.Diagnostics
+
+	c := m.(*smilecdr.Client)
+
+	client := resourceDataToOpenIdClient(d)
+
+	_, err := c.PostOpenIdClient(*client)
 
 	if err != nil {
 		return diag.FromErr(err)
@@ -466,6 +473,16 @@ func resourceOpenIdClientRead(ctx context.Context, d *schema.ResourceData, m int
 func resourceOpenIdClientUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 
 	var diags diag.Diagnostics
+
+	c := m.(*smilecdr.Client)
+
+	client := resourceDataToOpenIdClient(d)
+
+	_, err := c.PutOpenIdClient(*client)
+
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	return diags
 
