@@ -20,7 +20,7 @@ func dataSourceOpenIdClients() *schema.Resource {
 				Computed: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"pid": &schema.Schema{
+						"pid": {
 							Type:     schema.TypeInt,
 							Required: false,
 						},
