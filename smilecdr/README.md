@@ -8,6 +8,10 @@ The default base URL for this API will be found on port 9000 and would be access
 
 See [Smile CDR Admin API](https://smilecdr.com/docs/json_admin_endpoints/json_admin_api.html)
 
+## Swagger
+
+[JSON Admin API](http://localhost:9000/swagger-ui.html)
+
 ## Authentication
 
 The default auth for the Admin APIs is Basic Digest.. i.e. username and password Base 64 encoded in the Authorization Header.
