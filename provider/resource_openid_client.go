@@ -5,11 +5,13 @@ package provider
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/zed-werks/terraform-smilecdr/provider/util"
+	"github.com/zed-werks/terraform-smilecdr/smilecdr"
 )
 
 var (
@@ -372,7 +374,46 @@ func resourceOpenIdClientCreate(ctx context.Context, d *schema.ResourceData, m i
 
 	var diags diag.Diagnostics
 
-	apiClient := m.(*apiclient.Client)
+	c := m.(*smilecdr.Client)
+
+	secrets := d.Get("clientSecrets").(*schema.Set).List()
+	clientSecrets := make([]smilecdr.ClientSecret, len(secrets))
+
+	permissions := d.Get("permissions").(*schema.Set).List()
+	userPermissions := make([]smilecdr.UserPermission, len(permissions))
+
+	openidClient := &smilecdr.OpenIdClient{
+		ClientId:                    d.Get("clientId").(string),
+		ClientName:                  d.Get("clientName").(string),
+		NodeId:                      d.Get("nodeId").(string),
+		ModuleId:                    d.Get("moduleId").(string),
+		AccessTokenValiditySeconds:  d.Get("accessTokenValiditySeconds").(int),
+		AllowedGrantTypes:           d.Get("allowedGrantTypes").([]string),
+		AutoApproveScopes:           d.Get("autoApproveScopes").([]string),
+		AutoGrantScopes:             d.Get("autoGrantScopes").([]string),
+		ClientSecrets:               clientSecrets,
+		FixedScope:                  d.Get("fixedScope").(bool),
+		RefreshTokenValiditySeconds: d.Get("refreshTokenValiditySeconds").(int),
+		RegisteredRedirectUris:      d.Get("registeredRedirectUris").([]string),
+		Scopes:                      d.Get("scopes").([]string),
+		SecretRequired:              d.Get("secretRequired").(bool),
+		SecretClientCanChange:       d.Get("secretClientCanChange").(bool),
+		Enabled:                     d.Get("enabled").(bool),
+		CanIntrospectAnyTokens:      d.Get("canIntrospectAnyTokens").(bool),
+		CanIntrospectOwnTokens:      d.Get("canIntrospectOwnTokens").(bool),
+		AlwaysRequireApproval:       d.Get("alwaysRequireApproval").(bool),
+		CanReissueTokens:            d.Get("canReissueTokens").(bool),
+		Permissions:                 userPermissions,
+		AttestationAccepted:         d.Get("attestationAccepted").(bool),
+		PublicJwksUri:               d.Get("publicJwksUri").(string),
+		ArchivedAt:                  d.Get("archivedAt").(string),
+	}
+
+	_, err := c.PostOpenIdClient(*openidClient)
+
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	return diags
 
@@ -381,6 +422,23 @@ func resourceOpenIdClientCreate(ctx context.Context, d *schema.ResourceData, m i
 func resourceOpenIdClientRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 
 	var diags diag.Diagnostics
+
+	c := m.(*smilecdr.Client)
+
+	clientId := d.Get("clientId").(string)
+	nodeId := d.Get("nodeId").(string)
+	moduleId := d.Get("moduleId").(string)
+
+	endpoint := fmt.Sprintf("/openid-connect-clients/%s/%s/%s", nodeId, moduleId, clientId)
+	clientResource, err := c.Get(endpoint)
+
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	if clientResource == nil {
+		// Now set the Resource Data from what was returned from the API
+	}
 
 	return diags
 

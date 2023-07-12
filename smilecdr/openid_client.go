@@ -1,4 +1,12 @@
+// Copyright (c) Zed Werks Inc.
+// SPDX-License-Identifier: APACHE-2.0
+
 package smilecdr
+
+import (
+	"encoding/json"
+	"fmt"
+)
 
 type ClientSecret struct {
 	Pid         int    `json:"pid,omitempty"`
@@ -40,4 +48,73 @@ type OpenIdClient struct {
 	PublicJwksUri               string           `json:"publicJwksUri,omitempty"`
 	ArchivedAt                  string           `json:"archivedAt,omitempty"`
 	CreatedByAppSphere          string           `json:"createdByAppSphere,omitempty"`
+}
+
+func (smilecdr *Client) GetOpenIdClients() ([]OpenIdClient, error) {
+	var clients []OpenIdClient
+	jsonBody, getErr := smilecdr.Get("openid-connect-clients")
+	if getErr != nil {
+		return clients, getErr
+	}
+
+	err := json.Unmarshal(jsonBody, &clients)
+
+	return clients, err
+}
+
+func (smilecdr *Client) GetOpenIdClient(nodeId string, moduleId string, clientId string) (OpenIdClient, error) {
+	var client OpenIdClient
+	var endpoint = fmt.Sprintf("openid-connect-clients/%s/%s/%s", nodeId, moduleId, clientId)
+	jsonBody, getErr := smilecdr.Get(endpoint)
+	if getErr != nil {
+		return client, getErr
+	}
+
+	err := json.Unmarshal(jsonBody, &client)
+
+	return client, err
+}
+
+func (smilecdr *Client) PostOpenIdClient(client OpenIdClient) (OpenIdClient, error) {
+	var newClient OpenIdClient
+	var nodeId = client.NodeId
+	var moduleId = client.ModuleId
+
+	var endpoint = fmt.Sprintf("openid-connect-clients/%s/%s", nodeId, moduleId)
+	jsonBody, _ := json.Marshal(client)
+
+	jsonBody, postErr := smilecdr.Post(endpoint, jsonBody)
+	if postErr != nil {
+		return newClient, postErr
+	}
+
+	err := json.Unmarshal(jsonBody, &newClient)
+
+	return newClient, err
+}
+
+func (smilecdr *Client) PutOpenIdClient(client OpenIdClient) (OpenIdClient, error) {
+	var newClient OpenIdClient
+	var nodeId = client.NodeId
+	var moduleId = client.ModuleId
+	var clientId = client.ClientId
+
+	var endpoint = fmt.Sprintf("openid-connect-clients/%s/%s/%s", nodeId, moduleId, clientId)
+	jsonBody, _ := json.Marshal(client)
+
+	jsonBody, putErr := smilecdr.Put(endpoint, jsonBody)
+	if putErr != nil {
+		return newClient, putErr
+	}
+
+	err := json.Unmarshal(jsonBody, &newClient)
+
+	return newClient, err
+}
+
+func (smilecdr *Client) DeleteOpenIdClient(nodeId string, moduleId string, clientId string) error {
+	var endpoint = fmt.Sprintf("openid-connect-clients/%s/%s/%s", nodeId, moduleId, clientId)
+	_, err := smilecdr.Delete(endpoint)
+
+	return err
 }

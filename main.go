@@ -12,7 +12,7 @@ import (
 func main() {
 	plugin.Serve(&plugin.ServeOpts{
 		ProviderFunc: func() *schema.Provider {
-			return provider.SmileCdrProvider()
+			return provider.Provider()
 		},
 	})
 }

@@ -1,7 +1,7 @@
 // Copyright (c) Zed Werks Inc.
 // SPDX-License-Identifier: APACHE-2.0
 
-package client
+package smilecdr
 
 import (
 	"bytes"
@@ -10,24 +10,24 @@ import (
 	"net/http"
 )
 
-type RestClient struct {
+type Client struct {
 	baseUrl    string
 	authHeader string
 	httpClient *http.Client
 }
 
-func NewClient(baseUrl string, username string, password string) *RestClient {
+func NewClient(baseUrl string, username string, password string) *Client {
 	credentials := username + ":" + password
 	auth := "Basic " + base64.StdEncoding.EncodeToString([]byte(credentials))
 
-	return &RestClient{
+	return &Client{
 		baseUrl:    baseUrl,
 		authHeader: auth,
 		httpClient: &http.Client{},
 	}
 }
 
-func (c *RestClient) Get(endpoint string) ([]byte, error) {
+func (c *Client) Get(endpoint string) ([]byte, error) {
 	url := c.baseUrl + endpoint
 	req, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
@@ -49,7 +49,7 @@ func (c *RestClient) Get(endpoint string) ([]byte, error) {
 	return body, nil
 }
 
-func (c *RestClient) Post(endpoint string, body []byte) ([]byte, error) {
+func (c *Client) Post(endpoint string, body []byte) ([]byte, error) {
 	url := c.baseUrl + endpoint
 	req, err := http.NewRequest(http.MethodPost, url, bytes.NewBuffer(body))
 	if err != nil {
@@ -71,7 +71,7 @@ func (c *RestClient) Post(endpoint string, body []byte) ([]byte, error) {
 	return body, nil
 }
 
-func (c *RestClient) Put(endpoint string, body []byte) ([]byte, error) {
+func (c *Client) Put(endpoint string, body []byte) ([]byte, error) {
 	url := c.baseUrl + endpoint
 	req, err := http.NewRequest(http.MethodPut, url, bytes.NewBuffer(body))
 	if err != nil {
@@ -93,7 +93,7 @@ func (c *RestClient) Put(endpoint string, body []byte) ([]byte, error) {
 	return body, nil
 }
 
-func (c *RestClient) Delete(endpoint string) ([]byte, error) {
+func (c *Client) Delete(endpoint string) ([]byte, error) {
 	url := c.baseUrl + endpoint
 	req, err := http.NewRequest(http.MethodDelete, url, nil)
 	if err != nil {
