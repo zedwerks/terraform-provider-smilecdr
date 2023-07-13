@@ -23,11 +23,8 @@ resource "smilecdr_openid_client" "client1" {
   module_id                     = "smart_auth"
   access_token_validity_seconds = 300
   allowed_grant_types = [
-    "authorization_code",
-    "refresh_token",
-    "client_credentials",
-    "password",
-    "implicit"
+    "AUTHORIZATION_CODE",
+    "REFRESH_TOKEN"
   ]
   auto_approve_scopes = [
     "openid",
