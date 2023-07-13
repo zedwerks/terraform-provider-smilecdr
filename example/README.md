@@ -11,11 +11,37 @@ Make something like this be your .terraformrc or terraform.rc file:
 
 ```code
 #
-# .terraformrc configuration file.
+# ~/.terraformrc configuration file.
 #
 provider_installation {
-  dev_overrides {
-    "registry.terraform.io/zedwerks/smilecdr" = "/Users/brad/.terraform.d/plugins/zedwerks/smilecdr"
+  filesystem_mirror {
+    path = "/Users/brad/.terraform.d/plugins"
+    include = ["local.providers/*/*"]
+  }
+  direct {
+      exclude = ["local.providers/*/*"]
   }
 }
 ```
+
+## Initialize
+
+```code
+terraform init
+```
+
+### Build the Plan
+
+```code
+terraform plan
+```
+
+## Apply the Plan
+
+```code
+terraform apply
+```
+
+The goof around with the configuration files, add another client, modify a client, remove a line and
+re-run the plan and apply and you'll see the state mimic the changes.
+
