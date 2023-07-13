@@ -2,13 +2,14 @@
 # SPDX-License-Identifier: Apache-2.0
 
 
-resource "smilecdr_openid_client" "client_demo" {
+resource "smilecdr_openid_client" "client_lra_demo" {
   node_id                       = "Master"
   module_id                     = "smart_auth"
   access_token_validity_seconds = 300
   allowed_grant_types = [
     "AUTHORIZATION_CODE",
-    "REFRESH_TOKEN"
+    "REFRESH_TOKEN",
+    "CLIENT_CREDENTIALS",
   ]
   auto_approve_scopes = [
     "openid",
@@ -30,8 +31,8 @@ resource "smilecdr_openid_client" "client_demo" {
     "launch/encounter",
     "offline_access"
   ]
-  client_id                      = "client_demo"
-  client_name                    = "Client Demo"
+  client_id                      = "client_lra_demo"
+  client_name                    = "Client LRA Demo"
   fixed_scope                    = false
   refresh_token_validity_seconds = 86400
   registered_redirect_uris       = ["http://localhost:6000"]
