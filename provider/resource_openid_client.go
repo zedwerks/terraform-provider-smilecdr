@@ -388,20 +388,64 @@ func resourceDataToOpenIdClient(d *schema.ResourceData) *smilecdr.OpenIdClient {
 	perms := d.Get("permissions").(*schema.Set).List()
 	permissions := make([]smilecdr.UserPermission, len(perms))
 
+	allowedGrantTypes := make([]string, 0)
+	allowedGrantTypesData, allowedGrantTypesOk := d.GetOk("allowed_grant_types")
+
+	if allowedGrantTypesOk {
+		for _, grant := range allowedGrantTypesData.(*schema.Set).List() {
+			allowedGrantTypes = append(allowedGrantTypes, grant.(string))
+		}
+	}
+
+	autoApproveScopes := make([]string, 0)
+	autoApproveScopesData, autoApproveScopesOk := d.GetOk("auto_approve_scopes")
+
+	if autoApproveScopesOk {
+		for _, scope := range autoApproveScopesData.(*schema.Set).List() {
+			autoApproveScopes = append(autoApproveScopes, scope.(string))
+		}
+	}
+	autoGrantScopes := make([]string, 0)
+	autoGrantScopesData, autoGrantScopesOk := d.GetOk("auto_grant_scopes")
+
+	if autoGrantScopesOk {
+		for _, scope := range autoGrantScopesData.(*schema.Set).List() {
+			autoGrantScopes = append(autoGrantScopes, scope.(string))
+		}
+	}
+
+	registeredRedirectUris := make([]string, 0)
+	registeredRedirectUrisData, registeredRedirectUrisOk := d.GetOk("registered_redirect_uris")
+
+	if registeredRedirectUrisOk {
+		for _, uri := range registeredRedirectUrisData.(*schema.Set).List() {
+			registeredRedirectUris = append(registeredRedirectUris, uri.(string))
+		}
+	}
+
+	scopes := make([]string, 0)
+	scopesData, scopesOk := d.GetOk("scopes")
+
+	if scopesOk {
+		for _, scope := range scopesData.(*schema.Set).List() {
+			scopes = append(scopes, scope.(string))
+		}
+	}
+
 	openidClient := &smilecdr.OpenIdClient{
 		ClientId:                    d.Get("client_id").(string),
 		ClientName:                  d.Get("client_name").(string),
 		NodeId:                      d.Get("node_id").(string),
 		ModuleId:                    d.Get("module_id").(string),
 		AccessTokenValiditySeconds:  d.Get("access_token_validity_seconds").(int),
-		AllowedGrantTypes:           d.Get("allowed_grant_types").([]string),
-		AutoApproveScopes:           d.Get("auto_approve_scopes").([]string),
-		AutoGrantScopes:             d.Get("auto_grant_scopes").([]string),
+		AllowedGrantTypes:           allowedGrantTypes,
+		AutoApproveScopes:           autoApproveScopes,
+		AutoGrantScopes:             autoGrantScopes,
 		ClientSecrets:               clientSecrets,
 		FixedScope:                  d.Get("fixed_scope").(bool),
 		RefreshTokenValiditySeconds: d.Get("refresh_token_validity_seconds").(int),
-		RegisteredRedirectUris:      d.Get("registered_redirect_uris").([]string),
-		Scopes:                      d.Get("scopes").([]string),
+		RegisteredRedirectUris:      registeredRedirectUris,
+		Scopes:                      scopes,
 		SecretRequired:              d.Get("secret_required").(bool),
 		SecretClientCanChange:       d.Get("secret_client_can_change").(bool),
 		Enabled:                     d.Get("enabled").(bool),
