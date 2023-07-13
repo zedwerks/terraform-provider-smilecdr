@@ -1,9 +1,9 @@
 TEST?=$$(go list ./... | grep -v 'vendor')
-HOSTNAME=zedwerks.com
+HOSTNAME=zedwerks
 NAME=smilecdr
 BINARY=terraform-provider-${NAME}_v${VERSION}
 VERSION=0.2.0
-OS_ARCH=darwin_amd64
+OS_ARCH=darwin_arm64
 
 default: install
 
@@ -12,6 +12,7 @@ build:
 
 release:
 	GOOS=darwin GOARCH=amd64 go build -o ./bin/${BINARY}_${VERSION}_darwin_amd64
+	GOOS=darwin GOARCH=arm64 go build -o ./bin/${BINARY}_${VERSION}_darwin_arm64
 	GOOS=freebsd GOARCH=386 go build -o ./bin/${BINARY}_${VERSION}_freebsd_386
 	GOOS=freebsd GOARCH=amd64 go build -o ./bin/${BINARY}_${VERSION}_freebsd_amd64
 	GOOS=freebsd GOARCH=arm go build -o ./bin/${BINARY}_${VERSION}_freebsd_arm
@@ -25,11 +26,8 @@ release:
 	GOOS=windows GOARCH=amd64 go build -o ./bin/${BINARY}_${VERSION}_windows_amd64
 
 install: build
-	mkdir -p ./example/.terraform.d/plugins/${HOSTNAME}/${NAME}/v${VERSION}/${OS_ARCH}
-	cp ${BINARY} ./example/.terraform.d/plugins/${HOSTNAME}/${NAME}/v${VERSION}/${OS_ARCH}
-	mkdir -p ~/.terraform.d/plugins/${HOSTNAME}/${NAME}/v${VERSION}/${OS_ARCH}
-	mv ${BINARY} ~/.terraform.d/plugins/${HOSTNAME}/${NAME}/v${VERSION}/${OS_ARCH}
-
+	mkdir -p ~/.terraform.d/plugins/local.providers/${HOSTNAME}/${NAME}/${VERSION}/${OS_ARCH}
+	mv ${BINARY} ~/.terraform.d/plugins/local.providers/${HOSTNAME}/${NAME}/${VERSION}/${OS_ARCH}
 
 
 test: 
