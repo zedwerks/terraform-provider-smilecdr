@@ -1,8 +1,8 @@
 TEST?=$$(go list ./... | grep -v 'vendor')
 HOSTNAME=zedwerks.com
 NAME=smilecdr
-BINARY=terraform-provider-${NAME}
-VERSION=0.2
+BINARY=terraform-provider-${NAME}_v${VERSION}
+VERSION=0.2.0
 OS_ARCH=darwin_amd64
 
 default: install
@@ -25,8 +25,12 @@ release:
 	GOOS=windows GOARCH=amd64 go build -o ./bin/${BINARY}_${VERSION}_windows_amd64
 
 install: build
-	mkdir -p ~/.terraform.d/plugins/${HOSTNAME}/${NAME}/${VERSION}/${OS_ARCH}
-	mv ${BINARY} ~/.terraform.d/plugins/${HOSTNAME}/${NAME}/${VERSION}/${OS_ARCH}
+	mkdir -p ./example/.terraform.d/plugins/${HOSTNAME}/${NAME}/v${VERSION}/${OS_ARCH}
+	cp ${BINARY} ./example/.terraform.d/plugins/${HOSTNAME}/${NAME}/v${VERSION}/${OS_ARCH}
+	mkdir -p ~/.terraform.d/plugins/${HOSTNAME}/${NAME}/v${VERSION}/${OS_ARCH}
+	mv ${BINARY} ~/.terraform.d/plugins/${HOSTNAME}/${NAME}/v${VERSION}/${OS_ARCH}
+
+
 
 test: 
 	go test -i $(TEST) || exit 1                                                   
