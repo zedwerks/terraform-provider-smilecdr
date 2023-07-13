@@ -349,13 +349,7 @@ func resourceOpenIdClient() *schema.Resource {
 				Optional: true,
 				Default:  false,
 			},
-			"public_jwks": {
-				Type:     schema.TypeString,
-				Required: false,
-				Optional: true,
-				Default:  "",
-			},
-			"jwks_url": {
+			"public_jwks_uri": {
 				Type:     schema.TypeString,
 				Required: false,
 				Optional: true,
@@ -455,7 +449,7 @@ func resourceDataToOpenIdClient(d *schema.ResourceData) *smilecdr.OpenIdClient {
 		CanReissueTokens:            d.Get("can_reissue_tokens").(bool),
 		Permissions:                 permissions,
 		AttestationAccepted:         d.Get("attestation_accepted").(bool),
-		PublicJwksUri:               d.Get("public_jwksUri").(string),
+		PublicJwksUri:               d.Get("public_jwks_uri").(string),
 		ArchivedAt:                  d.Get("archived_at").(string),
 	}
 	return openidClient
