@@ -47,7 +47,7 @@ type OpenIdClient struct {
 	AttestationAccepted         bool             `json:"rememberedScopes,omitempty"`
 	PublicJwksUri               string           `json:"publicJwksUri,omitempty"`
 	ArchivedAt                  string           `json:"archivedAt,omitempty"`
-	CreatedByAppSphere          string           `json:"createdByAppSphere,omitempty"`
+	CreatedByAppSphere          bool             `json:"createdByAppSphere,omitempty"`
 }
 
 func (smilecdr *Client) GetOpenIdClients() ([]OpenIdClient, error) {
@@ -67,10 +67,14 @@ func (smilecdr *Client) GetOpenIdClient(nodeId string, moduleId string, clientId
 	var endpoint = fmt.Sprintf("/openid-connect-clients/%s/%s/%s", nodeId, moduleId, clientId)
 	jsonBody, getErr := smilecdr.Get(endpoint)
 	if getErr != nil {
+		fmt.Println("error during Get in GetOpenIdClient:", getErr)
 		return client, getErr
 	}
 
 	err := json.Unmarshal(jsonBody, &client)
+	if err != nil {
+		fmt.Println("error parsing Get response JSON:", err)
+	}
 
 	return client, err
 }
@@ -85,10 +89,14 @@ func (smilecdr *Client) PostOpenIdClient(client OpenIdClient) (OpenIdClient, err
 
 	jsonBody, postErr := smilecdr.Post(endpoint, jsonBody)
 	if postErr != nil {
+		fmt.Println("error during Post in PostOpenIdClient:", postErr)
 		return newClient, postErr
 	}
 
 	err := json.Unmarshal(jsonBody, &newClient)
+	if err != nil {
+		fmt.Println("error parsing Post response JSON:", err)
+	}
 
 	return newClient, err
 }
@@ -104,10 +112,14 @@ func (smilecdr *Client) PutOpenIdClient(client OpenIdClient) (OpenIdClient, erro
 
 	jsonBody, putErr := smilecdr.Put(endpoint, jsonBody)
 	if putErr != nil {
+		fmt.Println("error during Put in PutOpenIdClient:", putErr)
 		return newClient, putErr
 	}
 
 	err := json.Unmarshal(jsonBody, &newClient)
+	if err != nil {
+		fmt.Println("error parsing Put response JSON:", err)
+	}
 
 	return newClient, err
 }

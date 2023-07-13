@@ -5,6 +5,7 @@ package provider
 
 import (
 	"context"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -158,6 +159,7 @@ var (
 		"VIEW_TRANSACTION_LOG",
 		"VIEW_TRANSACTION_LOG_EVENT",
 		"VIEW_USERS"}
+
 	smileCdrOpenIdAuthorizationFlows = []string{"AUTHORIZATION_CODE", "CLIENT_CREDENTIALS", "IMPLICIT", "JWT_BEARER", "PASSWORD", "REFRESH_TOKEN"}
 )
 
@@ -168,6 +170,11 @@ func resourceOpenIdClient() *schema.Resource {
 		UpdateContext: resourceOpenIdClientUpdate,
 		DeleteContext: resourceOpenIdClientDelete,
 		Schema: map[string]*schema.Schema{
+			"pid": {
+				Type:     schema.TypeInt,
+				Required: false,
+				Computed: true,
+			},
 			"node_id": {
 				Type:     schema.TypeString,
 				Required: false,
@@ -353,7 +360,6 @@ func resourceOpenIdClient() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: false,
 				Optional: true,
-				Default:  "",
 			},
 			"archived_at": {
 				Type:         schema.TypeString,
@@ -369,12 +375,12 @@ func resourceOpenIdClient() *schema.Resource {
 			},
 		},
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 	}
 }
 
-func resourceDataToOpenIdClient(d *schema.ResourceData) *smilecdr.OpenIdClient {
+func resourceDataToOpenIdClient(d *schema.ResourceData) (*smilecdr.OpenIdClient, error) {
 
 	secrets := d.Get("client_secrets").(*schema.Set).List()
 	clientSecrets := make([]smilecdr.ClientSecret, len(secrets))
@@ -427,6 +433,7 @@ func resourceDataToOpenIdClient(d *schema.ResourceData) *smilecdr.OpenIdClient {
 	}
 
 	openidClient := &smilecdr.OpenIdClient{
+		Pid:                         d.Get("pid").(int),
 		ClientId:                    d.Get("client_id").(string),
 		ClientName:                  d.Get("client_name").(string),
 		NodeId:                      d.Get("node_id").(string),
@@ -451,27 +458,32 @@ func resourceDataToOpenIdClient(d *schema.ResourceData) *smilecdr.OpenIdClient {
 		AttestationAccepted:         d.Get("attestation_accepted").(bool),
 		PublicJwksUri:               d.Get("public_jwks_uri").(string),
 		ArchivedAt:                  d.Get("archived_at").(string),
+		CreatedByAppSphere:          d.Get("created_by_app_sphere").(bool),
 	}
-	return openidClient
+
+	return openidClient, nil
 
 }
 
 func resourceOpenIdClientCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 
-	var diags diag.Diagnostics
-
 	c := m.(*smilecdr.Client)
 
-	client := resourceDataToOpenIdClient(d)
+	client, mErr := resourceDataToOpenIdClient(d)
+	if mErr != nil {
+		return diag.FromErr(mErr)
+	}
 
-	_, err := c.PostOpenIdClient(*client)
+	o, err := c.PostOpenIdClient(*client)
 
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	return diags
+	d.SetId(client.ClientId) // the primary resource identifier. must be unique.
+	d.Set("pid", o.Pid)      // the pid is needed for Put requests
 
+	return resourceOpenIdClientRead(ctx, d, m)
 }
 
 func resourceOpenIdClientRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
@@ -484,13 +496,14 @@ func resourceOpenIdClientRead(ctx context.Context, d *schema.ResourceData, m int
 	nodeId := d.Get("node_id").(string)
 	moduleId := d.Get("module_id").(string)
 
-	openIdClient, err := c.GetOpenIdClient(client_id, nodeId, moduleId)
+	openIdClient, err := c.GetOpenIdClient(nodeId, moduleId, client_id)
 
 	if err != nil {
 		return diag.FromErr(err)
 	}
-
 	d.SetId(openIdClient.ClientId)
+
+	d.Set("pid", openIdClient.Pid)
 	d.Set("client_name", openIdClient.ClientName)
 	d.Set("node_id", openIdClient.NodeId)
 	d.Set("module_id", openIdClient.ModuleId)
@@ -521,11 +534,14 @@ func resourceOpenIdClientRead(ctx context.Context, d *schema.ResourceData, m int
 
 func resourceOpenIdClientUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 
-	var diags diag.Diagnostics
-
 	c := m.(*smilecdr.Client)
 
-	client := resourceDataToOpenIdClient(d)
+	client, mErr := resourceDataToOpenIdClient(d)
+	if mErr != nil {
+		return diag.FromErr(mErr)
+	}
+
+	d.SetId(client.ClientId)
 
 	_, err := c.PutOpenIdClient(*client)
 
@@ -533,7 +549,7 @@ func resourceOpenIdClientUpdate(ctx context.Context, d *schema.ResourceData, m i
 		return diag.FromErr(err)
 	}
 
-	return diags
+	return resourceOpenIdClientRead(ctx, d, m)
 
 }
 
@@ -541,6 +557,11 @@ func resourceOpenIdClientDelete(ctx context.Context, d *schema.ResourceData, m i
 
 	var diags diag.Diagnostics
 
-	return diags
+	d.Set("archived_at", time.Now().Format(time.RFC3339))
 
+	resourceOpenIdClientUpdate(ctx, d, m)
+
+	d.SetId("")
+
+	return diags
 }

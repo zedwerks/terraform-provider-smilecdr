@@ -1,2 +1,2 @@
 #!/bin/sh
-terraform plan -out=plan.out
+terraform plan -detailed-exitcode

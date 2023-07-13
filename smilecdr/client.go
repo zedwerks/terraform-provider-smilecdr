@@ -6,6 +6,7 @@ package smilecdr
 import (
 	"bytes"
 	"encoding/base64"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 )
@@ -34,15 +35,25 @@ func (c *Client) Get(endpoint string) ([]byte, error) {
 		return nil, err
 	}
 	req.Header.Add("Authorization", c.authHeader)
-	req.Header.Add("Content-Type", "application/json")
+	req.Header.Add("Accept", "application/json")
 
 	resp, err := c.httpClient.Do(req)
 	if err != nil {
+		fmt.Println("error making HTTP Get Request: ", err)
+		return nil, err
+	}
+
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		fmt.Println("received non-200 OK status code:", resp.StatusCode)
+		// Handle the error condition here
 		return nil, err
 	}
 
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
+		fmt.Println("error reading HTTP Get Response Body:", err)
 		return nil, err
 	}
 
@@ -57,14 +68,25 @@ func (c *Client) Post(endpoint string, body []byte) ([]byte, error) {
 	}
 	req.Header.Add("Authorization", c.authHeader)
 	req.Header.Add("Content-Type", "application/json")
+	req.Header.Add("Accept", "application/json")
 
 	resp, err := c.httpClient.Do(req)
 	if err != nil {
+		fmt.Println("error making HTTP Post Request: ", err)
+		return nil, err
+	}
+
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		fmt.Println("received non-200 OK status code:", resp.StatusCode)
+		// Handle the error condition here
 		return nil, err
 	}
 
 	body, err = ioutil.ReadAll(resp.Body)
 	if err != nil {
+		fmt.Println("error reading HTTP Post Response Body:", err)
 		return nil, err
 	}
 
@@ -79,14 +101,24 @@ func (c *Client) Put(endpoint string, body []byte) ([]byte, error) {
 	}
 	req.Header.Add("Authorization", c.authHeader)
 	req.Header.Add("Content-Type", "application/json")
+	req.Header.Add("Accept", "application/json")
 
 	resp, err := c.httpClient.Do(req)
 	if err != nil {
 		return nil, err
 	}
 
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		fmt.Println("received non-200 OK status code:", resp.StatusCode)
+		// Handle the error condition here
+		return nil, err
+	}
+
 	body, err = ioutil.ReadAll(resp.Body)
 	if err != nil {
+		fmt.Println("error reading HTTP Put Response Body:", err)
 		return nil, err
 	}
 
@@ -100,15 +132,25 @@ func (c *Client) Delete(endpoint string) ([]byte, error) {
 		return nil, err
 	}
 	req.Header.Add("Authorization", c.authHeader)
-	req.Header.Add("Content-Type", "application/json")
+	req.Header.Add("Accept", "application/json")
 
 	resp, err := c.httpClient.Do(req)
 	if err != nil {
+		fmt.Println("error making HTTP Delete Request: ", err)
+		return nil, err
+	}
+
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		fmt.Println("received non-200 OK status code:", resp.StatusCode)
+		// Handle the error condition here
 		return nil, err
 	}
 
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
+		fmt.Println("error reading HTTP Delete Response Body:", err)
 		return nil, err
 	}
 
