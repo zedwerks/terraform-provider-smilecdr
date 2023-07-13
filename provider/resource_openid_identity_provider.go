@@ -30,7 +30,7 @@ func resourceOpenIdIdentityProvider() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"tokenIntrospectionClientId": {
+			"tokenIntrospectionclient_id": {
 				Type:     schema.TypeString,
 				Required: false,
 			},

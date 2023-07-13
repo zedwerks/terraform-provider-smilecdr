@@ -11,7 +11,7 @@ terraform {
 }
 
 provider "smilecdr" {
-  url      = "http://localhost:8000"
+  base_url = "http://localhost:9000"
   username = "admin"
   password = "password"
 }
@@ -19,9 +19,9 @@ provider "smilecdr" {
 
 resource "smilecdr_openid_client" "client1" {
 
-  nodeId                     = "Master"
-  moduleId                   = "smart_auth"
-  accessTokenValiditySeconds = 300
+  node_id                       = "Master"
+  module_id                     = "smart_auth"
+  access_token_validity_seconds = 300
   allowedGrantTypes = [
     "authorization_code",
     "refresh_token",
@@ -29,7 +29,7 @@ resource "smilecdr_openid_client" "client1" {
     "password",
     "implicit"
   ]
-  autoApproveScopes = [
+  auto_approve_scopes = [
     "openid",
     "profile",
     "email",
@@ -39,7 +39,7 @@ resource "smilecdr_openid_client" "client1" {
     "launch/encounter",
     "offline_access"
   ]
-  autoGrantScopes = [
+  auto_grant_scopes = [
     "openid",
     "profile",
     "email",
@@ -49,11 +49,11 @@ resource "smilecdr_openid_client" "client1" {
     "launch/encounter",
     "offline_access"
   ]
-  clientId                    = "client1"
-  clientName                  = "Client 1"
-  fixedScope                  = false
-  refreshTokenValiditySeconds = 86400
-  registeredRedirectUris      = ["http://localhost:3000"]
+  client_id                      = "client1"
+  client_name                    = "Client 1"
+  fixed_scope                    = false
+  refresh_token_validity_seconds = 86400
+  registered_redirect_uris       = ["http://localhost:3000"]
   scopes = [
     "openid",
     "profile",
@@ -64,17 +64,17 @@ resource "smilecdr_openid_client" "client1" {
     "launch/encounter",
     "offline_access"
   ]
-  secretRequired         = false
-  secretClientCanChange  = false
-  enabled                = true
-  canIntrospectAnyTokens = false
-  canIntrospectOwnTokens = false
-  alwaysRequireApproval  = false
-  canReissueTokens       = false
-  rememberApprovedScopes = false
-  attestationAccepted    = false
-  publicJwks             = ""
-  jwksUrl                = ""
-  createdByAppSphere     = false
+  secret_required           = false
+  secret_client_can_change  = false
+  enabled                   = true
+  can_introspect_any_tokens = false
+  can_introspect_own_tokens = false
+  always_require_approval   = false
+  can_reissue_tokens        = false
+  remember_approved_scopes  = false
+  attestation_accepted      = false
+  public_jwks               = ""
+  jwks_url                  = ""
+  created_by_app_sphere     = false
 
 }

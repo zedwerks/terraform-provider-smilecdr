@@ -14,7 +14,7 @@ import (
 func Provider() *schema.Provider {
 	return &schema.Provider{
 		Schema: map[string]*schema.Schema{
-			"baseUrl": {
+			"base_url": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Default:     "http://localhost:9000",
@@ -50,7 +50,7 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}
 
 	username := d.Get("username").(string)
 	password := d.Get("password").(string)
-	baseUrl = d.Get("baseUrl").(string)
+	baseUrl = d.Get("base_url").(string)
 
 	if (baseUrl != "") && (username != "") && (password != "") {
 		c := smilecdr.NewClient(baseUrl, username, password)

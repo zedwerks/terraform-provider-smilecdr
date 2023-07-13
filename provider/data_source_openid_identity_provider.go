@@ -15,10 +15,6 @@ func dataSourceOpenIdIdentityProvider() *schema.Resource {
 	return &schema.Resource{
 		ReadContext: dataSourceOpenIdIdentityProviderRead,
 		Schema: map[string]*schema.Schema{
-			"pid": &schema.Schema{
-				Type:     schema.TypeInt,
-				Required: false,
-			},
 			"name": &schema.Schema{
 				Type:     schema.TypeString,
 				Required: true,
@@ -27,7 +23,7 @@ func dataSourceOpenIdIdentityProvider() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"tokenIntrospectionClientId": &schema.Schema{
+			"token_introspection_client_id": &schema.Schema{
 				Type:     schema.TypeString,
 				Required: false,
 			},
@@ -35,66 +31,66 @@ func dataSourceOpenIdIdentityProvider() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: false,
 			},
-			"nodeId": &schema.Schema{
+			"node_id": &schema.Schema{
 				Type:     schema.TypeString,
 				Required: false,
 				Default:  "Master",
 			},
-			"moduleId": &schema.Schema{
+			"module_id": &schema.Schema{
 				Type:     schema.TypeString,
 				Required: false,
 				Default:  "smart_auth",
 			},
-			"validationJwkText": &schema.Schema{
+			"validation_jwk_text": &schema.Schema{
 				Type:     schema.TypeString,
 				Required: false,
 			},
-			"validationJwkFile": &schema.Schema{
+			"validation_jwk_file": &schema.Schema{
 				Type:     schema.TypeString,
 				Required: false,
 			},
-			"federationRegistrationId": &schema.Schema{
+			"federation_registration_id": &schema.Schema{
 				Type:     schema.TypeString,
 				Required: false,
 			},
-			"federationRequestScopes": &schema.Schema{
+			"federation_request_scopes": &schema.Schema{
 				Type:     schema.TypeString,
 				Required: false,
 				Default:  "openid profile",
 			},
-			"federationAuthorizationUrl": &schema.Schema{
+			"federation_authorization_url": &schema.Schema{
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"federationTokenUrl": &schema.Schema{
+			"federation_token_url": &schema.Schema{
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"federationUserInfoUrl": &schema.Schema{
+			"federation_user_info_url": &schema.Schema{
 				Type:     schema.TypeString,
 				Required: false,
 			},
-			"federationJwkSetUrl": &schema.Schema{
+			"federation_jwk_set_url": &schema.Schema{
 				Type:     schema.TypeString,
 				Required: false,
 			},
-			"federationAuthScriptText": &schema.Schema{
+			"federation_auth_script_text": &schema.Schema{
 				Type:     schema.TypeString,
 				Required: false,
 			},
-			"federationAuthScriptFile": &schema.Schema{
+			"federation_auth_script_file": &schema.Schema{
 				Type:     schema.TypeString,
 				Required: false,
 			},
-			"federationUserMappingScriptText": &schema.Schema{
+			"federation_user_mapping_script_text": &schema.Schema{
 				Type:     schema.TypeString,
 				Required: false,
 			},
-			"fhirEndpointUrl": &schema.Schema{
+			"fhir_endpoint_url": &schema.Schema{
 				Type:     schema.TypeString,
 				Required: false,
 			},
-			"authWellKnownConfigUrl": &schema.Schema{
+			"auth_well_known_config_url": &schema.Schema{
 				Type:     schema.TypeString,
 				Required: false,
 			},
@@ -102,15 +98,15 @@ func dataSourceOpenIdIdentityProvider() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: false,
 			},
-			"customTokenParams": &schema.Schema{
+			"custom_token_params": &schema.Schema{
 				Type:     schema.TypeString,
 				Required: false,
 			},
-			"responseType": &schema.Schema{
+			"response_type": &schema.Schema{
 				Type:     schema.TypeString,
 				Required: false,
 			},
-			"organizationId": &schema.Schema{
+			"organization_id": &schema.Schema{
 				Type:     schema.TypeString,
 				Required: false,
 			},
@@ -118,7 +114,7 @@ func dataSourceOpenIdIdentityProvider() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: false,
 			},
-			"archivedAt": &schema.Schema{
+			"archived_at": &schema.Schema{
 				Type:         schema.TypeString,
 				Required:     false,
 				ValidateFunc: validation.IsRFC3339Time,

@@ -168,73 +168,73 @@ func resourceOpenIdClient() *schema.Resource {
 		UpdateContext: resourceOpenIdClientUpdate,
 		DeleteContext: resourceOpenIdClientDelete,
 		Schema: map[string]*schema.Schema{
-			"pid": {
-				Type:     schema.TypeInt,
-				Required: false,
-			},
-			"nodeId": {
+			"node_id": {
 				Type:     schema.TypeString,
 				Required: false,
+				Optional: true,
 				Default:  "Master",
 			},
-			"moduleId": {
+			"module_id": {
 				Type:     schema.TypeString,
 				Required: false,
+				Optional: true,
 				Default:  "smart_auth",
 			},
-			"accessTokenValiditySeconds": {
+			"access_token_validity_seconds": {
 				Type:     schema.TypeInt,
 				Required: false,
+				Optional: true,
 				Default:  300,
 			},
-			"allowedGrantTypes": {
+			"allowed_grant_types": {
 				Type:     schema.TypeSet,
 				Required: false,
+				Optional: true,
+				Default:  []string{"AUTHORIZATION_CODE", "REFRESH_TOKEN"},
 				Elem: &schema.Schema{
 					Type:         schema.TypeString,
 					Required:     false,
 					ValidateFunc: schema.SchemaValidateFunc(validation.StringInSlice(smileCdrOpenIdAuthorizationFlows, false)),
 				},
 			},
-			"autoApproveScopes": {
+			"auto_approve_scopes": {
 				Type:     schema.TypeSet,
 				Required: false,
+				Optional: true,
+				Default:  []string{"openid"},
 				Elem: &schema.Schema{
 					Type:     schema.TypeString,
 					Required: false,
 				},
 			},
-			"autoGrantScopes": {
+			"auto_grant_scopes": {
 				Type:     schema.TypeSet,
 				Required: false,
+				Optional: true,
+				Default:  []string{"openid"},
 				Elem: &schema.Schema{
 					Type:     schema.TypeString,
 					Required: false,
 				},
 			},
-			"clientId": {
+			"client_id": {
 				Type:         schema.TypeString,
 				Required:     true,
-				ValidateFunc: util.ValidateClientId,
+				ValidateFunc: util.Validateclient_id,
 			},
-			"clientName": {
+			"client_name": {
 				Type:     schema.TypeString,
-				Required: false,
-				Default:  "Some Client",
+				Required: true,
 			},
 			"clientSecrets": {
 				Type:     schema.TypeSet,
 				Required: false,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-
-						"pid": {
-							Type:     schema.TypeInt,
-							Required: false,
-						},
 						"secret": {
 							Type:     schema.TypeString,
-							Required: true,
+							Required: false,
+							Default:  "",
 						},
 						"description": {
 							Type:     schema.TypeString,
@@ -256,19 +256,23 @@ func resourceOpenIdClient() *schema.Resource {
 					},
 				},
 			},
-			"fixedScope": {
+			"fixed_scope": {
 				Type:     schema.TypeBool,
 				Required: false,
+				Optional: true,
 				Default:  false,
 			},
-			"refreshTokenValiditySeconds": {
+			"refresh_token_validity_seconds": {
 				Type:     schema.TypeInt,
 				Required: false,
+				Optional: true,
 				Default:  86400,
 			},
-			"registeredRedirectUris": {
+			"registered_redirect_uris": {
 				Type:     schema.TypeSet,
 				Required: false,
+				Optional: true,
+				Default:  []string{},
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
@@ -276,48 +280,59 @@ func resourceOpenIdClient() *schema.Resource {
 			"scopes": {
 				Type:     schema.TypeList,
 				Required: false,
+				Optional: true,
+				Default:  []string{"openid"},
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
 			},
-			"secretRequired": {
+			"secret_required": {
 				Type:     schema.TypeBool,
 				Required: false,
+				Optional: true,
 				Default:  false,
 			},
-			"secretClientCanChange": {
+			"secret_client_can_change": {
 				Type:     schema.TypeBool,
 				Required: false,
+				Optional: true,
 				Default:  false,
 			},
 			"enabled": {
 				Type:     schema.TypeBool,
 				Required: false,
+				Optional: true,
 				Default:  true,
 			},
-			"canIntrospectAnyTokens": {
+			"can_introspect_any_tokens": {
 				Type:     schema.TypeBool,
 				Required: false,
+				Optional: true,
 				Default:  false,
 			},
-			"canIntrospectOwnTokens": {
+			"can_introspect_own_tokens": {
 				Type:     schema.TypeBool,
 				Required: false,
+				Optional: true,
 				Default:  false,
 			},
-			"alwaysRequireApproval": {
+			"always_require_approval": {
 				Type:     schema.TypeBool,
 				Required: false,
+				Optional: true,
 				Default:  false,
 			},
-			"canReissueTokens": {
+			"can_reissue_tokens": {
 				Type:     schema.TypeBool,
 				Required: false,
+				Optional: true,
 				Default:  false,
 			},
 			"permissions": {
 				Type:     schema.TypeSet,
 				Required: false,
+				Optional: true,
+				Default:  []interface{}{},
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"permission": {
@@ -332,24 +347,28 @@ func resourceOpenIdClient() *schema.Resource {
 					},
 				},
 			},
-			"rememberApprovedScopes": {
+			"remember_approved_scopes": {
 				Type:     schema.TypeBool,
 				Required: false,
+				Optional: true,
 				Default:  false,
 			},
-			"attestationAccepted": {
+			"attestation_accepted": {
 				Type:     schema.TypeBool,
 				Required: false,
+				Optional: true,
 				Default:  false,
 			},
-			"publicJwks": {
+			"public_jwks": {
 				Type:     schema.TypeString,
 				Required: false,
+				Optional: true,
 				Default:  "",
 			},
-			"jwksUrl": {
+			"jwks_url": {
 				Type:     schema.TypeString,
 				Required: false,
+				Optional: true,
 				Default:  "",
 			},
 			"archivedAt": {
@@ -357,9 +376,10 @@ func resourceOpenIdClient() *schema.Resource {
 				Required:     false,
 				ValidateFunc: validation.IsRFC3339Time,
 			},
-			"createdByAppSphere": {
+			"created_by_app_sphere": {
 				Type:     schema.TypeBool,
 				Required: false,
+				Optional: true,
 				Default:  false,
 			},
 		},
@@ -371,36 +391,36 @@ func resourceOpenIdClient() *schema.Resource {
 
 func resourceDataToOpenIdClient(d *schema.ResourceData) *smilecdr.OpenIdClient {
 
-	secrets := d.Get("clientSecrets").(*schema.Set).List()
+	secrets := d.Get("client_secrets").(*schema.Set).List()
 	clientSecrets := make([]smilecdr.ClientSecret, len(secrets))
 
 	permissions := d.Get("permissions").(*schema.Set).List()
 	userPermissions := make([]smilecdr.UserPermission, len(permissions))
 
 	openidClient := &smilecdr.OpenIdClient{
-		ClientId:                    d.Get("clientId").(string),
-		ClientName:                  d.Get("clientName").(string),
-		NodeId:                      d.Get("nodeId").(string),
-		ModuleId:                    d.Get("moduleId").(string),
-		AccessTokenValiditySeconds:  d.Get("accessTokenValiditySeconds").(int),
+		ClientId:                    d.Get("client_id").(string),
+		ClientName:                  d.Get("client_name").(string),
+		NodeId:                      d.Get("node_id").(string),
+		ModuleId:                    d.Get("module_id").(string),
+		AccessTokenValiditySeconds:  d.Get("access_token_validity_seconds").(int),
 		AllowedGrantTypes:           d.Get("allowedGrantTypes").([]string),
-		AutoApproveScopes:           d.Get("autoApproveScopes").([]string),
-		AutoGrantScopes:             d.Get("autoGrantScopes").([]string),
+		AutoApproveScopes:           d.Get("auto_approve_scopes").([]string),
+		AutoGrantScopes:             d.Get("auto_grant_scopes").([]string),
 		ClientSecrets:               clientSecrets,
-		FixedScope:                  d.Get("fixedScope").(bool),
-		RefreshTokenValiditySeconds: d.Get("refreshTokenValiditySeconds").(int),
-		RegisteredRedirectUris:      d.Get("registeredRedirectUris").([]string),
+		FixedScope:                  d.Get("fixed_scope").(bool),
+		RefreshTokenValiditySeconds: d.Get("refresh_token_validity_seconds").(int),
+		RegisteredRedirectUris:      d.Get("registered_redirect_uris").([]string),
 		Scopes:                      d.Get("scopes").([]string),
-		SecretRequired:              d.Get("secretRequired").(bool),
-		SecretClientCanChange:       d.Get("secretClientCanChange").(bool),
+		SecretRequired:              d.Get("secret_required").(bool),
+		SecretClientCanChange:       d.Get("secret_client_can_change").(bool),
 		Enabled:                     d.Get("enabled").(bool),
-		CanIntrospectAnyTokens:      d.Get("canIntrospectAnyTokens").(bool),
-		CanIntrospectOwnTokens:      d.Get("canIntrospectOwnTokens").(bool),
-		AlwaysRequireApproval:       d.Get("alwaysRequireApproval").(bool),
-		CanReissueTokens:            d.Get("canReissueTokens").(bool),
+		CanIntrospectAnyTokens:      d.Get("can_introspect_any_tokens").(bool),
+		CanIntrospectOwnTokens:      d.Get("can_introspect_own_tokens").(bool),
+		AlwaysRequireApproval:       d.Get("always_require_approval").(bool),
+		CanReissueTokens:            d.Get("can_reissue_tokens").(bool),
 		Permissions:                 userPermissions,
-		AttestationAccepted:         d.Get("attestationAccepted").(bool),
-		PublicJwksUri:               d.Get("publicJwksUri").(string),
+		AttestationAccepted:         d.Get("attestation_accepted").(bool),
+		PublicJwksUri:               d.Get("public_jwksUri").(string),
 		ArchivedAt:                  d.Get("archivedAt").(string),
 	}
 	return openidClient
@@ -431,41 +451,41 @@ func resourceOpenIdClientRead(ctx context.Context, d *schema.ResourceData, m int
 
 	c := m.(*smilecdr.Client)
 
-	clientId := d.Get("clientId").(string)
-	nodeId := d.Get("nodeId").(string)
-	moduleId := d.Get("moduleId").(string)
+	client_id := d.Get("client_id").(string)
+	nodeId := d.Get("node_id").(string)
+	moduleId := d.Get("module_id").(string)
 
-	openIdClient, err := c.GetOpenIdClient(clientId, nodeId, moduleId)
+	openIdClient, err := c.GetOpenIdClient(client_id, nodeId, moduleId)
 
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
 	d.SetId(openIdClient.ClientId)
-	d.Set("clientName", openIdClient.ClientName)
-	d.Set("nodeId", openIdClient.NodeId)
-	d.Set("moduleId", openIdClient.ModuleId)
-	d.Set("accessTokenValiditySeconds", openIdClient.AccessTokenValiditySeconds)
-	d.Set("allowedGrantTypes", openIdClient.AllowedGrantTypes)
-	d.Set("autoApproveScopes", openIdClient.AutoApproveScopes)
-	d.Set("autoGrantScopes", openIdClient.AutoGrantScopes)
-	d.Set("clientSecrets", openIdClient.ClientSecrets)
-	d.Set("fixedScope", openIdClient.FixedScope)
-	d.Set("refreshTokenValiditySeconds", openIdClient.RefreshTokenValiditySeconds)
-	d.Set("registeredRedirectUris", openIdClient.RegisteredRedirectUris)
+	d.Set("client_name", openIdClient.ClientName)
+	d.Set("node_id", openIdClient.NodeId)
+	d.Set("module_id", openIdClient.ModuleId)
+	d.Set("access_token_validity_seconds", openIdClient.AccessTokenValiditySeconds)
+	d.Set("allowed_grant_types", openIdClient.AllowedGrantTypes)
+	d.Set("auto_approve_scopes", openIdClient.AutoApproveScopes)
+	d.Set("auto_grant_scopes", openIdClient.AutoGrantScopes)
+	d.Set("client_secrets", openIdClient.ClientSecrets)
+	d.Set("fixed_scope", openIdClient.FixedScope)
+	d.Set("refresh_token_validity_seconds", openIdClient.RefreshTokenValiditySeconds)
+	d.Set("registered_redirect_uris", openIdClient.RegisteredRedirectUris)
 	d.Set("scopes", openIdClient.Scopes)
-	d.Set("secretRequired", openIdClient.SecretRequired)
-	d.Set("secretClientCanChange", openIdClient.SecretClientCanChange)
+	d.Set("secret_required", openIdClient.SecretRequired)
+	d.Set("secret_client_can_change", openIdClient.SecretClientCanChange)
 	d.Set("enabled", openIdClient.Enabled)
-	d.Set("canIntrospectAnyTokens", openIdClient.CanIntrospectAnyTokens)
-	d.Set("canIntrospectOwnTokens", openIdClient.CanIntrospectOwnTokens)
-	d.Set("alwaysRequireApproval", openIdClient.AlwaysRequireApproval)
-	d.Set("canReissueTokens", openIdClient.CanReissueTokens)
+	d.Set("can_introspect_any_tokens", openIdClient.CanIntrospectAnyTokens)
+	d.Set("can_introspect_own_tokens", openIdClient.CanIntrospectOwnTokens)
+	d.Set("always_require_approval", openIdClient.AlwaysRequireApproval)
+	d.Set("can_reissue_tokens", openIdClient.CanReissueTokens)
 	d.Set("permissions", openIdClient.Permissions)
-	d.Set("attestationAccepted", openIdClient.AttestationAccepted)
-	d.Set("publicJwksUri", openIdClient.PublicJwksUri)
-	d.Set("archivedAt", openIdClient.ArchivedAt)
-	d.Set("createdByAppSphere", openIdClient.CreatedByAppSphere)
+	d.Set("attestation_accepted", openIdClient.AttestationAccepted)
+	d.Set("public_jwks_uri", openIdClient.PublicJwksUri)
+	d.Set("archived_at", openIdClient.ArchivedAt)
+	d.Set("created_by_app_sphere", openIdClient.CreatedByAppSphere)
 	return diags
 
 }

@@ -20,26 +20,25 @@ func dataSourceOpenIdClients() *schema.Resource {
 				Computed: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"pid": {
-							Type:     schema.TypeInt,
-							Required: false,
-						},
-						"nodeId": &schema.Schema{
+						"node_id": &schema.Schema{
 							Type:     schema.TypeString,
 							Required: false,
+							Optional: true,
 							Default:  "Master",
 						},
-						"moduleId": &schema.Schema{
+						"module_id": &schema.Schema{
 							Type:     schema.TypeString,
 							Required: false,
+							Optional: true,
 							Default:  "smart_auth",
 						},
-						"accessTokenValiditySeconds": &schema.Schema{
+						"access_token_validity_seconds": &schema.Schema{
 							Type:     schema.TypeInt,
 							Required: false,
+							Optional: true,
 							Default:  300,
 						},
-						"allowedGrantTypes": &schema.Schema{
+						"allowed_grant_types": &schema.Schema{
 							Type:     schema.TypeSet,
 							Required: false,
 							Elem: &schema.Schema{
@@ -47,39 +46,36 @@ func dataSourceOpenIdClients() *schema.Resource {
 								Required: false,
 							},
 						},
-						"autoApproveScopes": &schema.Schema{
+						"auto_approve_scopes": &schema.Schema{
 							Type:     schema.TypeSet,
 							Required: false,
 							Elem: &schema.Schema{
 								Type: schema.TypeString,
 							},
 						},
-						"autoGrantScopes": &schema.Schema{
+						"auto_grant_scopes": &schema.Schema{
 							Type:     schema.TypeSet,
 							Required: false,
+							Optional: true,
+							Default:  []string{""},
 							Elem: &schema.Schema{
 								Type: schema.TypeString,
 							},
 						},
-						"clientId": &schema.Schema{
+						"client_id": &schema.Schema{
 							Type:     schema.TypeString,
 							Required: true,
 						},
-						"clientName": &schema.Schema{
+						"client_name": &schema.Schema{
 							Type:     schema.TypeString,
-							Required: false,
-							Default:  "Some Client",
+							Required: true,
+							Optional: false,
 						},
-						"clientSecrets": &schema.Schema{
+						"client_secrets": &schema.Schema{
 							Type:     schema.TypeSet,
 							Required: false,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
-
-									"pid": &schema.Schema{
-										Type:     schema.TypeInt,
-										Required: false,
-									},
 									"secret": &schema.Schema{
 										Type:     schema.TypeString,
 										Required: true,
@@ -104,17 +100,17 @@ func dataSourceOpenIdClients() *schema.Resource {
 								},
 							},
 						},
-						"fixedScope": &schema.Schema{
+						"fixed_scope": &schema.Schema{
 							Type:     schema.TypeBool,
 							Required: false,
 							Default:  false,
 						},
-						"refreshTokenValiditySeconds": &schema.Schema{
+						"refresh_token_validity_seconds": &schema.Schema{
 							Type:     schema.TypeInt,
 							Required: false,
 							Default:  86400,
 						},
-						"registeredRedirectUris": &schema.Schema{
+						"registered_redirect_uris": &schema.Schema{
 							Type:     schema.TypeSet,
 							Required: false,
 							Elem: &schema.Schema{
@@ -128,12 +124,12 @@ func dataSourceOpenIdClients() *schema.Resource {
 								Type: schema.TypeString,
 							},
 						},
-						"secretRequired": &schema.Schema{
+						"secret_required": &schema.Schema{
 							Type:     schema.TypeBool,
 							Required: false,
 							Default:  false,
 						},
-						"secretClientCanChange": &schema.Schema{
+						"secret_client_can_change": &schema.Schema{
 							Type:     schema.TypeBool,
 							Required: false,
 							Default:  false,
@@ -143,22 +139,22 @@ func dataSourceOpenIdClients() *schema.Resource {
 							Required: false,
 							Default:  true,
 						},
-						"canIntrospectAnyTokens": &schema.Schema{
+						"can_introspect_any_tokens": &schema.Schema{
 							Type:     schema.TypeBool,
 							Required: false,
 							Default:  false,
 						},
-						"canIntrospectOwnTokens": &schema.Schema{
+						"can_introspect_own_tokens": &schema.Schema{
 							Type:     schema.TypeBool,
 							Required: false,
 							Default:  false,
 						},
-						"alwaysRequireApproval": &schema.Schema{
+						"always_require_approval": &schema.Schema{
 							Type:     schema.TypeBool,
 							Required: false,
 							Default:  false,
 						},
-						"canReissueTokens": &schema.Schema{
+						"can_reissue_tokens": &schema.Schema{
 							Type:     schema.TypeBool,
 							Required: false,
 							Default:  false,
@@ -170,22 +166,22 @@ func dataSourceOpenIdClients() *schema.Resource {
 								Type: schema.TypeString,
 							},
 						},
-						"rememberApprovedScopes": &schema.Schema{
+						"remember_approved_scopes": &schema.Schema{
 							Type:     schema.TypeBool,
 							Required: false,
 							Default:  false,
 						},
-						"attestationAccepted": &schema.Schema{
+						"attestation_accepted": &schema.Schema{
 							Type:     schema.TypeBool,
 							Required: false,
 							Default:  false,
 						},
-						"publicJwks": &schema.Schema{
+						"public_jwks": &schema.Schema{
 							Type:     schema.TypeString,
 							Required: false,
 							Default:  "",
 						},
-						"jwksUrl": &schema.Schema{
+						"jwks_url": &schema.Schema{
 							Type:     schema.TypeString,
 							Required: false,
 							Default:  "",
@@ -195,7 +191,7 @@ func dataSourceOpenIdClients() *schema.Resource {
 							Required:     false,
 							ValidateFunc: validation.IsRFC3339Time,
 						},
-						"createdByAppSphere": &schema.Schema{
+						"created_by_app_sphere": &schema.Schema{
 							Type:     schema.TypeBool,
 							Required: false,
 							Default:  false,

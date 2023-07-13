@@ -5,7 +5,7 @@ import (
 	"regexp"
 )
 
-func ValidateClientId(v interface{}, k string) (ws []string, es []error) {
+func Validateclient_id(v interface{}, k string) (ws []string, es []error) {
 	var errs []error
 	var warns []string
 	value, ok := v.(string)
