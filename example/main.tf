@@ -22,7 +22,7 @@ resource "smilecdr_openid_client" "client1" {
   node_id                       = "Master"
   module_id                     = "smart_auth"
   access_token_validity_seconds = 300
-  allowedGrantTypes = [
+  allowed_grant_types = [
     "authorization_code",
     "refresh_token",
     "client_credentials",

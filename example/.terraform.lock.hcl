@@ -5,6 +5,6 @@ provider "local.providers/zedwerks/smilecdr" {
   version     = "0.2.0"
   constraints = "0.2.0"
   hashes = [
-    "h1:aEkP6AFuUBDkNN8woutEq/aNJebRcSfihdtL7I+3DJE=",
+    "h1:GVZbN8NIZ56OUvyMuRU5ofg3eCEQePk0XQybgCD9QHY=",
   ]
 }

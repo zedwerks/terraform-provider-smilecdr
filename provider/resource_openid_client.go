@@ -190,7 +190,6 @@ func resourceOpenIdClient() *schema.Resource {
 				Type:     schema.TypeSet,
 				Required: false,
 				Optional: true,
-				Default:  schema.NewSet(schema.HashString, []interface{}{"AUTHORIZATION_CODE", "REFRESH_TOKEN"}),
 				Elem: &schema.Schema{
 					Type:     schema.TypeString,
 					Required: false,
@@ -199,19 +198,15 @@ func resourceOpenIdClient() *schema.Resource {
 			},
 			"auto_approve_scopes": {
 				Type:     schema.TypeSet,
-				Required: false,
 				Optional: true,
-				Default:  []string{"openid"},
 				Elem: &schema.Schema{
-					Type:     schema.TypeString,
-					Required: false,
+					Type: schema.TypeString,
 				},
 			},
 			"auto_grant_scopes": {
 				Type:     schema.TypeSet,
 				Required: false,
 				Optional: true,
-				Default:  schema.NewSet(schema.HashString, []interface{}{"openid"}),
 				Elem: &schema.Schema{
 					Type:     schema.TypeString,
 					Required: false,
@@ -276,13 +271,9 @@ func resourceOpenIdClient() *schema.Resource {
 				},
 			},
 			"scopes": {
-				Type:     schema.TypeList,
-				Required: false,
+				Type:     schema.TypeSet,
 				Optional: true,
-				Default:  schema.NewSet(schema.HashString, []interface{}{"openid"}),
-				Elem: &schema.Schema{
-					Type: schema.TypeString,
-				},
+				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
 			"secret_required": {
 				Type:     schema.TypeBool,
@@ -403,7 +394,7 @@ func resourceDataToOpenIdClient(d *schema.ResourceData) *smilecdr.OpenIdClient {
 		NodeId:                      d.Get("node_id").(string),
 		ModuleId:                    d.Get("module_id").(string),
 		AccessTokenValiditySeconds:  d.Get("access_token_validity_seconds").(int),
-		AllowedGrantTypes:           d.Get("allowedGrantTypes").([]string),
+		AllowedGrantTypes:           d.Get("allowed_grant_types").([]string),
 		AutoApproveScopes:           d.Get("auto_approve_scopes").([]string),
 		AutoGrantScopes:             d.Get("auto_grant_scopes").([]string),
 		ClientSecrets:               clientSecrets,
