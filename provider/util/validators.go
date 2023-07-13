@@ -5,12 +5,12 @@ import (
 	"regexp"
 )
 
-func Validateclient_id(v interface{}, k string) (ws []string, es []error) {
+func ValidateClientId(v interface{}, k string) (ws []string, es []error) {
 	var errs []error
 	var warns []string
 	value, ok := v.(string)
 	if !ok {
-		errs = append(errs, fmt.Errorf("Expected name to be string"))
+		errs = append(errs, fmt.Errorf("expected name to be string"))
 		return warns, errs
 	}
 	whiteSpace := regexp.MustCompile(`\s+`)

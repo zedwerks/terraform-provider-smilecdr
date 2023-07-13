@@ -190,11 +190,11 @@ func resourceOpenIdClient() *schema.Resource {
 				Type:     schema.TypeSet,
 				Required: false,
 				Optional: true,
-				Default:  []string{"AUTHORIZATION_CODE", "REFRESH_TOKEN"},
+				Default:  schema.NewSet(schema.HashString, []interface{}{"AUTHORIZATION_CODE", "REFRESH_TOKEN"}),
 				Elem: &schema.Schema{
-					Type:         schema.TypeString,
-					Required:     false,
-					ValidateFunc: schema.SchemaValidateFunc(validation.StringInSlice(smileCdrOpenIdAuthorizationFlows, false)),
+					Type:     schema.TypeString,
+					Required: false,
+					// @TODO: ValidateFunc: validateGrantType,
 				},
 			},
 			"auto_approve_scopes": {
@@ -211,7 +211,7 @@ func resourceOpenIdClient() *schema.Resource {
 				Type:     schema.TypeSet,
 				Required: false,
 				Optional: true,
-				Default:  []string{"openid"},
+				Default:  schema.NewSet(schema.HashString, []interface{}{"openid"}),
 				Elem: &schema.Schema{
 					Type:     schema.TypeString,
 					Required: false,
@@ -220,37 +220,36 @@ func resourceOpenIdClient() *schema.Resource {
 			"client_id": {
 				Type:         schema.TypeString,
 				Required:     true,
-				ValidateFunc: util.Validateclient_id,
+				ValidateFunc: util.ValidateClientId,
 			},
 			"client_name": {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"clientSecrets": {
+			"client_secrets": {
 				Type:     schema.TypeSet,
 				Required: false,
+				Optional: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"secret": {
 							Type:     schema.TypeString,
-							Required: false,
+							Optional: true,
 							Default:  "",
 						},
 						"description": {
 							Type:     schema.TypeString,
-							Required: false,
+							Optional: true,
 							Default:  "",
 						},
 						"activation": {
 							Type:         schema.TypeString,
-							Required:     false,
-							Default:      "",
+							Optional:     true,
 							ValidateFunc: validation.IsRFC3339Time,
 						},
 						"expiration": {
 							Type:         schema.TypeString,
-							Required:     false,
-							Default:      "",
+							Optional:     true,
 							ValidateFunc: validation.IsRFC3339Time,
 						},
 					},
@@ -272,7 +271,6 @@ func resourceOpenIdClient() *schema.Resource {
 				Type:     schema.TypeSet,
 				Required: false,
 				Optional: true,
-				Default:  []string{},
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
@@ -281,7 +279,7 @@ func resourceOpenIdClient() *schema.Resource {
 				Type:     schema.TypeList,
 				Required: false,
 				Optional: true,
-				Default:  []string{"openid"},
+				Default:  schema.NewSet(schema.HashString, []interface{}{"openid"}),
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
@@ -332,7 +330,6 @@ func resourceOpenIdClient() *schema.Resource {
 				Type:     schema.TypeSet,
 				Required: false,
 				Optional: true,
-				Default:  []interface{}{},
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"permission": {
@@ -343,6 +340,8 @@ func resourceOpenIdClient() *schema.Resource {
 						"argument": {
 							Type:     schema.TypeString,
 							Required: false,
+							Optional: true,
+							Default:  "",
 						},
 					},
 				},
@@ -371,9 +370,10 @@ func resourceOpenIdClient() *schema.Resource {
 				Optional: true,
 				Default:  "",
 			},
-			"archivedAt": {
+			"archived_at": {
 				Type:         schema.TypeString,
 				Required:     false,
+				Optional:     true,
 				ValidateFunc: validation.IsRFC3339Time,
 			},
 			"created_by_app_sphere": {
@@ -394,8 +394,8 @@ func resourceDataToOpenIdClient(d *schema.ResourceData) *smilecdr.OpenIdClient {
 	secrets := d.Get("client_secrets").(*schema.Set).List()
 	clientSecrets := make([]smilecdr.ClientSecret, len(secrets))
 
-	permissions := d.Get("permissions").(*schema.Set).List()
-	userPermissions := make([]smilecdr.UserPermission, len(permissions))
+	perms := d.Get("permissions").(*schema.Set).List()
+	permissions := make([]smilecdr.UserPermission, len(perms))
 
 	openidClient := &smilecdr.OpenIdClient{
 		ClientId:                    d.Get("client_id").(string),
@@ -418,10 +418,10 @@ func resourceDataToOpenIdClient(d *schema.ResourceData) *smilecdr.OpenIdClient {
 		CanIntrospectOwnTokens:      d.Get("can_introspect_own_tokens").(bool),
 		AlwaysRequireApproval:       d.Get("always_require_approval").(bool),
 		CanReissueTokens:            d.Get("can_reissue_tokens").(bool),
-		Permissions:                 userPermissions,
+		Permissions:                 permissions,
 		AttestationAccepted:         d.Get("attestation_accepted").(bool),
 		PublicJwksUri:               d.Get("public_jwksUri").(string),
-		ArchivedAt:                  d.Get("archivedAt").(string),
+		ArchivedAt:                  d.Get("archived_at").(string),
 	}
 	return openidClient
 
