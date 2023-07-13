@@ -73,8 +73,7 @@ resource "smilecdr_openid_client" "client1" {
   can_reissue_tokens        = false
   remember_approved_scopes  = false
   attestation_accepted      = false
-  public_jwks               = ""
-  jwks_url                  = ""
+  public_jwks_uri           = ""
   created_by_app_sphere     = false
 
 }
