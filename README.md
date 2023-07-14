@@ -1,5 +1,4 @@
-Terraform Provider for Smile CDR
-================================
+# Terraform Provider for Smile CDR
 
 ![Badge-License]
 
@@ -32,6 +31,5 @@ Then, run the following command to initialize the workspace and apply the exampl
 ```shell
 terraform init && terraform apply
 ```
-
 
 [Badge-License]: https://img.shields.io/badge/license-apache%202.0-60C060.svg
