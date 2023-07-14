@@ -1,4 +1,6 @@
-# terraform-provider-smilecdr
+# Terraform Provider for Smile CDR
+
+![Badge-License]
 
 An initial cut at creating a Terraform provider for Smile CDR. Focus early days on security module configurations:
 
@@ -29,3 +31,5 @@ Then, run the following command to initialize the workspace and apply the exampl
 ```shell
 terraform init && terraform apply
 ```
+
+[Badge-License]: https://img.shields.io/badge/license-apache%202.0-60C060.svg
