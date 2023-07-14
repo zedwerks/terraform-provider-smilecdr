@@ -154,7 +154,7 @@ func resourceOpenIdIdentityProvider() *schema.Resource {
 	}
 }
 
-func resource2OpenIdIdentityProvider(d *schema.ResourceData) (*OpenIdIdentityProvider, error) {
+func resource2OpenIdIdentityProvider(d *schema.ResourceData) (*smilecdr.OpenIdIdentityProvider, error) {
 
 	openidIdp := &smilecdr.OpenIdIdentityProvider{
 		Pid:                             d.Get("pid").(int),
