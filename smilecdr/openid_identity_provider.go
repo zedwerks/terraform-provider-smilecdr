@@ -49,6 +49,21 @@ func (smilecdr *Client) GetOpenIdIdentityProviders() ([]OpenIdIdentityProvider, 
 	return providers, err
 }
 
+func (smilecdr *Client) GetOpenIdIdentityProvider(nodeId string, moduleId string, name string) (OpenIdIdentityProvider, error) {
+
+	var provider OpenIdIdentityProvider
+	var endpoint = fmt.Sprintf("/openid-connect-servers/%s/%s/%s", nodeId, moduleId, name)
+	jsonBody, getErr := smilecdr.Get(endpoint)
+	if getErr != nil {
+		fmt.Println("error during Get in GetOpenIdIdentityProvider:", getErr)
+		return provider, getErr
+	}
+
+	err := json.Unmarshal(jsonBody, &provider)
+
+	return provider, err
+}
+
 func (smilecdr *Client) PostOpenIdIdentityProvider(provider OpenIdIdentityProvider) (OpenIdIdentityProvider, error) {
 	var newProvider OpenIdIdentityProvider
 	var nodeId = provider.NodeId
@@ -59,7 +74,7 @@ func (smilecdr *Client) PostOpenIdIdentityProvider(provider OpenIdIdentityProvid
 
 	jsonBody, postErr := smilecdr.Post(endpoint, jsonBody)
 	if postErr != nil {
-		fmt.Println("error during Post in PostOpenIdClient:", postErr)
+		fmt.Println("error during Post in PostOpenIdIdentityProvider:", postErr)
 		return newProvider, postErr
 	}
 

@@ -33,7 +33,8 @@ func Provider() *schema.Provider {
 			},
 		},
 		ResourcesMap: map[string]*schema.Resource{
-			"smilecdr_openid_client": resourceOpenIdClient(),
+			"smilecdr_openid_client":            resourceOpenIdClient(),
+			"smilecdr_openid_identity_provider": resourceOpenIdIdentityProvider(),
 		},
 		DataSourcesMap:       map[string]*schema.Resource{},
 		ConfigureContextFunc: providerConfigure,

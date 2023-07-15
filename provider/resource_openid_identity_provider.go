@@ -213,6 +213,19 @@ func resourceOpenIdIdentityProviderRead(ctx context.Context, d *schema.ResourceD
 
 	var diags diag.Diagnostics
 
+	c := m.(*smilecdr.Client)
+
+	name := d.Get("name").(string)
+	nodeId := d.Get("node_id").(string)
+	moduleId := d.Get("module_id").(string)
+
+	provider, err := c.GetOpenIdIdentityProvider(nodeId, moduleId, name)
+
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	d.SetId(provider.Name)
+
 	return diags
 }
 
