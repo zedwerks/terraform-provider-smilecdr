@@ -3,7 +3,10 @@
 
 package smilecdr
 
-import "encoding/json"
+import (
+	"encoding/json"
+	"fmt"
+)
 
 type OpenIdIdentityProvider struct {
 	Pid                             int    `json:"pid,omitempty"`
@@ -44,4 +47,23 @@ func (smilecdr *Client) GetOpenIdIdentityProviders() ([]OpenIdIdentityProvider, 
 	err := json.Unmarshal(jsonBody, &providers)
 
 	return providers, err
+}
+
+func (smilecdr *Client) PostOpenIdIdentityProvider(provider OpenIdIdentityProvider) (OpenIdIdentityProvider, error) {
+	var newProvider OpenIdIdentityProvider
+	var nodeId = provider.NodeId
+	var moduleId = provider.ModuleId
+
+	var endpoint = fmt.Sprintf("/openid-connect-servers/%s/%s", nodeId, moduleId)
+	jsonBody, _ := json.Marshal(provider)
+
+	jsonBody, postErr := smilecdr.Post(endpoint, jsonBody)
+	if postErr != nil {
+		fmt.Println("error during Post in PostOpenIdClient:", postErr)
+		return newProvider, postErr
+	}
+
+	err := json.Unmarshal(jsonBody, &newProvider)
+
+	return newProvider, err
 }

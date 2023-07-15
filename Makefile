@@ -2,7 +2,7 @@ TEST?=$$(go list ./... | grep -v 'vendor')
 HOSTNAME=zedwerks
 NAME=smilecdr
 BINARY=terraform-provider-${NAME}_v${VERSION}
-VERSION=0.2.0
+VERSION=0.3.0
 OS_ARCH=darwin_arm64
 
 default: install

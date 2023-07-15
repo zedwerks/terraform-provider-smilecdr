@@ -190,9 +190,23 @@ func resource2OpenIdIdentityProvider(d *schema.ResourceData) (*smilecdr.OpenIdId
 
 func resourceOpenIdIdentityProviderCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 
-	var diags diag.Diagnostics
+	c := m.(*smilecdr.Client)
 
-	return diags
+	idp, mErr := resource2OpenIdIdentityProvider(d)
+	if mErr != nil {
+		return diag.FromErr(mErr)
+	}
+
+	o, err := c.PostOpenIdIdentityProvider(*idp)
+
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	d.SetId(idp.Name)   // the primary resource identifier. must be unique.
+	d.Set("pid", o.Pid) // the pid is needed for Put requests
+
+	return resourceOpenIdIdentityProviderRead(ctx, d, m)
 }
 
 func resourceOpenIdIdentityProviderRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
