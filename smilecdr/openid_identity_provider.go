@@ -82,3 +82,31 @@ func (smilecdr *Client) PostOpenIdIdentityProvider(provider OpenIdIdentityProvid
 
 	return newProvider, err
 }
+
+func (smilecdr *Client) PutOpenIdIdentityProvider(provider OpenIdIdentityProvider) (OpenIdIdentityProvider, error) {
+	var newProvider OpenIdIdentityProvider
+	var nodeId = provider.NodeId
+	var moduleId = provider.ModuleId
+	var name = provider.Name
+
+	var endpoint = fmt.Sprintf("/openid-connect-servers/%s/%s/%s", nodeId, moduleId, name)
+	jsonBody, _ := json.Marshal(provider)
+
+	jsonBody, putErr := smilecdr.Put(endpoint, jsonBody)
+	if putErr != nil {
+		fmt.Println("error during Put in PutOpenIdIdentityProvider:", putErr)
+		return newProvider, putErr
+	}
+
+	err := json.Unmarshal(jsonBody, &newProvider)
+	if err != nil {
+		fmt.Println("error parsing Put response JSON:", err)
+	}
+	return newProvider, err
+}
+
+func (smilecdr *Client) DeleteOpenIdIdentityProvider(nodeId string, moduleId string, name string) error {
+	var endpoint = fmt.Sprintf("/openid-connect-servers/%s/%s/%s", nodeId, moduleId, name)
+	_, err := smilecdr.Delete(endpoint)
+	return err
+}

@@ -5,6 +5,7 @@ package provider
 
 import (
 	"context"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -226,19 +227,65 @@ func resourceOpenIdIdentityProviderRead(ctx context.Context, d *schema.ResourceD
 	}
 	d.SetId(provider.Name)
 
+	d.Set("pid", provider.Pid)
+	d.Set("name", provider.Name)
+	d.Set("issuer", provider.Issuer)
+	d.Set("token_introspection_client_id", provider.TokenIntrospectionClientId)
+	d.Set("token_introspection_client_secret", provider.TokenIntrospectionClientSecret)
+	d.Set("node_id", provider.NodeId)
+	d.Set("module_id", provider.ModuleId)
+	d.Set("validation_jwk_text", provider.ValidationJwkText)
+	d.Set("validation_jwk_file", provider.ValidationJwkFile)
+	d.Set("federation_registration_id", provider.FederationRegistrationId)
+	d.Set("federation_request_scopes", provider.FederationRequestScopes)
+	d.Set("federation_authorization_url", provider.FederationAuthorizationUrl)
+	d.Set("federation_token_url", provider.FederationTokenUrl)
+	d.Set("federation_user_info_url", provider.FederationUserInfoUrl)
+	d.Set("federation_jwk_set_url", provider.FederationJwkSetUrl)
+	d.Set("federation_auth_script_text", provider.FederationAuthScriptText)
+	d.Set("federation_auth_script_file", provider.FederationAuthScriptFile)
+	d.Set("federation_user_mapping_script_text", provider.FederationUserMappingScriptText)
+	d.Set("fhir_endpoint_url", provider.FhirEndpointUrl)
+	d.Set("auth_well_known_config_url", provider.AuthWellKnownConfigUrl)
+	d.Set("notes", provider.Notes)
+	d.Set("custom_token_params", provider.CustomTokenParams)
+	d.Set("response_type", provider.ResponseType)
+	d.Set("organization_id", provider.OrganizationId)
+	d.Set("audience", provider.Audience)
+	d.Set("archived_at", provider.ArchivedAt)
+
 	return diags
 }
 
 func resourceOpenIdIdentityProviderUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 
-	var diags diag.Diagnostics
+	c := m.(*smilecdr.Client)
 
-	return diags
+	provider, mErr := resource2OpenIdIdentityProvider(d)
+	if mErr != nil {
+		return diag.FromErr(mErr)
+	}
+	d.SetId(provider.Name)
+
+	_, err := c.PutOpenIdIdentityProvider(*provider)
+
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	return resourceOpenIdIdentityProviderRead(ctx, d, m)
+
 }
 
 func resourceOpenIdIdentityProviderDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 
 	var diags diag.Diagnostics
+
+	d.Set("archived_at", time.Now().Format(time.RFC3339))
+
+	resourceOpenIdIdentityProviderUpdate(ctx, d, m)
+
+	d.SetId("")
 
 	return diags
 }
