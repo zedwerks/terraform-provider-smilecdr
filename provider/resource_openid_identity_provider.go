@@ -204,7 +204,7 @@ func resourceOpenIdIdentityProviderCreate(ctx context.Context, d *schema.Resourc
 		return diag.FromErr(err)
 	}
 
-	d.SetId(idp.Name)   // the primary resource identifier. must be unique.
+	d.SetId(idp.Issuer) // the primary resource identifier. must be unique.
 	d.Set("pid", o.Pid) // the pid is needed for Put requests
 
 	return resourceOpenIdIdentityProviderRead(ctx, d, m)
@@ -216,16 +216,16 @@ func resourceOpenIdIdentityProviderRead(ctx context.Context, d *schema.ResourceD
 
 	c := m.(*smilecdr.Client)
 
-	name := d.Get("name").(string)
+	pid := d.Get("pid").(string)
 	nodeId := d.Get("node_id").(string)
 	moduleId := d.Get("module_id").(string)
 
-	provider, err := c.GetOpenIdIdentityProvider(nodeId, moduleId, name)
+	provider, err := c.GetOpenIdIdentityProvider(nodeId, moduleId, pid)
 
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	d.SetId(provider.Name)
+	d.SetId(provider.Issuer)
 
 	d.Set("pid", provider.Pid)
 	d.Set("name", provider.Name)

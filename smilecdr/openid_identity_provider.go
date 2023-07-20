@@ -6,6 +6,7 @@ package smilecdr
 import (
 	"encoding/json"
 	"fmt"
+	"strconv"
 )
 
 type OpenIdIdentityProvider struct {
@@ -49,10 +50,10 @@ func (smilecdr *Client) GetOpenIdIdentityProviders() ([]OpenIdIdentityProvider, 
 	return providers, err
 }
 
-func (smilecdr *Client) GetOpenIdIdentityProvider(nodeId string, moduleId string, name string) (OpenIdIdentityProvider, error) {
+func (smilecdr *Client) GetOpenIdIdentityProvider(nodeId string, moduleId string, issuerUrl string) (OpenIdIdentityProvider, error) {
 
 	var provider OpenIdIdentityProvider
-	var endpoint = fmt.Sprintf("/openid-connect-servers/%s/%s/%s", nodeId, moduleId, name)
+	var endpoint = fmt.Sprintf("/openid-connect-servers/%s/%s/?issuer_url=%s", nodeId, moduleId, issuerUrl)
 	jsonBody, getErr := smilecdr.Get(endpoint)
 	if getErr != nil {
 		fmt.Println("error during Get in GetOpenIdIdentityProvider:", getErr)
@@ -69,7 +70,7 @@ func (smilecdr *Client) PostOpenIdIdentityProvider(provider OpenIdIdentityProvid
 	var nodeId = provider.NodeId
 	var moduleId = provider.ModuleId
 
-	var endpoint = fmt.Sprintf("/openid-connect-servers/%s/%s", nodeId, moduleId)
+	var endpoint = fmt.Sprintf("/openid-connect-servers/%s/%s/", nodeId, moduleId)
 	jsonBody, _ := json.Marshal(provider)
 
 	jsonBody, postErr := smilecdr.Post(endpoint, jsonBody)
@@ -87,9 +88,9 @@ func (smilecdr *Client) PutOpenIdIdentityProvider(provider OpenIdIdentityProvide
 	var newProvider OpenIdIdentityProvider
 	var nodeId = provider.NodeId
 	var moduleId = provider.ModuleId
-	var name = provider.Name
+	var pid = provider.Pid
 
-	var endpoint = fmt.Sprintf("/openid-connect-servers/%s/%s/%s", nodeId, moduleId, name)
+	var endpoint = fmt.Sprintf("/openid-connect-servers/%s/%s/%s/", nodeId, moduleId, strconv.Itoa(pid))
 	jsonBody, _ := json.Marshal(provider)
 
 	jsonBody, putErr := smilecdr.Put(endpoint, jsonBody)
@@ -105,8 +106,8 @@ func (smilecdr *Client) PutOpenIdIdentityProvider(provider OpenIdIdentityProvide
 	return newProvider, err
 }
 
-func (smilecdr *Client) DeleteOpenIdIdentityProvider(nodeId string, moduleId string, name string) error {
-	var endpoint = fmt.Sprintf("/openid-connect-servers/%s/%s/%s", nodeId, moduleId, name)
+func (smilecdr *Client) DeleteOpenIdIdentityProvider(nodeId string, moduleId string, pid string) error {
+	var endpoint = fmt.Sprintf("/openid-connect-servers/%s/%s/%s", nodeId, moduleId, pid)
 	_, err := smilecdr.Delete(endpoint)
 	return err
 }
