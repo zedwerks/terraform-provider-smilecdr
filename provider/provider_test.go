@@ -1,4 +1,4 @@
-package provider_test
+package provider
 
 import (
 	"os"
@@ -7,8 +7,18 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
+var testAccProviders map[string]*schema.Provider
+var testAccProvider *schema.Provider
+
+func init() {
+	testAccProvider = Provider()
+	testAccProviders = map[string]*schema.Provider{
+		"smilecdr": testAccProvider,
+	}
+}
+
 // Test the Provider
-func Test_Provider(t *testing.T) {
+func TestProvider(t *testing.T) {
 	// Create a new instance of the Provider
 	provider := Provider()
 
@@ -18,14 +28,11 @@ func Test_Provider(t *testing.T) {
 	}
 }
 
-// Provider function
-func Provider() *schema.Provider {
-	return &schema.Provider{
-		// Implement your provider's resources, data sources, and other functionality here
-	}
+func TestProvider_impl(t *testing.T) {
+	var _ *schema.Provider = Provider()
 }
 
-func Test_envCheck(t *testing.T) {
+func testAccPreCheck(t *testing.T) {
 	if v := os.Getenv("SMILECDR_BASE_URL"); v == "" {
 		t.Fatal("SMILECDR_BASE_URL must be set for acceptance tests")
 	}
