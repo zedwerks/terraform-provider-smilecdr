@@ -27,11 +27,14 @@ func resourceOpenIdIdentityProvider() *schema.Resource {
 			},
 			"name": {
 				Type:     schema.TypeString,
-				Required: true,
+				Required: false,
+				Optional: true,
+				Default:  "An OpenID Identity Provider",
 			},
 			"issuer": {
 				Type:     schema.TypeString,
 				Required: true,
+				Optional: false,
 			},
 			"token_introspection_client_id": {
 				Type:     schema.TypeString,
@@ -58,15 +61,17 @@ func resourceOpenIdIdentityProvider() *schema.Resource {
 			"validation_jwk_text": {
 				Type:     schema.TypeString,
 				Required: false,
+				Optional: true,
 			},
 			"validation_jwk_file": {
 				Type:     schema.TypeString,
 				Required: false,
+				Optional: true,
 			},
 			"federation_registration_id": {
 				Type:     schema.TypeString,
 				Required: false,
-				Optional: true,
+				Computed: true,
 			},
 			"federation_request_scopes": {
 				Type:     schema.TypeString,
@@ -97,47 +102,7 @@ func resourceOpenIdIdentityProvider() *schema.Resource {
 				Required: false,
 				Optional: true,
 			},
-			"federation_auth_script_file": {
-				Type:     schema.TypeString,
-				Required: false,
-				Optional: true,
-			},
 			"federation_user_mapping_script_text": {
-				Type:     schema.TypeString,
-				Required: false,
-				Optional: true,
-			},
-			"fhir_endpoint_url": {
-				Type:     schema.TypeString,
-				Required: false,
-				Optional: true,
-			},
-			"auth_well_known_config_url": {
-				Type:     schema.TypeString,
-				Required: false,
-				Optional: true,
-			},
-			"notes": {
-				Type:     schema.TypeString,
-				Required: false,
-				Optional: true,
-			},
-			"custom_token_params": {
-				Type:     schema.TypeString,
-				Required: false,
-				Optional: true,
-			},
-			"response_type": {
-				Type:     schema.TypeString,
-				Required: false,
-				Optional: true,
-			},
-			"organization_id": {
-				Type:     schema.TypeString,
-				Required: false,
-				Optional: true,
-			},
-			"audience": {
 				Type:     schema.TypeString,
 				Required: false,
 				Optional: true,
@@ -174,15 +139,7 @@ func resource2OpenIdIdentityProvider(d *schema.ResourceData) (*smilecdr.OpenIdId
 		FederationUserInfoUrl:           d.Get("federation_user_info_url").(string),
 		FederationJwkSetUrl:             d.Get("federation_jwk_set_url").(string),
 		FederationAuthScriptText:        d.Get("federation_auth_script_text").(string),
-		FederationAuthScriptFile:        d.Get("federation_auth_script_file").(string),
 		FederationUserMappingScriptText: d.Get("federation_user_mapping_script_text").(string),
-		FhirEndpointUrl:                 d.Get("fhir_endpoint_url").(string),
-		AuthWellKnownConfigUrl:          d.Get("auth_well_known_config_url").(string),
-		Notes:                           d.Get("notes").(string),
-		CustomTokenParams:               d.Get("custom_token_params").(string),
-		ResponseType:                    d.Get("response_type").(string),
-		OrganizationId:                  d.Get("organization_id").(string),
-		Audience:                        d.Get("audience").(string),
 		ArchivedAt:                      d.Get("archived_at").(string),
 	}
 
@@ -204,8 +161,9 @@ func resourceOpenIdIdentityProviderCreate(ctx context.Context, d *schema.Resourc
 		return diag.FromErr(err)
 	}
 
-	d.SetId(idp.Issuer) // the primary resource identifier. must be unique.
-	d.Set("pid", o.Pid) // the pid is needed for Put requests
+	d.Set("federation_registration_id", o.FederationRegistrationId) // set the computed value
+	d.SetId(o.Issuer)                                               // the primary resource identifier. must be unique.
+	d.Set("pid", o.Pid)                                             // the pid is needed for Put requests
 
 	return resourceOpenIdIdentityProviderRead(ctx, d, m)
 }
@@ -216,11 +174,11 @@ func resourceOpenIdIdentityProviderRead(ctx context.Context, d *schema.ResourceD
 
 	c := m.(*smilecdr.Client)
 
-	pid := d.Get("pid").(string)
 	nodeId := d.Get("node_id").(string)
 	moduleId := d.Get("module_id").(string)
+	issuerUrl := d.Get("issuer").(string)
 
-	provider, err := c.GetOpenIdIdentityProvider(nodeId, moduleId, pid)
+	provider, err := c.GetOpenIdIdentityProvider(nodeId, moduleId, issuerUrl)
 
 	if err != nil {
 		return diag.FromErr(err)
@@ -243,15 +201,7 @@ func resourceOpenIdIdentityProviderRead(ctx context.Context, d *schema.ResourceD
 	d.Set("federation_user_info_url", provider.FederationUserInfoUrl)
 	d.Set("federation_jwk_set_url", provider.FederationJwkSetUrl)
 	d.Set("federation_auth_script_text", provider.FederationAuthScriptText)
-	d.Set("federation_auth_script_file", provider.FederationAuthScriptFile)
 	d.Set("federation_user_mapping_script_text", provider.FederationUserMappingScriptText)
-	d.Set("fhir_endpoint_url", provider.FhirEndpointUrl)
-	d.Set("auth_well_known_config_url", provider.AuthWellKnownConfigUrl)
-	d.Set("notes", provider.Notes)
-	d.Set("custom_token_params", provider.CustomTokenParams)
-	d.Set("response_type", provider.ResponseType)
-	d.Set("organization_id", provider.OrganizationId)
-	d.Set("audience", provider.Audience)
 	d.Set("archived_at", provider.ArchivedAt)
 
 	return diags
@@ -265,7 +215,7 @@ func resourceOpenIdIdentityProviderUpdate(ctx context.Context, d *schema.Resourc
 	if mErr != nil {
 		return diag.FromErr(mErr)
 	}
-	d.SetId(provider.Name)
+	d.SetId(provider.Issuer)
 
 	_, err := c.PutOpenIdIdentityProvider(*provider)
 

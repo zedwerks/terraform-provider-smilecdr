@@ -6,6 +6,7 @@ package smilecdr
 import (
 	"encoding/json"
 	"fmt"
+	"net/url"
 	"strconv"
 )
 
@@ -15,27 +16,19 @@ type OpenIdIdentityProvider struct {
 	Issuer                          string `json:"issuer,omitempty"`
 	TokenIntrospectionClientId      string `json:"tokenIntrospectionClientId,omitempty"`
 	TokenIntrospectionClientSecret  string `json:"tokenIntrospectionClientSecret,omitempty"`
-	NodeId                          string `json:"node_id,omitempty"`
-	ModuleId                        string `json:"module_id,omitempty"`
-	ValidationJwkText               string `json:"validation_jwk_text,omitempty"`
-	ValidationJwkFile               string `json:"validation_jwk_file,omitempty"`
-	FederationRegistrationId        string `json:"federation_registration_id,omitempty"`
-	FederationRequestScopes         string `json:"federation_request_scopes,omitempty"`
-	FederationAuthorizationUrl      string `json:"federation_authorization_url,omitempty"`
-	FederationTokenUrl              string `json:"federation_token_url,omitempty"`
-	FederationUserInfoUrl           string `json:"federation_user_info_url,omitempty"`
-	FederationJwkSetUrl             string `json:"federation_jwk_set_url,omitempty"`
-	FederationAuthScriptText        string `json:"federation_auth_script_text,omitempty"`
-	FederationAuthScriptFile        string `json:"federation_auth_script_file,omitempty"`
-	FederationUserMappingScriptText string `json:"federation_user_mapping_script_text,omitempty"`
-	FhirEndpointUrl                 string `json:"fhir_endpoint_url,omitempty"`
-	AuthWellKnownConfigUrl          string `json:"auth_well_known_config_url,omitempty"`
-	Notes                           string `json:"notes,omitempty"`
-	CustomTokenParams               string `json:"custom_token_params,omitempty"`
-	ResponseType                    string `json:"response_type,omitempty"`
-	OrganizationId                  string `json:"organization_id,omitempty"`
-	Audience                        string `json:"audience,omitempty"`
-	ArchivedAt                      string `json:"archived_at,omitempty"`
+	NodeId                          string `json:"nodeId,omitempty"`
+	ModuleId                        string `json:"moduleId,omitempty"`
+	ValidationJwkText               string `json:"validationJwkText,omitempty"`
+	ValidationJwkFile               string `json:"validationJwkFile,omitempty"`
+	FederationRegistrationId        string `json:"federationRegistrationId,omitempty"`
+	FederationRequestScopes         string `json:"federationRequestScopes,omitempty"`
+	FederationAuthorizationUrl      string `json:"federationAuthorizationUrl,omitempty"`
+	FederationTokenUrl              string `json:"federationTokenUrl,omitempty"`
+	FederationUserInfoUrl           string `json:"federationUserInfoUrl,omitempty"`
+	FederationJwkSetUrl             string `json:"federationJwkSetUrl,omitempty"`
+	FederationAuthScriptText        string `json:"federationAuthScriptText,omitempty"`
+	FederationUserMappingScriptText string `json:"federationUserMappingScriptText,omitempty"`
+	ArchivedAt                      string `json:"archivedAt,omitempty"`
 }
 
 func (smilecdr *Client) GetOpenIdIdentityProviders() ([]OpenIdIdentityProvider, error) {
@@ -53,10 +46,10 @@ func (smilecdr *Client) GetOpenIdIdentityProviders() ([]OpenIdIdentityProvider, 
 func (smilecdr *Client) GetOpenIdIdentityProvider(nodeId string, moduleId string, issuerUrl string) (OpenIdIdentityProvider, error) {
 
 	var provider OpenIdIdentityProvider
-	var endpoint = fmt.Sprintf("/openid-connect-servers/%s/%s/?issuer_url=%s", nodeId, moduleId, issuerUrl)
+	var endpoint = fmt.Sprintf("/openid-connect-servers/%s/%s/?issuer_url=%s", nodeId, moduleId, url.PathEscape(issuerUrl))
 	jsonBody, getErr := smilecdr.Get(endpoint)
 	if getErr != nil {
-		fmt.Println("error during Get in GetOpenIdIdentityProvider:", getErr)
+		fmt.Println("error during GET in GetOpenIdIdentityProvider:", getErr)
 		return provider, getErr
 	}
 
@@ -70,12 +63,12 @@ func (smilecdr *Client) PostOpenIdIdentityProvider(provider OpenIdIdentityProvid
 	var nodeId = provider.NodeId
 	var moduleId = provider.ModuleId
 
-	var endpoint = fmt.Sprintf("/openid-connect-servers/%s/%s/", nodeId, moduleId)
+	var endpoint = fmt.Sprintf("/openid-connect-servers/%s/%s", nodeId, moduleId)
 	jsonBody, _ := json.Marshal(provider)
 
 	jsonBody, postErr := smilecdr.Post(endpoint, jsonBody)
 	if postErr != nil {
-		fmt.Println("error during Post in PostOpenIdIdentityProvider:", postErr)
+		fmt.Println("error during POST in PostOpenIdIdentityProvider:", postErr)
 		return newProvider, postErr
 	}
 
@@ -90,24 +83,18 @@ func (smilecdr *Client) PutOpenIdIdentityProvider(provider OpenIdIdentityProvide
 	var moduleId = provider.ModuleId
 	var pid = provider.Pid
 
-	var endpoint = fmt.Sprintf("/openid-connect-servers/%s/%s/%s/", nodeId, moduleId, strconv.Itoa(pid))
+	var endpoint = fmt.Sprintf("/openid-connect-servers/%s/%s/%s", nodeId, moduleId, strconv.Itoa(pid))
 	jsonBody, _ := json.Marshal(provider)
 
 	jsonBody, putErr := smilecdr.Put(endpoint, jsonBody)
 	if putErr != nil {
-		fmt.Println("error during Put in PutOpenIdIdentityProvider:", putErr)
+		fmt.Println("error during PUT in PutOpenIdIdentityProvider:", putErr)
 		return newProvider, putErr
 	}
 
 	err := json.Unmarshal(jsonBody, &newProvider)
 	if err != nil {
-		fmt.Println("error parsing Put response JSON:", err)
+		fmt.Println("error parsing PUT response JSON:", err)
 	}
 	return newProvider, err
-}
-
-func (smilecdr *Client) DeleteOpenIdIdentityProvider(nodeId string, moduleId string, pid string) error {
-	var endpoint = fmt.Sprintf("/openid-connect-servers/%s/%s/%s", nodeId, moduleId, pid)
-	_, err := smilecdr.Delete(endpoint)
-	return err
 }
