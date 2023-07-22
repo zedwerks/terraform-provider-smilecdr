@@ -3,7 +3,7 @@ HOSTNAME=zedwerks
 NAME=smilecdr
 OUTPUT_DIR=./bin
 BINARY=${OUTPUT_DIR}/terraform-provider-${NAME}_v${VERSION}
-VERSION=0.3.0
+VERSION=0.3.1
 OS_ARCH=darwin_arm64
 
 default: install

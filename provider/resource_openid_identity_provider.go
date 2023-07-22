@@ -10,6 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/zed-werks/terraform-smilecdr/provider/utils"
 	"github.com/zed-werks/terraform-smilecdr/smilecdr"
 )
 
@@ -80,8 +81,9 @@ func resourceOpenIdIdentityProvider() *schema.Resource {
 				Default:  "openid profile",
 			},
 			"federation_authorization_url": {
-				Type:     schema.TypeString,
-				Required: true,
+				Type:         schema.TypeString,
+				Required:     true,
+				ValidateFunc: utils.ValidateUrl,
 			},
 			"federation_token_url": {
 				Type:     schema.TypeString,
