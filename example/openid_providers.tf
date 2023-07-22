@@ -1,6 +1,12 @@
 # Copyright (c) Zed Werks Inc.
 # SPDX-License-Identifier: Apache-2.0
 
+locals {
+  smilecdr_version = "2021.05.R01"
+  authScriptFile = file("${path.module}/js/federationAuthScript.js")
+  userMappingScriptFile = file("${path.module}/js/federationUserMappingScript.js")
+}
+
 resource "smilecdr_openid_identity_provider" "idp4" {
   node_id                             = "Master"
   module_id                           = "smart_auth"
@@ -29,8 +35,8 @@ resource "smilecdr_openid_identity_provider" "idp5" {
   federation_token_url                = "https://idp5.com/auth/token"
   federation_user_info_url            = "https://idp5.com/auth/userinfo"
   federation_jwk_set_url              = "https://idp5.com/auth/jwks"
-  federation_auth_script_text         = "print('hello there. This is whee we can add some authorization logic')"
-  federation_user_mapping_script_text = "// user mapping script goes here,\n// such as attribute mapping."
+  federation_auth_script_text         = local.authScriptFile
+  federation_user_mapping_script_text = local.userMappingScriptFile
   token_introspection_client_id       = "smile"
   token_introspection_client_secret   = "client_secret"
 }
