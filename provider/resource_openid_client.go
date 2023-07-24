@@ -7,11 +7,12 @@ import (
 	"context"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
+	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/zed-werks/terraform-smilecdr/provider/utils"
-	"github.com/zed-werks/terraform-smilecdr/smilecdr"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	"github.com/zedwerks/terraform-smilecdr/provider/helper/validations"
+	"github.com/zedwerks/terraform-smilecdr/smilecdr"
 )
 
 func resourceOpenIdClient() *schema.Resource {
@@ -23,38 +24,34 @@ func resourceOpenIdClient() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 			"pid": {
 				Type:     schema.TypeInt,
-				Required: false,
 				Computed: true,
 			},
 			"node_id": {
 				Type:     schema.TypeString,
-				Required: false,
 				Optional: true,
 				Default:  "Master",
+				ForceNew: true,
 			},
 			"module_id": {
 				Type:     schema.TypeString,
-				Required: false,
 				Optional: true,
 				Default:  "smart_auth",
+				ForceNew: true,
 			},
 			"access_token_validity_seconds": {
 				Type:     schema.TypeInt,
-				Required: false,
 				Optional: true,
 				Default:  300,
 			},
 			"allowed_grant_types": {
 				Type:     schema.TypeSet,
 				Required: true,
-				Optional: false,
+				MinItems: 1,
 				Elem: &schema.Schema{
-					Type:         schema.TypeString,
-					Required:     true,
-					Optional:     false,
-					Default:      "AUTHORIZATION_CODE",
-					ValidateFunc: utils.ValidateGrantType,
+					Type: schema.TypeString,
 				},
+				Set:              schema.HashString,
+				ValidateDiagFunc: validateGrantTypes(),
 			},
 			"auto_approve_scopes": {
 				Type:     schema.TypeSet,
@@ -62,28 +59,28 @@ func resourceOpenIdClient() *schema.Resource {
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
+				Set: schema.HashString,
 			},
 			"auto_grant_scopes": {
 				Type:     schema.TypeSet,
-				Required: false,
 				Optional: true,
 				Elem: &schema.Schema{
-					Type:     schema.TypeString,
-					Required: false,
+					Type: schema.TypeString,
 				},
+				Set: schema.HashString,
 			},
 			"client_id": {
-				Type:         schema.TypeString,
-				Required:     true,
-				ValidateFunc: utils.ValidateClientId,
+				Type:             schema.TypeString,
+				Required:         true,
+				ValidateDiagFunc: validations.IsValidClientID,
 			},
 			"client_name": {
-				Type:     schema.TypeString,
-				Required: true,
+				Type:             schema.TypeString,
+				Required:         true,
+				ValidateDiagFunc: customValidationFunc,
 			},
 			"client_secrets": {
 				Type:     schema.TypeSet,
-				Required: false,
 				Optional: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
@@ -112,86 +109,74 @@ func resourceOpenIdClient() *schema.Resource {
 			},
 			"fixed_scope": {
 				Type:     schema.TypeBool,
-				Required: false,
 				Optional: true,
 				Default:  false,
 			},
 			"refresh_token_validity_seconds": {
 				Type:     schema.TypeInt,
-				Required: false,
 				Optional: true,
 				Default:  86400,
 			},
 			"registered_redirect_uris": {
 				Type:     schema.TypeSet,
-				Required: false,
 				Optional: true,
 				Elem: &schema.Schema{
-					Type:         schema.TypeString,
-					ValidateFunc: utils.ValidateUrl,
+					Type: schema.TypeString,
 				},
+				Set: schema.HashString,
 			},
 			"scopes": {
 				Type:     schema.TypeSet,
 				Optional: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
+				Set:      schema.HashString,
 			},
 			"secret_required": {
 				Type:     schema.TypeBool,
-				Required: false,
 				Optional: true,
 				Default:  false,
 			},
 			"secret_client_can_change": {
 				Type:     schema.TypeBool,
-				Required: false,
 				Optional: true,
 				Default:  false,
 			},
 			"enabled": {
 				Type:     schema.TypeBool,
-				Required: false,
 				Optional: true,
 				Default:  true,
 			},
 			"can_introspect_any_tokens": {
 				Type:     schema.TypeBool,
-				Required: false,
 				Optional: true,
 				Default:  false,
 			},
 			"can_introspect_own_tokens": {
 				Type:     schema.TypeBool,
-				Required: false,
 				Optional: true,
-				Default:  false,
 			},
 			"always_require_approval": {
 				Type:     schema.TypeBool,
-				Required: false,
 				Optional: true,
 				Default:  false,
 			},
 			"can_reissue_tokens": {
 				Type:     schema.TypeBool,
-				Required: false,
 				Optional: true,
 				Default:  false,
 			},
 			"permissions": {
-				Type:     schema.TypeSet,
-				Required: false,
+				Type:     schema.TypeList,
 				Optional: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"permission": {
-							Type:         schema.TypeString,
-							Required:     true,
-							ValidateFunc: utils.ValidateUserPermission,
+							Type:             schema.TypeString,
+							Required:         true,
+							ValidateDiagFunc: validations.IsUserPermission,
 						},
 						"argument": {
 							Type:     schema.TypeString,
-							Required: false,
 							Optional: true,
 							Default:  "",
 						},
@@ -200,30 +185,27 @@ func resourceOpenIdClient() *schema.Resource {
 			},
 			"remember_approved_scopes": {
 				Type:     schema.TypeBool,
-				Required: false,
 				Optional: true,
 				Default:  false,
 			},
 			"attestation_accepted": {
 				Type:     schema.TypeBool,
-				Required: false,
 				Optional: true,
 				Default:  false,
 			},
 			"public_jwks_uri": {
-				Type:     schema.TypeString,
-				Required: false,
-				Optional: true,
+				Type:         schema.TypeString,
+				Optional:     false,
+				Required:     true,
+				ValidateFunc: validation.IsURLWithHTTPorHTTPS,
 			},
 			"archived_at": {
 				Type:         schema.TypeString,
-				Required:     false,
 				Optional:     true,
 				ValidateFunc: validation.IsRFC3339Time,
 			},
 			"created_by_app_sphere": {
 				Type:     schema.TypeBool,
-				Required: false,
 				Optional: true,
 				Default:  false,
 			},
@@ -416,6 +398,34 @@ func resourceOpenIdClientDelete(ctx context.Context, d *schema.ResourceData, m i
 	resourceOpenIdClientUpdate(ctx, d, m)
 
 	d.SetId("")
+
+	return diags
+}
+
+// -------------- Validations functions ----------------
+
+func validateClientId() schema.SchemaValidateDiagFunc {
+	return validations.IsValidClientID
+}
+
+func validateGrantTypes() schema.SchemaValidateDiagFunc {
+	return func(i interface{}, path cty.Path) diag.Diagnostics {
+		grantTypes := i.([]string)
+		return validations.IsValidGrantTypes(grantTypes)
+	}
+}
+
+func customValidationFunc(v interface{}, path cty.Path) diag.Diagnostics {
+	var diags diag.Diagnostics
+
+	if v.(string) != "expected_value" {
+		diag := diag.Diagnostic{
+			Severity: diag.Error,
+			Summary:  "Validation error",
+			Detail:   "Expected 'expected_value', but got '" + v.(string) + "'",
+		}
+		diags = append(diags, diag)
+	}
 
 	return diags
 }

@@ -10,8 +10,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/zed-werks/terraform-smilecdr/provider/utils"
-	"github.com/zed-werks/terraform-smilecdr/smilecdr"
+	"github.com/zedwerks/terraform-smilecdr/provider/helper/validations"
+	"github.com/zedwerks/terraform-smilecdr/smilecdr"
 )
 
 func resourceOpenIdIdentityProvider() *schema.Resource {
@@ -38,9 +38,10 @@ func resourceOpenIdIdentityProvider() *schema.Resource {
 				Optional: false,
 			},
 			"token_introspection_client_id": {
-				Type:     schema.TypeString,
-				Required: false,
-				Optional: true,
+				Type:             schema.TypeString,
+				Required:         false,
+				Optional:         true,
+				ValidateDiagFunc: validations.IsValidClientID,
 			},
 			"token_introspection_client_secret": {
 				Type:     schema.TypeString,
@@ -81,9 +82,8 @@ func resourceOpenIdIdentityProvider() *schema.Resource {
 				Default:  "openid profile",
 			},
 			"federation_authorization_url": {
-				Type:         schema.TypeString,
-				Required:     true,
-				ValidateFunc: utils.ValidateUrl,
+				Type:     schema.TypeString,
+				Required: true,
 			},
 			"federation_token_url": {
 				Type:     schema.TypeString,

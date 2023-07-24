@@ -1,7 +1,10 @@
-package utils
+package validations
 
 import (
 	"fmt"
+
+	"github.com/hashicorp/go-cty/cty"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 )
 
 var (
@@ -154,20 +157,29 @@ var (
 	}
 )
 
-func ValidateUserPermission(v interface{}, k string) (ws []string, es []error) {
-	var errs []error
-	var warns []string
+func IsUserPermission(i interface{}, k cty.Path) diag.Diagnostics {
 
 	// Convert the input value to a string (assuming the input is a string)
-	inputValue, ok := v.(string)
+	inputValue, ok := i.(string)
 	if !ok {
-		errs = append(errs, fmt.Errorf("expected name to be string"))
-		return warns, errs
+		return diag.Diagnostics{
+			diag.Diagnostic{
+				Severity: diag.Error,
+				Summary:  "Invalid type for the field",
+				Detail:   fmt.Sprintf("Expected a string, but got %T", i),
+			},
+		}
 	}
 	// Check if the value is in the set of acceptable values
 	if _, ok := smileCdrUserPermissionTypes[inputValue]; !ok {
-		errs = append(errs, fmt.Errorf("invalid user permission. Got %s", inputValue))
+		return diag.Diagnostics{
+			diag.Diagnostic{
+				Severity: diag.Error,
+				Summary:  "Invalid value for the field",
+				Detail:   fmt.Sprintf("Invalid user permission, got %s", inputValue),
+			},
+		}
 	}
 
-	return warns, errs
+	return nil
 }

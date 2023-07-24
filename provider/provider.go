@@ -8,7 +8,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/zed-werks/terraform-smilecdr/smilecdr"
+	"github.com/zedwerks/terraform-smilecdr/smilecdr"
 )
 
 func Provider() *schema.Provider {

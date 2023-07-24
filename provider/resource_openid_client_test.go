@@ -9,7 +9,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	"github.com/zed-werks/terraform-smilecdr/smilecdr"
+	"github.com/zedwerks/terraform-smilecdr/smilecdr"
 )
 
 func TestSmileCdrOpenIdClientBasic(t *testing.T) {

@@ -8,7 +8,7 @@ resource "smilecdr_openid_client" "client_lra_demo" {
   access_token_validity_seconds = 300
   allowed_grant_types = [
     "AUTHORIZATION_CODE",
-    "REFRESH_TOKEN", ]
+  "REFRESH_TOKEN", ]
   auto_approve_scopes = [
     "openid",
     "profile",
@@ -60,21 +60,14 @@ resource "smilecdr_openid_client" "client_phr" {
   node_id                       = "Master"
   module_id                     = "smart_auth"
   access_token_validity_seconds = 300
-  allowed_grant_types = [
-    "AUTHORIZATION_CODE",
-    "REFRESH_TOKEN", ]
-  auto_approve_scopes = [
-    "openid",
-    "profile",
+  allowed_grant_types           = []
+  auto_approve_scopes = ["openid", "profile",
     "fhirUser",
     "launch",
     "launch/patient",
     "offline_access"
   ]
-  auto_grant_scopes = [
-    "openid",
-    "offline_access"
-  ]
+  auto_grant_scopes              = ["openid", "offline_access"]
   client_id                      = "client_phr"
   client_name                    = "Client PHR Demo"
   fixed_scope                    = false
@@ -98,4 +91,8 @@ resource "smilecdr_openid_client" "client_phr" {
   can_reissue_tokens        = false
   remember_approved_scopes  = false
   attestation_accepted      = false
+  permissions {
+    permission = "ACCESS_ADMIN_JSON"
+  }
+  public_jwks_uri = "fubar://example-phr.com/jwks"
 }
