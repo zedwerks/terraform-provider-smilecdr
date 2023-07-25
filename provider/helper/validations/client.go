@@ -19,7 +19,7 @@ var (
 	}
 )
 
-func IsValidGrantTypes(v interface{}) diag.Diagnostics {
+func IsValidGrantTypes(v interface{}, k cty.Path) diag.Diagnostics {
 
 	var diags diag.Diagnostics
 

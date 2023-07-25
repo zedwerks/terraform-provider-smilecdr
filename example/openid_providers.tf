@@ -19,7 +19,7 @@ resource "smilecdr_openid_identity_provider" "idp4" {
   federation_jwk_set_url              = "//localhost:8800/auth/jwks"
   federation_auth_script_text         = "print('hello world')"
   federation_user_mapping_script_text = "// user mapping script goes here"
-  token_introspection_client_id       = "smile "
+  token_introspection_client_id       = "smile"
   token_introspection_client_secret   = "client_secret"
   validation_jwk_text                 = ""
   validation_jwk_file                 = ""

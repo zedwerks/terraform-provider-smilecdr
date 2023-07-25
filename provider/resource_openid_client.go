@@ -7,7 +7,6 @@ import (
 	"context"
 	"time"
 
-	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -30,13 +29,11 @@ func resourceOpenIdClient() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 				Default:  "Master",
-				ForceNew: true,
 			},
 			"module_id": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Default:  "smart_auth",
-				ForceNew: true,
 			},
 			"access_token_validity_seconds": {
 				Type:     schema.TypeInt,
@@ -48,10 +45,10 @@ func resourceOpenIdClient() *schema.Resource {
 				Required: true,
 				MinItems: 1,
 				Elem: &schema.Schema{
-					Type: schema.TypeString,
+					Type:    schema.TypeString,
+					Default: "AUTHORIZATION_CODE",
 				},
-				Set:              schema.HashString,
-				ValidateDiagFunc: validateGrantTypes(),
+				ValidateDiagFunc: validations.IsValidGrantTypes,
 			},
 			"auto_approve_scopes": {
 				Type:     schema.TypeSet,
@@ -59,7 +56,6 @@ func resourceOpenIdClient() *schema.Resource {
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
-				Set: schema.HashString,
 			},
 			"auto_grant_scopes": {
 				Type:     schema.TypeSet,
@@ -67,7 +63,6 @@ func resourceOpenIdClient() *schema.Resource {
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
-				Set: schema.HashString,
 			},
 			"client_id": {
 				Type:             schema.TypeString,
@@ -75,9 +70,8 @@ func resourceOpenIdClient() *schema.Resource {
 				ValidateDiagFunc: validations.IsValidClientID,
 			},
 			"client_name": {
-				Type:             schema.TypeString,
-				Required:         true,
-				ValidateDiagFunc: customValidationFunc,
+				Type:     schema.TypeString,
+				Required: true,
 			},
 			"client_secrets": {
 				Type:     schema.TypeSet,
@@ -95,14 +89,13 @@ func resourceOpenIdClient() *schema.Resource {
 							Default:  "",
 						},
 						"activation": {
-							Type:         schema.TypeString,
-							Optional:     true,
-							ValidateFunc: validation.IsRFC3339Time,
+							Type:     schema.TypeString,
+							Optional: true,
+							//ValidateFunc: validation.IsRFC3339Time,
 						},
 						"expiration": {
-							Type:         schema.TypeString,
-							Optional:     true,
-							ValidateFunc: validation.IsRFC3339Time,
+							Type:     schema.TypeString,
+							Optional: true,
 						},
 					},
 				},
@@ -129,7 +122,6 @@ func resourceOpenIdClient() *schema.Resource {
 				Type:     schema.TypeSet,
 				Optional: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
-				Set:      schema.HashString,
 			},
 			"secret_required": {
 				Type:     schema.TypeBool,
@@ -194,10 +186,10 @@ func resourceOpenIdClient() *schema.Resource {
 				Default:  false,
 			},
 			"public_jwks_uri": {
-				Type:         schema.TypeString,
-				Optional:     false,
-				Required:     true,
-				ValidateFunc: validation.IsURLWithHTTPorHTTPS,
+				Type:     schema.TypeString,
+				Optional: true,
+				Required: false,
+				//ValidateFunc: validation.IsURLWithHTTPorHTTPS,
 			},
 			"archived_at": {
 				Type:         schema.TypeString,
@@ -398,34 +390,6 @@ func resourceOpenIdClientDelete(ctx context.Context, d *schema.ResourceData, m i
 	resourceOpenIdClientUpdate(ctx, d, m)
 
 	d.SetId("")
-
-	return diags
-}
-
-// -------------- Validations functions ----------------
-
-func validateClientId() schema.SchemaValidateDiagFunc {
-	return validations.IsValidClientID
-}
-
-func validateGrantTypes() schema.SchemaValidateDiagFunc {
-	return func(i interface{}, path cty.Path) diag.Diagnostics {
-		grantTypes := i.([]string)
-		return validations.IsValidGrantTypes(grantTypes)
-	}
-}
-
-func customValidationFunc(v interface{}, path cty.Path) diag.Diagnostics {
-	var diags diag.Diagnostics
-
-	if v.(string) != "expected_value" {
-		diag := diag.Diagnostic{
-			Severity: diag.Error,
-			Summary:  "Validation error",
-			Detail:   "Expected 'expected_value', but got '" + v.(string) + "'",
-		}
-		diags = append(diags, diag)
-	}
 
 	return diags
 }

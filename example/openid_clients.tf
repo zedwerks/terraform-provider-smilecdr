@@ -56,11 +56,11 @@ resource "smilecdr_openid_client" "client_lra_demo" {
 }
 
 
-resource "smilecdr_openid_client" "client_phr" {
+resource "smilecdr_openid_client" "client_phr_new" {
   node_id                       = "Master"
   module_id                     = "smart_auth"
   access_token_validity_seconds = 300
-  allowed_grant_types           = []
+  allowed_grant_types           = ["AUTHORIZATION_CODE", "brad" ]
   auto_approve_scopes = ["openid", "profile",
     "fhirUser",
     "launch",
@@ -72,7 +72,7 @@ resource "smilecdr_openid_client" "client_phr" {
   client_name                    = "Client PHR Demo"
   fixed_scope                    = false
   refresh_token_validity_seconds = 86400
-  registered_redirect_uris       = ["http://example-phr.com:6000"]
+  registered_redirect_uris       = ["httpoop://example-phr.com:6000", "poop://example-phr.com:6000"]
   scopes = [
     "openid",
     "profile",
@@ -94,5 +94,5 @@ resource "smilecdr_openid_client" "client_phr" {
   permissions {
     permission = "ACCESS_ADMIN_JSON"
   }
-  public_jwks_uri = "fubar://example-phr.com/jwks"
+  public_jwks_uri = "http://example-phr.com/jwks"
 }
