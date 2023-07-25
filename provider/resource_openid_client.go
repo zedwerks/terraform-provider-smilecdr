@@ -26,9 +26,10 @@ func resourceOpenIdClient() *schema.Resource {
 				Computed: true,
 			},
 			"node_id": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Default:  "Master",
+				Type:         schema.TypeString,
+				Optional:     true,
+				Default:      "Master",
+				ValidateFunc: validation.StringInSlice([]string{"Master", "Tenant"}, false),
 			},
 			"module_id": {
 				Type:     schema.TypeString,
@@ -48,7 +49,6 @@ func resourceOpenIdClient() *schema.Resource {
 					Type:    schema.TypeString,
 					Default: "AUTHORIZATION_CODE",
 				},
-				ValidateDiagFunc: validations.IsValidGrantTypes,
 			},
 			"auto_approve_scopes": {
 				Type:     schema.TypeSet,

@@ -19,31 +19,9 @@ var (
 	}
 )
 
-func IsValidGrantTypes(v interface{}, k cty.Path) diag.Diagnostics {
+func ValidateGrantTypes(v interface{}, path cty.Path) diag.Diagnostics {
 
-	var diags diag.Diagnostics
-
-	grants, ok := v.([]string)
-
-	if !ok {
-		diag := diag.Diagnostic{
-			Severity: diag.Error,
-			Summary:  "Invalid type for the field",
-			Detail:   fmt.Sprintf("Expected a string, but got %T", v),
-		}
-		diags = append(diags, diag)
-	}
-	for _, grant := range grants {
-		if _, ok := smileCdrGrantTypes[grant]; !ok {
-			diag := diag.Diagnostic{
-				Severity: diag.Error,
-				Summary:  "Invalid value for the field",
-				Detail:   fmt.Sprintf("Expected valid grant type, but got %s", grant),
-			}
-			diags = append(diags, diag)
-		}
-	}
-	return diags
+	return nil
 }
 
 func IsValidClientID(i interface{}, k cty.Path) diag.Diagnostics {
