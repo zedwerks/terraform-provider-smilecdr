@@ -7,7 +7,7 @@ import (
 	"bytes"
 	"encoding/base64"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 )
 
@@ -51,7 +51,7 @@ func (c *Client) Get(endpoint string) ([]byte, error) {
 		return nil, err
 	}
 
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		fmt.Println("error reading HTTP Get Response Body:", err)
 		return nil, err
@@ -84,7 +84,7 @@ func (c *Client) Post(endpoint string, body []byte) ([]byte, error) {
 		return nil, err
 	}
 
-	body, err = ioutil.ReadAll(resp.Body)
+	body, err = io.ReadAll(resp.Body)
 	if err != nil {
 		fmt.Println("error reading HTTP Post Response Body:", err)
 		return nil, err
@@ -116,7 +116,7 @@ func (c *Client) Put(endpoint string, body []byte) ([]byte, error) {
 		return nil, err
 	}
 
-	body, err = ioutil.ReadAll(resp.Body)
+	body, err = io.ReadAll(resp.Body)
 	if err != nil {
 		fmt.Println("error reading HTTP Put Response Body:", err)
 		return nil, err
@@ -148,7 +148,7 @@ func (c *Client) Delete(endpoint string) ([]byte, error) {
 		return nil, err
 	}
 
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		fmt.Println("error reading HTTP Delete Response Body:", err)
 		return nil, err
