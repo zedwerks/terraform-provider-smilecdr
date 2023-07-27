@@ -29,8 +29,8 @@ func NewClient(baseUrl string, username string, password string) *Client {
 }
 
 func (c *Client) Get(endpoint string) ([]byte, error) {
-	url := c.baseUrl + endpoint
-	req, err := http.NewRequest(http.MethodGet, url, nil)
+	uri := c.baseUrl + endpoint
+	req, err := http.NewRequest(http.MethodGet, uri, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -61,8 +61,8 @@ func (c *Client) Get(endpoint string) ([]byte, error) {
 }
 
 func (c *Client) Post(endpoint string, body []byte) ([]byte, error) {
-	url := c.baseUrl + endpoint
-	req, err := http.NewRequest(http.MethodPost, url, bytes.NewBuffer(body))
+	uri := c.baseUrl + endpoint
+	req, err := http.NewRequest(http.MethodPost, uri, bytes.NewBuffer(body))
 	if err != nil {
 		return nil, err
 	}
@@ -94,8 +94,8 @@ func (c *Client) Post(endpoint string, body []byte) ([]byte, error) {
 }
 
 func (c *Client) Put(endpoint string, body []byte) ([]byte, error) {
-	url := c.baseUrl + endpoint
-	req, err := http.NewRequest(http.MethodPut, url, bytes.NewBuffer(body))
+	uri := c.baseUrl + endpoint
+	req, err := http.NewRequest(http.MethodPut, uri, bytes.NewBuffer(body))
 	if err != nil {
 		return nil, err
 	}
@@ -126,8 +126,8 @@ func (c *Client) Put(endpoint string, body []byte) ([]byte, error) {
 }
 
 func (c *Client) Delete(endpoint string) ([]byte, error) {
-	url := c.baseUrl + endpoint
-	req, err := http.NewRequest(http.MethodDelete, url, nil)
+	uri := c.baseUrl + endpoint
+	req, err := http.NewRequest(http.MethodDelete, uri, nil)
 	if err != nil {
 		return nil, err
 	}

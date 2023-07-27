@@ -1,2 +1,2 @@
 #!/bin/sh
-terraform init
+terraform init -upgrade

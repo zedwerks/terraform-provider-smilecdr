@@ -6,19 +6,21 @@ package provider
 import (
 	"context"
 
+	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/zed-werks/terraform-smilecdr/smilecdr"
+	"github.com/zedwerks/terraform-smilecdr/smilecdr"
 )
 
 func Provider() *schema.Provider {
 	return &schema.Provider{
 		Schema: map[string]*schema.Schema{
 			"base_url": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Default:     "http://localhost:9000",
-				DefaultFunc: schema.EnvDefaultFunc("SMILECDR_BASE_URL", nil),
+				Type:         schema.TypeString,
+				Optional:     true,
+				Default:      "http://localhost:9000",
+				DefaultFunc:  schema.EnvDefaultFunc("SMILECDR_BASE_URL", nil),
+				ValidateFunc: validation.IsURLWithHTTPorHTTPS,
 			},
 			"username": {
 				Type:        schema.TypeString,
@@ -33,7 +35,8 @@ func Provider() *schema.Provider {
 			},
 		},
 		ResourcesMap: map[string]*schema.Resource{
-			"smilecdr_openid_client": resourceOpenIdClient(),
+			"smilecdr_openid_client":            resourceOpenIdClient(),
+			"smilecdr_openid_identity_provider": resourceOpenIdIdentityProvider(),
 		},
 		DataSourcesMap:       map[string]*schema.Resource{},
 		ConfigureContextFunc: providerConfigure,

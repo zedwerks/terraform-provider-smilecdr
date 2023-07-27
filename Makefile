@@ -1,13 +1,15 @@
 TEST?=$$(go list ./... | grep -v 'vendor')
 HOSTNAME=zedwerks
 NAME=smilecdr
-BINARY=terraform-provider-${NAME}_v${VERSION}
-VERSION=0.2.0
+OUTPUT_DIR=./bin
+BINARY=${OUTPUT_DIR}/terraform-provider-${NAME}_v${VERSION}
+VERSION=0.3.2
 OS_ARCH=darwin_arm64
 
 default: install
 
 build:
+	mkdir -p ${OUTPUT_DIR}
 	go build -o ${BINARY}
 
 release:
@@ -36,3 +38,6 @@ test:
 
 testacc: 
 	TF_ACC=1 go test $(TEST) -v $(TESTARGS) -timeout 120m   
+
+clean:
+	rm -rf ${OUTPUT_DIR}

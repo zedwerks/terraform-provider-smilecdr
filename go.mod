@@ -1,4 +1,4 @@
-module github.com/zed-werks/terraform-smilecdr
+module github.com/zedwerks/terraform-smilecdr
 
 go 1.20
 
