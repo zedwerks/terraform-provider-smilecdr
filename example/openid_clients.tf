@@ -60,7 +60,7 @@ resource "smilecdr_openid_client" "client_phr_new" {
   node_id                       = "Master"
   module_id                     = "smart_auth"
   access_token_validity_seconds = 300
-  allowed_grant_types           = ["AUTHORIZATION_CODE", "brad" ]
+  allowed_grant_types           = ["AUTHORIZATION_CODE", "brad"]
   auto_approve_scopes = ["openid", "profile",
     "fhirUser",
     "launch",

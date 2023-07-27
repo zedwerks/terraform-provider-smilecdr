@@ -19,11 +19,6 @@ var (
 	}
 )
 
-func ValidateGrantTypes(v interface{}, path cty.Path) diag.Diagnostics {
-
-	return nil
-}
-
 func IsValidClientID(i interface{}, k cty.Path) diag.Diagnostics {
 	value, ok := i.(string)
 	if !ok {

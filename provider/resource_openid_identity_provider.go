@@ -7,10 +7,9 @@ import (
 	"context"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/zedwerks/terraform-smilecdr/provider/helper/validations"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/zedwerks/terraform-smilecdr/smilecdr"
 )
 
@@ -23,61 +22,53 @@ func resourceOpenIdIdentityProvider() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 			"pid": {
 				Type:     schema.TypeInt,
-				Required: false,
 				Computed: true,
 			},
 			"name": {
 				Type:     schema.TypeString,
-				Required: false,
 				Optional: true,
 				Default:  "An OpenID Identity Provider",
 			},
 			"issuer": {
 				Type:     schema.TypeString,
 				Required: true,
-				Optional: false,
 			},
 			"token_introspection_client_id": {
-				Type:             schema.TypeString,
-				Required:         false,
-				Optional:         true,
-				ValidateDiagFunc: validations.IsValidClientID,
+				Type:     schema.TypeString,
+				Required: false,
+				//ValidateDiagFunc: validations.IsValidClientID,
+				ValidateFunc: validation.All(
+					validation.StringIsNotWhiteSpace,
+					validation.StringDoesNotContainAny(" \t\n\r")),
 			},
 			"token_introspection_client_secret": {
 				Type:     schema.TypeString,
-				Required: false,
 				Optional: true,
 			},
 			"node_id": {
 				Type:     schema.TypeString,
-				Required: false,
 				Optional: true,
 				Default:  "Master",
 			},
 			"module_id": {
 				Type:     schema.TypeString,
-				Required: false,
 				Optional: true,
 				Default:  "smart_auth",
 			},
 			"validation_jwk_text": {
 				Type:     schema.TypeString,
-				Required: false,
 				Optional: true,
 			},
 			"validation_jwk_file": {
 				Type:     schema.TypeString,
-				Required: false,
 				Optional: true,
 			},
 			"federation_registration_id": {
 				Type:     schema.TypeString,
-				Required: false,
 				Computed: true,
 			},
 			"federation_request_scopes": {
 				Type:     schema.TypeString,
-				Required: false,
 				Optional: true,
 				Default:  "openid profile",
 			},
@@ -91,27 +82,23 @@ func resourceOpenIdIdentityProvider() *schema.Resource {
 			},
 			"federation_user_info_url": {
 				Type:     schema.TypeString,
-				Required: false,
 				Optional: true,
 			},
 			"federation_jwk_set_url": {
-				Type:     schema.TypeString,
-				Required: false,
-				Optional: true,
+				Type:         schema.TypeString,
+				Optional:     true,
+				ValidateFunc: validation.IsURLWithHTTPorHTTPS,
 			},
 			"federation_auth_script_text": {
 				Type:     schema.TypeString,
-				Required: false,
 				Optional: true,
 			},
 			"federation_user_mapping_script_text": {
 				Type:     schema.TypeString,
-				Required: false,
 				Optional: true,
 			},
 			"archived_at": {
 				Type:         schema.TypeString,
-				Required:     false,
 				Optional:     true,
 				ValidateFunc: validation.IsRFC3339Time,
 			},

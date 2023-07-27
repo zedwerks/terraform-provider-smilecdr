@@ -26,10 +26,9 @@ func resourceOpenIdClient() *schema.Resource {
 				Computed: true,
 			},
 			"node_id": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				Default:      "Master",
-				ValidateFunc: validation.StringInSlice([]string{"Master", "Tenant"}, false),
+				Type:     schema.TypeString,
+				Optional: true,
+				Default:  "Master",
 			},
 			"module_id": {
 				Type:     schema.TypeString,
@@ -46,8 +45,8 @@ func resourceOpenIdClient() *schema.Resource {
 				Required: true,
 				MinItems: 1,
 				Elem: &schema.Schema{
-					Type:    schema.TypeString,
-					Default: "AUTHORIZATION_CODE",
+					Type:     schema.TypeString,
+					Required: true,
 				},
 			},
 			"auto_approve_scopes": {
@@ -89,9 +88,9 @@ func resourceOpenIdClient() *schema.Resource {
 							Default:  "",
 						},
 						"activation": {
-							Type:     schema.TypeString,
-							Optional: true,
-							//ValidateFunc: validation.IsRFC3339Time,
+							Type:         schema.TypeString,
+							Optional:     true,
+							ValidateFunc: validation.IsRFC3339Time,
 						},
 						"expiration": {
 							Type:     schema.TypeString,
@@ -114,9 +113,9 @@ func resourceOpenIdClient() *schema.Resource {
 				Type:     schema.TypeSet,
 				Optional: true,
 				Elem: &schema.Schema{
-					Type: schema.TypeString,
+					Type:     schema.TypeString,
+					Required: true,
 				},
-				Set: schema.HashString,
 			},
 			"scopes": {
 				Type:     schema.TypeSet,
@@ -186,10 +185,9 @@ func resourceOpenIdClient() *schema.Resource {
 				Default:  false,
 			},
 			"public_jwks_uri": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Required: false,
-				//ValidateFunc: validation.IsURLWithHTTPorHTTPS,
+				Type:         schema.TypeString,
+				Optional:     true,
+				ValidateFunc: validation.IsURLWithHTTPorHTTPS,
 			},
 			"archived_at": {
 				Type:         schema.TypeString,

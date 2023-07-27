@@ -2,8 +2,8 @@
 # SPDX-License-Identifier: Apache-2.0
 
 locals {
-  smilecdr_version = "2021.05.R01"
-  authScriptFile = file("${path.module}/js/federationAuthScript.js")
+  smilecdr_version      = "2021.05.R01"
+  authScriptFile        = file("${path.module}/js/federationAuthScript.js")
   userMappingScriptFile = file("${path.module}/js/federationUserMappingScript.js")
 }
 
@@ -19,7 +19,7 @@ resource "smilecdr_openid_identity_provider" "idp4" {
   federation_jwk_set_url              = "//localhost:8800/auth/jwks"
   federation_auth_script_text         = "print('hello world')"
   federation_user_mapping_script_text = "// user mapping script goes here"
-  token_introspection_client_id       = "smile"
+  token_introspection_client_id       = "smile "
   token_introspection_client_secret   = "client_secret"
   validation_jwk_text                 = ""
   validation_jwk_file                 = ""
@@ -37,6 +37,6 @@ resource "smilecdr_openid_identity_provider" "idp5" {
   federation_jwk_set_url              = "https://idp5.com/auth/jwks"
   federation_auth_script_text         = local.authScriptFile
   federation_user_mapping_script_text = local.userMappingScriptFile
-  token_introspection_client_id       = "smile"
+  token_introspection_client_id       = "smile "
   token_introspection_client_secret   = "client_secret"
 }
