@@ -8,7 +8,7 @@ resource "smilecdr_openid_client" "client_lra_demo" {
   access_token_validity_seconds = 300
   allowed_grant_types = [
     "AUTHORIZATION_CODE",
-    "REFRESH_TOKEN", ]
+  "REFRESH_TOKEN", ]
   auto_approve_scopes = [
     "openid",
     "profile",
