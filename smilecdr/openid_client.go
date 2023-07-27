@@ -13,7 +13,7 @@ type ClientSecret struct {
 	Secret      string `json:"secret,omitempty"`
 	Description string `json:"description,omitempty"`
 	Expiration  string `json:"expiration,omitempty"`
-	activation  string `json:"activation,omitempty"`
+	Activation  string `json:"activation,omitempty"`
 }
 
 type UserPermission struct {
