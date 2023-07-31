@@ -6,8 +6,10 @@ package provider
 import (
 	"context"
 
+	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/zedwerks/terraform-smilecdr/provider/helper/validations"
 	"github.com/zedwerks/terraform-smilecdr/smilecdr"
 )
 
@@ -23,8 +25,9 @@ func resourceModuleConfig() *schema.Resource {
 				Required: true,
 			},
 			"module_type": {
-				Type:     schema.TypeString,
-				Required: true,
+				Type:             schema.TypeString,
+				Required:         true,
+				ValidateDiagFunc: validations.ValidateDiagFunc(validation.StringInSlice([]string{"LICENSE", "SECURITY_IN_LOCAL", "SECURITY_OUT_SMART"}, false)),
 			},
 			"options": {
 				Type:     schema.TypeList,

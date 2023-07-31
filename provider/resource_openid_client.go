@@ -45,8 +45,9 @@ func resourceOpenIdClient() *schema.Resource {
 				Required: true,
 				MinItems: 1,
 				Elem: &schema.Schema{
-					Type:     schema.TypeString,
-					Required: true,
+					Type:             schema.TypeString,
+					ValidateDiagFunc: validations.ValidateDiagFunc(validation.StringInSlice([]string{"AUTHORIZATION_CODE", "REFRESH_TOKEN"}, false)),
+					Required:         true,
 				},
 			},
 			"auto_approve_scopes": {
