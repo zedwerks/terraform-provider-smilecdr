@@ -25,6 +25,18 @@ type ModuleDependencies struct {
 	Type     string `json:"type,omitempty"`
 }
 
+func (moduleConfig *ModuleConfig) LookupOption(key string) (string, error) {
+
+	moduleConfigOptions := moduleConfig.Options
+	for _, kv := range moduleConfigOptions {
+		if kv.Key == key {
+			return kv.Value, nil
+		}
+	}
+
+	return "", fmt.Errorf("value not found for key '%s'", key)
+}
+
 func (smilecdr *Client) GetModuleConfigs() ([]ModuleConfig, error) {
 	var modules []ModuleConfig
 	jsonBody, getErr := smilecdr.Get("/module-config")

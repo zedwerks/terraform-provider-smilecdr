@@ -68,7 +68,7 @@ func resourceModuleConfig() *schema.Resource {
 	}
 }
 
-func resourceDataToModuleConfig(d *schema.ResourceData) (*smilecdr.ModuleConfig, error) {
+func resourceToModuleConfig(d *schema.ResourceData) (*smilecdr.ModuleConfig, error) {
 	moduleConfig := &smilecdr.ModuleConfig{
 		ModuleId:   d.Get("module_id").(string),
 		ModuleType: d.Get("module_type").(string),
@@ -98,7 +98,7 @@ func resourceDataToModuleConfig(d *schema.ResourceData) (*smilecdr.ModuleConfig,
 func resourceModuleConfigCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	c := m.(*smilecdr.Client)
 
-	moduleConfig, mErr := resourceDataToModuleConfig(d)
+	moduleConfig, mErr := resourceToModuleConfig(d)
 	if mErr != nil {
 		return diag.FromErr(mErr)
 	}
@@ -151,7 +151,7 @@ func resourceModuleConfigUpdate(ctx context.Context, d *schema.ResourceData, m i
 
 	c := m.(*smilecdr.Client)
 
-	moduleConfig, mErr := resourceDataToModuleConfig(d)
+	moduleConfig, mErr := resourceToModuleConfig(d)
 	if mErr != nil {
 		return diag.FromErr(mErr)
 	}

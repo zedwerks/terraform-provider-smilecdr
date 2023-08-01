@@ -8,6 +8,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/zedwerks/terraform-smilecdr/smilecdr"
 )
 
 func resourceSmartOutboundSecurity() *schema.Resource {
@@ -110,18 +111,201 @@ func resourceSmartOutboundSecurity() *schema.Resource {
 	}
 }
 
+func outboundSecurityResourceToModuleConfig(d *schema.ResourceData) (*smilecdr.ModuleConfig, error) {
+
+	moduleConfig := &smilecdr.ModuleConfig{
+		ModuleId:   d.Get("module_id").(string),
+		ModuleType: d.Get("module_type").(string),
+	}
+
+	moduleConfig.Options = append(moduleConfig.Options, smilecdr.ModuleOption{
+		Key:   "smart_capabilities_list",
+		Value: d.Get("smart_capabilities_list").(string),
+	})
+	moduleConfig.Options = append(moduleConfig.Options, smilecdr.ModuleOption{
+		Key:   "pkce.required",
+		Value: d.Get("pkce.required").(string),
+	})
+	moduleConfig.Options = append(moduleConfig.Options, smilecdr.ModuleOption{
+		Key:   "pkce.plain_challenge_supported",
+		Value: d.Get("pkce.plain_challenge_supported").(string),
+	})
+	moduleConfig.Options = append(moduleConfig.Options, smilecdr.ModuleOption{
+		Key:   "enforce_approved_scopes_to_restrict_permissions",
+		Value: d.Get("enforce_approved_scopes_to_restrict_permissions").(string),
+	})
+	moduleConfig.Options = append(moduleConfig.Options, smilecdr.ModuleOption{
+		Key:   "smart_configuration.scopes_supported",
+		Value: d.Get("smart_configuration.scopes_supported").(string),
+	})
+	moduleConfig.Options = append(moduleConfig.Options, smilecdr.ModuleOption{
+		Key:   "allowed_audience_list",
+		Value: d.Get("allowed_audience_list").(string),
+	})
+	moduleConfig.Options = append(moduleConfig.Options, smilecdr.ModuleOption{
+		Key:   "federate_mode.enabled",
+		Value: d.Get("federate_mode.enabled").(string),
+	})
+	moduleConfig.Options = append(moduleConfig.Options, smilecdr.ModuleOption{
+		Key:   "davinci.consent_handling.enabled",
+		Value: d.Get("davinci.consent_handling.enabled").(string),
+	})
+	moduleConfig.Options = append(moduleConfig.Options, smilecdr.ModuleOption{
+		Key:   "port",
+		Value: d.Get("port").(string),
+	})
+	moduleConfig.Options = append(moduleConfig.Options, smilecdr.ModuleOption{
+		Key:   "issuer.url",
+		Value: d.Get("issuer.url").(string),
+	})
+
+	dependencies := d.Get("dependencies").([]interface{})
+	for _, dependency := range dependencies {
+		dependencyMap := dependency.(map[string]interface{})
+		moduleConfig.Dependencies = append(moduleConfig.Dependencies, smilecdr.ModuleDependencies{
+			ModuleId: dependencyMap["module_id"].(string),
+			Type:     dependencyMap["type"].(string),
+		})
+	}
+
+	return moduleConfig, nil
+}
+
 func resourceSmartOutboundSecurityCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	return resourceModuleConfigCreate(ctx, d, m)
+
+	c := m.(*smilecdr.Client)
+
+	moduleConfig, err := outboundSecurityResourceToModuleConfig(d)
+
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	module, err := c.PostModuleConfig(*moduleConfig)
+
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	d.SetId(module.ModuleId) // the primary resource identifier. must be unique.
+
+	return resourceSmartOutboundSecurityRead(ctx, d, m)
+
 }
 
 func resourceSmartOutboundSecurityRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	return resourceModuleConfigRead(ctx, d, m)
+
+	c := m.(*smilecdr.Client)
+
+	moduleId := d.Get("module_id").(string)
+	moduleConfig, err := c.GetModuleConfig(moduleId)
+
+	// map from moduleConfig to resourceData
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	val, err := moduleConfig.LookupOption(("smart_capabilities_list"))
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	d.Set("smart_capabilities_list", val)
+	val, err = moduleConfig.LookupOption(("pkce.required"))
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	d.Set("pkce.required", val)
+	val, err = moduleConfig.LookupOption(("pkce.plain_challenge_supported"))
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	d.Set("pkce.plain_challenge_supported", val)
+	val, err = moduleConfig.LookupOption(("enforce_approved_scopes_to_restrict_permissions"))
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	d.Set("enforce_approved_scopes_to_restrict_permissions", val)
+	val, err = moduleConfig.LookupOption(("smart_configuration.scopes_supported"))
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	d.Set("smart_configuration.scopes_supported", val)
+	val, err = moduleConfig.LookupOption(("allowed_audience_list"))
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	d.Set("allowed_audience_list", val)
+	val, err = moduleConfig.LookupOption(("federate_mode.enabled"))
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	d.Set("federate_mode.enabled", val)
+	val, err = moduleConfig.LookupOption(("davinci.consent_handling.enabled"))
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	d.Set("davinci.consent_handling.enabled", val)
+	val, err = moduleConfig.LookupOption(("port"))
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	d.Set("port", val)
+	val, err = moduleConfig.LookupOption(("issuer.url"))
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	d.Set("issuer.url", val)
+	val, err = moduleConfig.LookupOption(("openid.signing.keystore_id"))
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	d.Set("openid.signing.keystore_id", val)
+	val, err = moduleConfig.LookupOption(("cors.enable"))
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	d.Set("cors.enable", val)
+
+	// Set The Dependencies
+	dependencies := make([]interface{}, len(moduleConfig.Dependencies))
+	for i, dependency := range moduleConfig.Dependencies {
+		dependencies[i] = map[string]interface{}{
+			"module_id": dependency.ModuleId,
+			"type":      dependency.Type,
+		}
+	}
+	d.Set("dependencies", dependencies)
+
+	return nil
 }
 
 func resourceSmartOutboundSecurityUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	return resourceModuleConfigUpdate(ctx, d, m)
+
+	c := m.(*smilecdr.Client)
+
+	moduleConfig, err := outboundSecurityResourceToModuleConfig(d)
+
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	d.SetId(moduleConfig.ModuleId) // the primary resource identifier. must be unique.
+
+	_, pErr := c.PutModuleConfig(*moduleConfig)
+
+	if pErr != nil {
+		return diag.FromErr(pErr)
+	}
+
+	return resourceSmartOutboundSecurityRead(ctx, d, m)
 }
 
 func resourceSmartOutboundSecurityDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	return resourceModuleConfigDelete(ctx, d, m)
+	c := m.(*smilecdr.Client)
+
+	err := c.DeleteModuleConfig(d.Id())
+
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	d.SetId("") // This is unset when the resource is deleted
+
+	return nil
 }
