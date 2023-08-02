@@ -8,8 +8,17 @@
 
 
 
-resource "smilecdr_smart_inbound_security" "inbound_security" {
-    module_id = "smart_inbound"
-    node_id = "Master"
+resource "smilecdr_smart_inbound_security" "example_inbound" {
+  module_id = "example_smart_inbound"
+  node_id   = "Master"
 
+  cache_authentication_seconds                    = 300
+  key_validation_prevent_token_key_reuse          = true
+  key_validation_require_key_expiry               = true
+  enforce_approved_scopes_to_restrict_permissions = true
+  smart_configuration_scopes_supported            = "openid fhirUser patient/*.read"
+  token_endpoint                                  = "http://localhost:8080/auth/realms/poc/protocol/openid-connect/token"
+  authorization_endpoint                          = "http://localhost:8080/auth/realms/poc/protocol/openid-connect/auth"
+  introspection_endpoint                          = "http://localhost:8080/auth/realms/poc/protocol/openid-connect/token/introspect"
+  revocation_endpoint                             = "http://localhost:8080/auth/realms/poc/protocol/openid-connect/revoke"
 }

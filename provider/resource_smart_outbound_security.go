@@ -46,13 +46,13 @@ func resourceSmartOutboundSecurity() *schema.Resource {
 				},
 				Description: "List of Smart Capabilities to enable (See http://hl7.org/fhir/smart-app-launch/conformance.html#capability-sets); one capability per line.",
 			},
-			"pkce.required": {
+			"pkce_required": {
 				Type:        schema.TypeBool,
 				Optional:    true,
 				Default:     false,
 				Description: "If this setting is enabled, the server will require the use of PKCE for all Authorization Code SMART Auth flows. Enabling this setting also disallows the use of the OAuth2 Implicit Grant type, since this flow does not support PKCE.",
 			},
-			"pkce.plain_challenge_supported": {
+			"pkce_plain_challenge_supported": {
 				Type:        schema.TypeBool,
 				Optional:    true,
 				Default:     false,
@@ -63,7 +63,7 @@ func resourceSmartOutboundSecurity() *schema.Resource {
 				Optional: true,
 				Default:  false,
 			},
-			"smart_configuration.scopes_supported": {
+			"smart_configuration_scopes_supported": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Default:     "openid fhirUser launch launch/patient patient/*.* offline_access",
@@ -74,12 +74,12 @@ func resourceSmartOutboundSecurity() *schema.Resource {
 				Optional: true,
 				Default:  "",
 			},
-			"federate_mode.enabled": {
+			"federate_mode_enabled": {
 				Type:     schema.TypeBool,
 				Optional: true,
 				Default:  false,
 			},
-			"davinci.consent_handling.enabled": {
+			"davinci_consent_handling": {
 				Type:     schema.TypeBool,
 				Optional: true,
 				Default:  false,
@@ -89,18 +89,34 @@ func resourceSmartOutboundSecurity() *schema.Resource {
 				Optional: true,
 				Default:  9200,
 			},
-			"issuer.url": {
+			"issuer_url": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-			"openid.signing.keystore_id": {
+			"openid_signing_keystore_id": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-			"cors.enable": {
+			"cors_enable": {
 				Type:     schema.TypeBool,
 				Optional: true,
 				Default:  false,
+			},
+			"options": {
+				Type:     schema.TypeList,
+				Optional: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"key": {
+							Type:     schema.TypeString,
+							Required: true,
+						},
+						"value": {
+							Type:     schema.TypeString,
+							Required: true,
+						},
+					},
+				},
 			},
 			"dependencies": {
 				Type:     schema.TypeList,
@@ -135,46 +151,99 @@ func outboundSecurityResourceToModuleConfig(d *schema.ResourceData) (*smilecdr.M
 		NodeId:     d.Get("node_id").(string),
 	}
 
-	moduleConfig.Options = append(moduleConfig.Options, smilecdr.ModuleOption{
-		Key:   "smart_capabilities_list",
-		Value: d.Get("smart_capabilities_list").(string),
-	})
-	moduleConfig.Options = append(moduleConfig.Options, smilecdr.ModuleOption{
-		Key:   "pkce.required",
-		Value: d.Get("pkce.required").(string),
-	})
-	moduleConfig.Options = append(moduleConfig.Options, smilecdr.ModuleOption{
-		Key:   "pkce.plain_challenge_supported",
-		Value: d.Get("pkce.plain_challenge_supported").(string),
-	})
-	moduleConfig.Options = append(moduleConfig.Options, smilecdr.ModuleOption{
-		Key:   "enforce_approved_scopes_to_restrict_permissions",
-		Value: d.Get("enforce_approved_scopes_to_restrict_permissions").(string),
-	})
-	moduleConfig.Options = append(moduleConfig.Options, smilecdr.ModuleOption{
-		Key:   "smart_configuration.scopes_supported",
-		Value: d.Get("smart_configuration.scopes_supported").(string),
-	})
-	moduleConfig.Options = append(moduleConfig.Options, smilecdr.ModuleOption{
-		Key:   "allowed_audience_list",
-		Value: d.Get("allowed_audience_list").(string),
-	})
-	moduleConfig.Options = append(moduleConfig.Options, smilecdr.ModuleOption{
-		Key:   "federate_mode.enabled",
-		Value: d.Get("federate_mode.enabled").(string),
-	})
-	moduleConfig.Options = append(moduleConfig.Options, smilecdr.ModuleOption{
-		Key:   "davinci.consent_handling.enabled",
-		Value: d.Get("davinci.consent_handling.enabled").(string),
-	})
-	moduleConfig.Options = append(moduleConfig.Options, smilecdr.ModuleOption{
-		Key:   "port",
-		Value: d.Get("port").(string),
-	})
-	moduleConfig.Options = append(moduleConfig.Options, smilecdr.ModuleOption{
-		Key:   "issuer.url",
-		Value: d.Get("issuer.url").(string),
-	})
+	if v, ok := d.GetOk("smart_capabilities_list"); ok {
+		moduleConfig.Options = append(moduleConfig.Options, smilecdr.ModuleOption{
+			Key:   "smart_capabilities_list",
+			Value: v.(string),
+		})
+	}
+
+	if v, ok := d.GetOk("pkce_required"); ok {
+		moduleConfig.Options = append(moduleConfig.Options, smilecdr.ModuleOption{
+			Key:   "pkce.required",
+			Value: v.(string),
+		})
+	}
+
+	if v, ok := d.GetOk("pkce_plain_challenge_supported"); ok {
+		moduleConfig.Options = append(moduleConfig.Options, smilecdr.ModuleOption{
+			Key:   "pkce.plain_challenge_supported",
+			Value: v.(string),
+		})
+	}
+
+	if v, ok := d.GetOk("enforce_approved_scopes_to_restrict_permissions"); ok {
+		moduleConfig.Options = append(moduleConfig.Options, smilecdr.ModuleOption{
+			Key:   "enforce_approved_scopes_to_restrict_permissions",
+			Value: v.(string),
+		})
+	}
+
+	if v, ok := d.GetOk("smart_configuration_scopes_supported"); ok {
+		moduleConfig.Options = append(moduleConfig.Options, smilecdr.ModuleOption{
+			Key:   "smart_configuration.scopes_supported",
+			Value: v.(string),
+		})
+	}
+
+	if v, ok := d.GetOk("allowed_audience_list"); ok {
+		moduleConfig.Options = append(moduleConfig.Options, smilecdr.ModuleOption{
+			Key:   "allowed_audience_list",
+			Value: v.(string),
+		})
+	}
+
+	if v, ok := d.GetOk("federate_mode_enabled"); ok {
+		moduleConfig.Options = append(moduleConfig.Options, smilecdr.ModuleOption{
+			Key:   "federate_mode.enabled",
+			Value: v.(string),
+		})
+	}
+
+	if v, ok := d.GetOk("davinci_consent_handling"); ok {
+		moduleConfig.Options = append(moduleConfig.Options, smilecdr.ModuleOption{
+			Key:   "davinci.consent_handling",
+			Value: v.(string),
+		})
+	}
+
+	if v, ok := d.GetOk("port"); ok {
+		moduleConfig.Options = append(moduleConfig.Options, smilecdr.ModuleOption{
+			Key:   "port",
+			Value: v.(string),
+		})
+	}
+
+	if v, ok := d.GetOk("issuer_url"); ok {
+		moduleConfig.Options = append(moduleConfig.Options, smilecdr.ModuleOption{
+			Key:   "issuer.url",
+			Value: v.(string),
+		})
+	}
+
+	if v, ok := d.GetOk("openid_signing_keystore_id"); ok {
+		moduleConfig.Options = append(moduleConfig.Options, smilecdr.ModuleOption{
+			Key:   "openid.signing.keystore_id",
+			Value: v.(string),
+		})
+	}
+
+	if v, ok := d.GetOk("cors_enable"); ok {
+		moduleConfig.Options = append(moduleConfig.Options, smilecdr.ModuleOption{
+			Key:   "cors.enable",
+			Value: v.(string),
+		})
+	}
+
+	// Add any other options that are not in the schema
+	options := d.Get("options").([]interface{})
+	for _, option := range options {
+		optionMap := option.(map[string]interface{})
+		moduleConfig.Options = append(moduleConfig.Options, smilecdr.ModuleOption{
+			Key:   optionMap["key"].(string),
+			Value: optionMap["value"].(string),
+		})
+	}
 
 	dependencies := d.Get("dependencies").([]interface{})
 	for _, dependency := range dependencies {
@@ -221,66 +290,87 @@ func resourceSmartOutboundSecurityRead(ctx context.Context, d *schema.ResourceDa
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	val, err := moduleConfig.LookupOption(("smart_capabilities_list"))
+
+	val, err := moduleConfig.LookupOption("smart_capabilities_list")
 	if err != nil {
 		return diag.FromErr(err)
 	}
 	d.Set("smart_capabilities_list", val)
-	val, err = moduleConfig.LookupOption(("pkce.required"))
+
+	val, err = moduleConfig.LookupOption("pkce.required")
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	d.Set("pkce.required", val)
-	val, err = moduleConfig.LookupOption(("pkce.plain_challenge_supported"))
+	d.Set("pkce_required", val)
+
+	val, err = moduleConfig.LookupOption("pkce.plain_challenge_supported")
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	d.Set("pkce.plain_challenge_supported", val)
-	val, err = moduleConfig.LookupOption(("enforce_approved_scopes_to_restrict_permissions"))
+	d.Set("pkce_plain_challenge_supported", val)
+
+	val, err = moduleConfig.LookupOption("enforce_approved_scopes_to_restrict_permissions")
 	if err != nil {
 		return diag.FromErr(err)
 	}
 	d.Set("enforce_approved_scopes_to_restrict_permissions", val)
-	val, err = moduleConfig.LookupOption(("smart_configuration.scopes_supported"))
+
+	val, err = moduleConfig.LookupOption("smart_configuration.scopes_supported")
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	d.Set("smart_configuration.scopes_supported", val)
-	val, err = moduleConfig.LookupOption(("allowed_audience_list"))
+	d.Set("smart_configuration_scopes_supported", val)
+
+	val, err = moduleConfig.LookupOption("allowed_audience_list")
 	if err != nil {
 		return diag.FromErr(err)
 	}
 	d.Set("allowed_audience_list", val)
-	val, err = moduleConfig.LookupOption(("federate_mode.enabled"))
+
+	val, err = moduleConfig.LookupOption("federate_mode.enabled")
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	d.Set("federate_mode.enabled", val)
-	val, err = moduleConfig.LookupOption(("davinci.consent_handling.enabled"))
+	d.Set("federate_mode_enabled", val)
+
+	val, err = moduleConfig.LookupOption("davinci.consent_handling")
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	d.Set("davinci.consent_handling.enabled", val)
+	d.Set("davinci_consent_handling", val)
+
 	val, err = moduleConfig.LookupOption(("port"))
 	if err != nil {
 		return diag.FromErr(err)
 	}
 	d.Set("port", val)
+
 	val, err = moduleConfig.LookupOption(("issuer.url"))
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	d.Set("issuer.url", val)
+	d.Set("issuer_url", val)
+
 	val, err = moduleConfig.LookupOption(("openid.signing.keystore_id"))
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	d.Set("openid.signing.keystore_id", val)
+	d.Set("openid_signing_keystore_id", val)
+
 	val, err = moduleConfig.LookupOption(("cors.enable"))
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	d.Set("cors.enable", val)
+	d.Set("cors_enable", val)
+
+	options := make([]interface{}, len(moduleConfig.Options))
+	for i, option := range moduleConfig.Options {
+		options[i] = map[string]interface{}{
+			"key":   option.Key,
+			"value": option.Value,
+		}
+	}
+	d.Set("options", options)
 
 	// Set The Dependencies
 	dependencies := make([]interface{}, len(moduleConfig.Dependencies))
