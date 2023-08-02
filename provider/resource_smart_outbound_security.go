@@ -23,6 +23,20 @@ func resourceSmartOutboundSecurity() *schema.Resource {
 				Required:    true,
 				Description: "The unique module ID of the module to be configured.",
 			},
+			"module_type": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Required:    false,
+				Optional:    false,
+				Description: "The module type of the module to be configured.",
+				Default:     "SECURITY_OUT_SMART",
+			},
+			"node_id": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Default:     "Master",
+				Description: "The node ID of the node to be configured.",
+			},
 			"smart_capabilities_list": {
 				Type:     schema.TypeList,
 				Required: true,
@@ -113,9 +127,12 @@ func resourceSmartOutboundSecurity() *schema.Resource {
 
 func outboundSecurityResourceToModuleConfig(d *schema.ResourceData) (*smilecdr.ModuleConfig, error) {
 
+	d.Set("module_type", "SECURITY_OUT_SMART") // Hardcoded for this module type
+
 	moduleConfig := &smilecdr.ModuleConfig{
 		ModuleId:   d.Get("module_id").(string),
 		ModuleType: d.Get("module_type").(string),
+		NodeId:     d.Get("node_id").(string),
 	}
 
 	moduleConfig.Options = append(moduleConfig.Options, smilecdr.ModuleOption{
@@ -197,7 +214,8 @@ func resourceSmartOutboundSecurityRead(ctx context.Context, d *schema.ResourceDa
 	c := m.(*smilecdr.Client)
 
 	moduleId := d.Get("module_id").(string)
-	moduleConfig, err := c.GetModuleConfig(moduleId)
+	nodeId := d.Get("node_id").(string)
+	moduleConfig, err := c.GetModuleConfig(nodeId, moduleId)
 
 	// map from moduleConfig to resourceData
 	if err != nil {
@@ -300,7 +318,10 @@ func resourceSmartOutboundSecurityUpdate(ctx context.Context, d *schema.Resource
 func resourceSmartOutboundSecurityDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	c := m.(*smilecdr.Client)
 
-	err := c.DeleteModuleConfig(d.Id())
+	moduleId := d.Get("module_id").(string)
+	nodeId := d.Get("node_id").(string)
+
+	err := c.DeleteModuleConfig(nodeId, moduleId)
 
 	if err != nil {
 		return diag.FromErr(err)

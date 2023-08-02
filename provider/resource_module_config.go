@@ -20,6 +20,11 @@ func resourceModuleConfig() *schema.Resource {
 		UpdateContext: resourceModuleConfigUpdate,
 		DeleteContext: resourceModuleConfigDelete,
 		Schema: map[string]*schema.Schema{
+			"node_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Default:  "Master",
+			},
 			"module_id": {
 				Type:     schema.TypeString,
 				Required: true,
@@ -72,6 +77,7 @@ func resourceToModuleConfig(d *schema.ResourceData) (*smilecdr.ModuleConfig, err
 	moduleConfig := &smilecdr.ModuleConfig{
 		ModuleId:   d.Get("module_id").(string),
 		ModuleType: d.Get("module_type").(string),
+		NodeId:     d.Get("node_id").(string),
 	}
 
 	options := d.Get("options").([]interface{})
@@ -117,12 +123,15 @@ func resourceModuleConfigCreate(ctx context.Context, d *schema.ResourceData, m i
 func resourceModuleConfigRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	c := m.(*smilecdr.Client)
 
-	moduleConfig, err := c.GetModuleConfig(d.Id())
+	moduleId := d.Get("module_id").(string)
+	nodeId := d.Get("node_id").(string)
+
+	moduleConfig, err := c.GetModuleConfig(nodeId, moduleId)
 
 	if err != nil {
 		return diag.FromErr(err)
 	}
-
+	d.Set("node_id", moduleConfig.NodeId)
 	d.Set("module_id", moduleConfig.ModuleId)
 	d.Set("module_type", moduleConfig.ModuleType)
 
@@ -170,7 +179,10 @@ func resourceModuleConfigUpdate(ctx context.Context, d *schema.ResourceData, m i
 func resourceModuleConfigDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	c := m.(*smilecdr.Client)
 
-	err := c.DeleteModuleConfig(d.Id())
+	moduleId := d.Get("module_id").(string)
+	nodeId := d.Get("node_id").(string)
+
+	err := c.DeleteModuleConfig(nodeId, moduleId)
 
 	if err != nil {
 		return diag.FromErr(err)
