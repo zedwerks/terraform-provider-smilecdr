@@ -29,7 +29,6 @@ func resourceSmartOutboundSecurity() *schema.Resource {
 				Required:    false,
 				Optional:    false,
 				Description: "The module type of the module to be configured.",
-				Default:     "SECURITY_OUT_SMART",
 			},
 			"node_id": {
 				Type:        schema.TypeString,
@@ -41,8 +40,7 @@ func resourceSmartOutboundSecurity() *schema.Resource {
 				Type:     schema.TypeList,
 				Required: true,
 				Elem: &schema.Schema{
-					Type:     schema.TypeString,
-					Required: true,
+					Type: schema.TypeString,
 				},
 				Description: "List of Smart Capabilities to enable (See http://hl7.org/fhir/smart-app-launch/conformance.html#capability-sets); one capability per line.",
 			},

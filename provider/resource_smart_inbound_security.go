@@ -6,8 +6,10 @@ package provider
 import (
 	"context"
 
+	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/zedwerks/terraform-smilecdr/provider/helper/validations"
 	"github.com/zedwerks/terraform-smilecdr/smilecdr"
 )
 
@@ -29,7 +31,6 @@ func resourceSmartInboundSecurity() *schema.Resource {
 				Required:    false,
 				Optional:    false,
 				Description: "The module type of the module to be configured.",
-				Default:     "SECURITY_IN_SMART",
 			},
 			"node_id": {
 				Type:        schema.TypeString,
@@ -74,29 +75,34 @@ func resourceSmartInboundSecurity() *schema.Resource {
 				Description: "A space-separated list of scopes that are supported by the SMART on FHIR server. This list is used to validate the scopes that are requested by the client. If the client requests a scope that is not in this list, the request will be rejected.",
 			},
 			"token_endpoint": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Description: "The URL of the token endpoint. This is the endpoint that the SMART on FHIR client will use to obtain an access token.",
+				Type:             schema.TypeString,
+				Optional:         true,
+				ValidateDiagFunc: validations.ValidateDiagFunc(validation.IsURLWithHTTPorHTTPS),
+				Description:      "The URL of the token endpoint. This is the endpoint that the SMART on FHIR client will use to obtain an access token.",
 			},
 			"authorization_endpoint": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Description: "The URL of the authorization endpoint. This is the endpoint that the SMART on FHIR client will use to obtain an authorization code.",
+				Type:             schema.TypeString,
+				Optional:         true,
+				ValidateDiagFunc: validations.ValidateDiagFunc(validation.IsURLWithHTTPorHTTPS),
+				Description:      "The URL of the authorization endpoint. This is the endpoint that the SMART on FHIR client will use to obtain an authorization code.",
 			},
 			"management_endpoint": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Description: "The URL of the management endpoint. This is the endpoint that the SMART on FHIR client will use to obtain a refresh token.",
+				Type:             schema.TypeString,
+				Optional:         true,
+				ValidateDiagFunc: validations.ValidateDiagFunc(validation.IsURLWithHTTPorHTTPS),
+				Description:      "The URL of the management endpoint. This is the endpoint that the SMART on FHIR client will use to obtain a refresh token.",
 			},
 			"introspection_endpoint": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Description: "The URL of the introspection endpoint. This is the endpoint that the SMART on FHIR client will use to validate an access token.",
+				Type:             schema.TypeString,
+				Optional:         true,
+				ValidateDiagFunc: validations.ValidateDiagFunc(validation.IsURLWithHTTPorHTTPS),
+				Description:      "The URL of the introspection endpoint. This is the endpoint that the SMART on FHIR client will use to validate an access token.",
 			},
 			"revocation_endpoint": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Description: "The URL of the revocation endpoint. This is the endpoint that the SMART on FHIR client will use to revoke an access token.",
+				Type:             schema.TypeString,
+				Optional:         true,
+				ValidateDiagFunc: validations.ValidateDiagFunc(validation.IsURLWithHTTPorHTTPS),
+				Description:      "The URL of the revocation endpoint. This is the endpoint that the SMART on FHIR client will use to revoke an access token.",
 			},
 			"introspection_client_jwks_cache_mins": {
 				Type:        schema.TypeInt,
@@ -163,7 +169,7 @@ func resourceSmartInboundSecurity() *schema.Resource {
 			},
 			"dependencies": {
 				Type:     schema.TypeList,
-				Required: true,
+				Optional: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"module_id": {

@@ -2,7 +2,6 @@
 # SPDX-License-Identifier: Apache-2.0
 
 locals {
-  smilecdr_version      = "2021.05.R01"
   authScriptFile        = file("${path.module}/js/federationAuthScript.js")
   userMappingScriptFile = file("${path.module}/js/federationUserMappingScript.js")
 }

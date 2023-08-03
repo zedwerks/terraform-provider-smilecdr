@@ -46,8 +46,7 @@ func resourceOpenIdClient() *schema.Resource {
 				MinItems: 1,
 				Elem: &schema.Schema{
 					Type:             schema.TypeString,
-					ValidateDiagFunc: validations.ValidateDiagFunc(validation.StringInSlice([]string{"AUTHORIZATION_CODE", "REFRESH_TOKEN"}, false)),
-					Required:         true,
+					ValidateDiagFunc: validations.ValidateDiagFunc(validation.StringInSlice([]string{"AUTHORIZATION_CODE", "IMPLICIT", "REFRESH_TOKEN", "CLIENT_CREDENTIALS", "PASSWORD", "JWT_BEARER"}, false)),
 				},
 			},
 			"auto_approve_scopes": {
@@ -114,8 +113,8 @@ func resourceOpenIdClient() *schema.Resource {
 				Type:     schema.TypeSet,
 				Optional: true,
 				Elem: &schema.Schema{
-					Type:     schema.TypeString,
-					Required: true,
+					Type:             schema.TypeString,
+					ValidateDiagFunc: validations.ValidateDiagFunc(validation.IsURLWithHTTPorHTTPS),
 				},
 			},
 			"scopes": {
@@ -186,14 +185,14 @@ func resourceOpenIdClient() *schema.Resource {
 				Default:  false,
 			},
 			"public_jwks_uri": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				ValidateFunc: validation.IsURLWithHTTPorHTTPS,
+				Type:             schema.TypeString,
+				Optional:         true,
+				ValidateDiagFunc: validations.ValidateDiagFunc(validation.IsURLWithHTTPorHTTPS),
 			},
 			"archived_at": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				ValidateFunc: validation.IsRFC3339Time,
+				Type:             schema.TypeString,
+				Optional:         true,
+				ValidateDiagFunc: validations.ValidateDiagFunc(validation.IsRFC3339Time),
 			},
 			"created_by_app_sphere": {
 				Type:     schema.TypeBool,

@@ -7,9 +7,10 @@ import (
 	"context"
 	"time"
 
+	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	"github.com/zedwerks/terraform-smilecdr/provider/helper/validations"
 	"github.com/zedwerks/terraform-smilecdr/smilecdr"
 )
 
@@ -35,11 +36,7 @@ func resourceOpenIdIdentityProvider() *schema.Resource {
 			},
 			"token_introspection_client_id": {
 				Type:     schema.TypeString,
-				Required: false,
-				//ValidateDiagFunc: validations.IsValidClientID,
-				ValidateFunc: validation.All(
-					validation.StringIsNotWhiteSpace,
-					validation.StringDoesNotContainAny(" \t\n\r")),
+				Optional: true,
 			},
 			"token_introspection_client_secret": {
 				Type:     schema.TypeString,
@@ -73,21 +70,24 @@ func resourceOpenIdIdentityProvider() *schema.Resource {
 				Default:  "openid profile",
 			},
 			"federation_authorization_url": {
-				Type:     schema.TypeString,
-				Required: true,
+				Type:             schema.TypeString,
+				Required:         true,
+				ValidateDiagFunc: validations.ValidateDiagFunc(validation.IsURLWithHTTPorHTTPS),
 			},
 			"federation_token_url": {
-				Type:     schema.TypeString,
-				Required: true,
+				Type:             schema.TypeString,
+				Required:         true,
+				ValidateDiagFunc: validations.ValidateDiagFunc(validation.IsURLWithHTTPorHTTPS),
 			},
 			"federation_user_info_url": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:             schema.TypeString,
+				Optional:         true,
+				ValidateDiagFunc: validations.ValidateDiagFunc(validation.IsURLWithHTTPorHTTPS),
 			},
 			"federation_jwk_set_url": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				ValidateFunc: validation.IsURLWithHTTPorHTTPS,
+				Type:             schema.TypeString,
+				Optional:         true,
+				ValidateDiagFunc: validations.ValidateDiagFunc(validation.IsURLWithHTTPorHTTPS),
 			},
 			"federation_auth_script_text": {
 				Type:     schema.TypeString,
@@ -98,9 +98,8 @@ func resourceOpenIdIdentityProvider() *schema.Resource {
 				Optional: true,
 			},
 			"archived_at": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				ValidateFunc: validation.IsRFC3339Time,
+				Type:     schema.TypeString,
+				Optional: true,
 			},
 		},
 		Importer: &schema.ResourceImporter{

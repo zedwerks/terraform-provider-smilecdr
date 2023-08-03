@@ -7,7 +7,6 @@
 # authorization server.
 
 locals {
-  smilecdr_version   = "2021.05.R01"
   callbackScriptFile = file("${path.module}/js/inbound_security_callback.js")
 }
 
