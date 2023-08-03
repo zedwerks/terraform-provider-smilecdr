@@ -196,7 +196,6 @@ func resourceOpenIdClient() *schema.Resource {
 			"created_by_app_sphere": {
 				Type:     schema.TypeBool,
 				Optional: true,
-				Default:  false,
 			},
 		},
 		Importer: &schema.ResourceImporter{
