@@ -78,8 +78,8 @@ func (c *Client) Post(endpoint string, body []byte) ([]byte, error) {
 
 	defer resp.Body.Close()
 
-	if resp.StatusCode != http.StatusOK {
-		fmt.Println("received non-200 OK status code:", resp.StatusCode)
+	if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusCreated {
+		fmt.Println("received non-200 OK or 201 Created status code:", resp.StatusCode)
 		// Handle the error condition here
 		return nil, err
 	}

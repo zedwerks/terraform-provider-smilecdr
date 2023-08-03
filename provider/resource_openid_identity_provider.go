@@ -171,7 +171,7 @@ func resourceOpenIdIdentityProviderRead(ctx context.Context, d *schema.ResourceD
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	d.SetId(provider.Issuer)
+	d.SetId(provider.Issuer) // Issuer must be unique in the system
 
 	d.Set("pid", provider.Pid)
 	d.Set("name", provider.Name)

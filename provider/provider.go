@@ -39,6 +39,7 @@ func Provider() *schema.Provider {
 			"smilecdr_openid_identity_provider": resourceOpenIdIdentityProvider(),
 			"smilecdr_smart_outbound_security":  resourceSmartOutboundSecurity(),
 			"smilecdr_smart_inbound_security":   resourceSmartInboundSecurity(),
+			"smilecdr_module_config":            resourceModuleConfig(),
 		},
 		DataSourcesMap:       map[string]*schema.Resource{},
 		ConfigureContextFunc: providerConfigure,

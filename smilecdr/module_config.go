@@ -26,16 +26,16 @@ type ModuleDependencies struct {
 	Type     string `json:"type,omitempty"`
 }
 
-func (moduleConfig *ModuleConfig) LookupOption(key string) (string, error) {
+func (moduleConfig *ModuleConfig) LookupOptionOk(key string) (string, bool) {
 
 	moduleConfigOptions := moduleConfig.Options
 	for _, kv := range moduleConfigOptions {
 		if kv.Key == key {
-			return kv.Value, nil
+			return kv.Value, true
 		}
 	}
 
-	return "", fmt.Errorf("value not found for key '%s'", key)
+	return "", false
 }
 
 func (smilecdr *Client) GetModuleConfigs() ([]ModuleConfig, error) {
@@ -72,7 +72,9 @@ func (smilecdr *Client) PostModuleConfig(module ModuleConfig) (ModuleConfig, err
 	var moduleId = module.ModuleId
 	var nodeId = module.NodeId
 
-	var endpoint = fmt.Sprintf("/module-config/%s/%s", nodeId, moduleId)
+	fmt.Println("PostModuleConfig: ", module)
+
+	var endpoint = fmt.Sprintf("/module-config/%s/%s/create", nodeId, moduleId)
 	jsonBody, _ := json.Marshal(module)
 
 	jsonBody, postErr := smilecdr.Post(endpoint, jsonBody)
@@ -94,7 +96,7 @@ func (smilecdr *Client) PutModuleConfig(module ModuleConfig) (ModuleConfig, erro
 	var moduleId = module.ModuleId
 	var nodeId = module.NodeId
 
-	var endpoint = fmt.Sprintf("/module-config/%s/%s", nodeId, moduleId)
+	var endpoint = fmt.Sprintf("/module-config/%s/%s/set", nodeId, moduleId)
 	jsonBody, _ := json.Marshal(module)
 
 	jsonBody, putErr := smilecdr.Put(endpoint, jsonBody)
@@ -112,7 +114,7 @@ func (smilecdr *Client) PutModuleConfig(module ModuleConfig) (ModuleConfig, erro
 }
 
 func (smilecdr *Client) DeleteModuleConfig(nodeId, moduleId string) error {
-	var endpoint = fmt.Sprintf("/module-config/%s/%s", nodeId, moduleId)
+	var endpoint = fmt.Sprintf("/module-config/%s/%s/archive", nodeId, moduleId)
 	_, err := smilecdr.Delete(endpoint)
 	return err
 }

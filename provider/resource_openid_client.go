@@ -43,7 +43,6 @@ func resourceOpenIdClient() *schema.Resource {
 			"allowed_grant_types": {
 				Type:     schema.TypeSet,
 				Required: true,
-				MinItems: 1,
 				Elem: &schema.Schema{
 					Type:             schema.TypeString,
 					ValidateDiagFunc: validations.ValidateDiagFunc(validation.StringInSlice([]string{"AUTHORIZATION_CODE", "IMPLICIT", "REFRESH_TOKEN", "CLIENT_CREDENTIALS", "PASSWORD", "JWT_BEARER"}, false)),
@@ -157,7 +156,7 @@ func resourceOpenIdClient() *schema.Resource {
 				Default:  false,
 			},
 			"permissions": {
-				Type:     schema.TypeList,
+				Type:     schema.TypeSet,
 				Optional: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{

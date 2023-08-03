@@ -6,22 +6,18 @@
 # and does not issue tokens.  It is used to validate tokens issued by an external
 # authorization server.
 
-locals {
-  callbackScriptFile = file("${path.module}/js/inbound_security_callback.js")
-}
-
-resource "smilecdr_smart_inbound_security" "example_inbound" {
-  module_id = "example_smart_inbound"
-  node_id   = "Master"
-
-  enforce_approved_scopes_to_restrict_permissions = true
-  trust_intra_cluster_tokens_modules              = "module"
+resource "smilecdr_smart_inbound_security" "ex1_smart_inbound" {
+  module_id                                       = "ex1_smart_inbound"
+  node_id                                         = "Master"
+  enforce_approved_scopes_to_restrict_permissions = false
+  trust_intra_cluster_tokens_modules              = ""
   cache_authentication_seconds                    = 300
-  key_validation_prevent_token_key_reuse          = true
-  key_validation_require_key_expiry               = true
+  key_validation_prevent_token_key_reuse          = false
+  key_validation_require_key_expiry               = false
   smart_configuration_scopes_supported            = "openid fhirUser patient/*.read"
   token_endpoint                                  = "http://localhost:8080/auth/realms/poc/protocol/openid-connect/token"
   authorization_endpoint                          = "http://localhost:8080/auth/realms/poc/protocol/openid-connect/auth"
+  management_endpoint                             = "http://localhost:8080/auth/realms/poc/account"
   introspection_endpoint                          = "http://localhost:8080/auth/realms/poc/protocol/openid-connect/token/introspect"
   revocation_endpoint                             = "http://localhost:8080/auth/realms/poc/protocol/openid-connect/revoke"
   introspection_client_jwks_cache_mins            = 10
@@ -29,16 +25,11 @@ resource "smilecdr_smart_inbound_security" "example_inbound" {
   callback_script_text                            = local.callbackScriptFile
   tfa_totp_issuer_name                            = "issuerName"
   tfa_totp_lock_after_failed_attempts             = 2
-  seed_servers_file = "seedServers.txt"
-  debug_enabled      = true
-  debug_host =  "localhost"
-  debug_port =  5005
-  debug_path = "/debug" 
-
-  dependencies = [
-    { 
-        module_id = "persistence"
-        type   = "PERSISTENCE_ALL"
-    },
-  ]
+  seed_servers_file                               = "seedServers.txt"
+  debug_enabled                                   = false
+  debug_host_address                              = "localhost"
+  debug_secure                                    = false
+  debug_suspend                                   = false
+  debug_port                                      = 5005
+  debug_path                                      = "/debug"
 }

@@ -1,7 +1,6 @@
 # Copyright (c) Zed Werks Inc.
 # SPDX-License-Identifier: Apache-2.0
 
-
 terraform {
   required_providers {
     smilecdr = {
@@ -15,9 +14,4 @@ provider "smilecdr" {
   base_url = "http://localhost:9000"
   username = "admin"
   password = "password"
-}
-
-
-locals {
-  smilecdr_version = "2021.05.R01"
 }

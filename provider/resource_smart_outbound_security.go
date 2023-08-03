@@ -6,8 +6,10 @@ package provider
 import (
 	"context"
 
+	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/zedwerks/terraform-smilecdr/provider/helper/validations"
 	"github.com/zedwerks/terraform-smilecdr/smilecdr"
 )
 
@@ -88,8 +90,9 @@ func resourceSmartOutboundSecurity() *schema.Resource {
 				Default:  9200,
 			},
 			"issuer_url": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:             schema.TypeString,
+				Optional:         true,
+				ValidateDiagFunc: validations.ValidateDiagFunc(validation.IsURLWithHTTPorHTTPS),
 			},
 			"openid_signing_keystore_id": {
 				Type:     schema.TypeString,
@@ -99,22 +102,6 @@ func resourceSmartOutboundSecurity() *schema.Resource {
 				Type:     schema.TypeBool,
 				Optional: true,
 				Default:  false,
-			},
-			"options": {
-				Type:     schema.TypeList,
-				Optional: true,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"key": {
-							Type:     schema.TypeString,
-							Required: true,
-						},
-						"value": {
-							Type:     schema.TypeString,
-							Required: true,
-						},
-					},
-				},
 			},
 			"dependencies": {
 				Type:     schema.TypeList,
@@ -289,86 +276,65 @@ func resourceSmartOutboundSecurityRead(ctx context.Context, d *schema.ResourceDa
 		return diag.FromErr(err)
 	}
 
-	val, err := moduleConfig.LookupOption("smart_capabilities_list")
-	if err != nil {
-		return diag.FromErr(err)
+	val, ok := moduleConfig.LookupOptionOk("smart_capabilities_list")
+	if ok {
+		d.Set("smart_capabilities_list", val)
 	}
-	d.Set("smart_capabilities_list", val)
 
-	val, err = moduleConfig.LookupOption("pkce.required")
-	if err != nil {
-		return diag.FromErr(err)
+	val, ok = moduleConfig.LookupOptionOk("pkce.required")
+	if ok {
+		d.Set("pkce_required", val)
 	}
-	d.Set("pkce_required", val)
 
-	val, err = moduleConfig.LookupOption("pkce.plain_challenge_supported")
-	if err != nil {
-		return diag.FromErr(err)
+	val, ok = moduleConfig.LookupOptionOk("pkce.plain_challenge_supported")
+	if ok {
+		d.Set("pkce_plain_challenge_supported", val)
 	}
-	d.Set("pkce_plain_challenge_supported", val)
 
-	val, err = moduleConfig.LookupOption("enforce_approved_scopes_to_restrict_permissions")
-	if err != nil {
-		return diag.FromErr(err)
+	val, ok = moduleConfig.LookupOptionOk("enforce_approved_scopes_to_restrict_permissions")
+	if ok {
+		d.Set("enforce_approved_scopes_to_restrict_permissions", val)
 	}
-	d.Set("enforce_approved_scopes_to_restrict_permissions", val)
 
-	val, err = moduleConfig.LookupOption("smart_configuration.scopes_supported")
-	if err != nil {
-		return diag.FromErr(err)
+	val, ok = moduleConfig.LookupOptionOk("smart_configuration.scopes_supported")
+	if ok {
+		d.Set("smart_configuration_scopes_supported", val)
 	}
-	d.Set("smart_configuration_scopes_supported", val)
 
-	val, err = moduleConfig.LookupOption("allowed_audience_list")
-	if err != nil {
-		return diag.FromErr(err)
+	val, ok = moduleConfig.LookupOptionOk("allowed_audience_list")
+	if ok {
+		d.Set("allowed_audience_list", val)
 	}
-	d.Set("allowed_audience_list", val)
 
-	val, err = moduleConfig.LookupOption("federate_mode.enabled")
-	if err != nil {
-		return diag.FromErr(err)
+	val, ok = moduleConfig.LookupOptionOk("federate_mode.enabled")
+	if ok {
+		d.Set("federate_mode_enabled", val)
 	}
-	d.Set("federate_mode_enabled", val)
 
-	val, err = moduleConfig.LookupOption("davinci.consent_handling")
-	if err != nil {
-		return diag.FromErr(err)
+	val, ok = moduleConfig.LookupOptionOk("davinci.consent_handling")
+	if ok {
+		d.Set("davinci_consent_handling", val)
 	}
-	d.Set("davinci_consent_handling", val)
 
-	val, err = moduleConfig.LookupOption(("port"))
-	if err != nil {
-		return diag.FromErr(err)
+	val, ok = moduleConfig.LookupOptionOk("port")
+	if ok {
+		d.Set("port", val)
 	}
-	d.Set("port", val)
 
-	val, err = moduleConfig.LookupOption(("issuer.url"))
-	if err != nil {
-		return diag.FromErr(err)
+	val, ok = moduleConfig.LookupOptionOk("issuer.url")
+	if ok {
+		d.Set("issuer_url", val)
 	}
-	d.Set("issuer_url", val)
 
-	val, err = moduleConfig.LookupOption(("openid.signing.keystore_id"))
-	if err != nil {
-		return diag.FromErr(err)
+	val, ok = moduleConfig.LookupOptionOk("openid.signing.keystore_id")
+	if ok {
+		d.Set("openid_signing_keystore_id", val)
 	}
-	d.Set("openid_signing_keystore_id", val)
 
-	val, err = moduleConfig.LookupOption(("cors.enable"))
-	if err != nil {
-		return diag.FromErr(err)
+	val, ok = moduleConfig.LookupOptionOk("cors.enable")
+	if ok {
+		d.Set("cors_enable", val)
 	}
-	d.Set("cors_enable", val)
-
-	options := make([]interface{}, len(moduleConfig.Options))
-	for i, option := range moduleConfig.Options {
-		options[i] = map[string]interface{}{
-			"key":   option.Key,
-			"value": option.Value,
-		}
-	}
-	d.Set("options", options)
 
 	// Set The Dependencies
 	dependencies := make([]interface{}, len(moduleConfig.Dependencies))

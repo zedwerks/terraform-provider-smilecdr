@@ -5,6 +5,7 @@ package provider
 
 import (
 	"context"
+	"strconv"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -21,9 +22,10 @@ func resourceSmartInboundSecurity() *schema.Resource {
 		DeleteContext: resourceSmartInboundSecurityDelete,
 		Schema: map[string]*schema.Schema{
 			"module_id": {
-				Type:        schema.TypeString,
-				Required:    true,
-				Description: "The unique module ID of the module to be configured.",
+				Type:             schema.TypeString,
+				Required:         true,
+				Description:      "The unique module ID of the module to be configured.",
+				ValidateDiagFunc: validations.ValidateDiagFunc(validation.StringDoesNotContainAny(" \t\n\r")),
 			},
 			"module_type": {
 				Type:        schema.TypeString,
@@ -111,6 +113,7 @@ func resourceSmartInboundSecurity() *schema.Resource {
 				Description: "The minutes the keystore is valid.  If set to a non-zero value, any keystore lookups performed by the OIDC HTTP Client will be cached for the specified number of minutes. Caching these fetched keystores improves authentication performance by avoiding unnecessary lookups, but can also mean that invalidated keys will be honored for a period. Setting this to a small setting (such as the default value) is generally a sensible compromise.",
 			},
 			"introspection_client_truststore_file": {
+
 				Type:        schema.TypeString,
 				Optional:    true,
 				Description: "The path to the trust store file. If set, the trust store file will be used to validate the TLS certificate of the introspection endpoint. If not set, the introspection endpoint will not be validated.",
@@ -139,33 +142,28 @@ func resourceSmartInboundSecurity() *schema.Resource {
 				Optional: true,
 				Default:  false,
 			},
-			"debug_host": {
+			"debug_secure": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default:  false,
+			},
+			"debug_suspend": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default:  false,
+			},
+			"debug_host_address": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
 			"debug_port": {
-				Type:     schema.TypeInt,
-				Optional: true,
+				Type:             schema.TypeInt,
+				Optional:         true,
+				ValidateDiagFunc: validations.ValidateDiagFunc(validation.IsPortNumber),
 			},
 			"debug_path": {
 				Type:     schema.TypeString,
 				Optional: true,
-			},
-			"options": {
-				Type:     schema.TypeList,
-				Optional: true,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"key": {
-							Type:     schema.TypeString,
-							Required: true,
-						},
-						"value": {
-							Type:     schema.TypeString,
-							Required: true,
-						},
-					},
-				},
 			},
 			"dependencies": {
 				Type:     schema.TypeList,
@@ -203,7 +201,7 @@ func inboundSecurityResourceToModuleConfig(d *schema.ResourceData) (*smilecdr.Mo
 	if v, ok := d.GetOk("enforce_approved_scopes_to_restrict_permissions"); ok {
 		moduleConfig.Options = append(moduleConfig.Options, smilecdr.ModuleOption{
 			Key:   "enforce_approved_scopes_to_restrict_permissions",
-			Value: v.(string),
+			Value: strconv.FormatBool(v.(bool)),
 		})
 	}
 	if v, ok := d.GetOk("trust_intra_cluster_tokens_modules"); ok {
@@ -215,19 +213,19 @@ func inboundSecurityResourceToModuleConfig(d *schema.ResourceData) (*smilecdr.Mo
 	if v, ok := d.GetOk("cache_authentication_seconds"); ok {
 		moduleConfig.Options = append(moduleConfig.Options, smilecdr.ModuleOption{
 			Key:   "cache_authentication.seconds",
-			Value: v.(string),
+			Value: strconv.Itoa(v.(int)),
 		})
 	}
 	if v, ok := d.GetOk("key_validation_prevent_token_key_reuse"); ok {
 		moduleConfig.Options = append(moduleConfig.Options, smilecdr.ModuleOption{
 			Key:   "key_validation.prevent_token_key_reuse",
-			Value: v.(string),
+			Value: strconv.FormatBool(v.(bool)),
 		})
 	}
 	if v, ok := d.GetOk("key_validation_require_key_expiry"); ok {
 		moduleConfig.Options = append(moduleConfig.Options, smilecdr.ModuleOption{
 			Key:   "key_validation.require_key_expiry",
-			Value: v.(string),
+			Value: strconv.FormatBool(v.(bool)),
 		})
 	}
 	if v, ok := d.GetOk("smart_configuration_scopes_supported"); ok {
@@ -269,7 +267,7 @@ func inboundSecurityResourceToModuleConfig(d *schema.ResourceData) (*smilecdr.Mo
 	if v, ok := d.GetOk("introspection_client_jwks_cache_mins"); ok {
 		moduleConfig.Options = append(moduleConfig.Options, smilecdr.ModuleOption{
 			Key:   "introspection_client.jwks_cache.mins",
-			Value: v.(string),
+			Value: strconv.Itoa(v.(int)),
 		})
 	}
 	if v, ok := d.GetOk("introspection_client_truststore_file"); ok {
@@ -293,7 +291,7 @@ func inboundSecurityResourceToModuleConfig(d *schema.ResourceData) (*smilecdr.Mo
 	if v, ok := d.GetOk("tfa_totp_lock_after_failed_attempts"); ok {
 		moduleConfig.Options = append(moduleConfig.Options, smilecdr.ModuleOption{
 			Key:   "tfa.totp.lock_after_failed_attempts",
-			Value: v.(string),
+			Value: strconv.Itoa(v.(int)),
 		})
 	}
 	if v, ok := d.GetOk("seed_servers_file"); ok {
@@ -305,19 +303,32 @@ func inboundSecurityResourceToModuleConfig(d *schema.ResourceData) (*smilecdr.Mo
 	if v, ok := d.GetOk("debug_enabled"); ok {
 		moduleConfig.Options = append(moduleConfig.Options, smilecdr.ModuleOption{
 			Key:   "debug.debug_enabled",
-			Value: v.(string),
+			Value: strconv.FormatBool(v.(bool)),
 		})
 	}
-	if v, ok := d.GetOk("debug_host"); ok {
+	if v, ok := d.GetOk("debug_secure"); ok {
 		moduleConfig.Options = append(moduleConfig.Options, smilecdr.ModuleOption{
-			Key:   "debug.host",
+			Key:   "debug.secure",
+			Value: strconv.FormatBool(v.(bool)),
+		})
+	}
+	if v, ok := d.GetOk("debug_suspend"); ok {
+		moduleConfig.Options = append(moduleConfig.Options, smilecdr.ModuleOption{
+			Key:   "debug.suspend",
+			Value: strconv.FormatBool(v.(bool)),
+		})
+	}
+
+	if v, ok := d.GetOk("debug_host_address"); ok {
+		moduleConfig.Options = append(moduleConfig.Options, smilecdr.ModuleOption{
+			Key:   "debug.host_address",
 			Value: v.(string),
 		})
 	}
 	if v, ok := d.GetOk("debug_port"); ok {
 		moduleConfig.Options = append(moduleConfig.Options, smilecdr.ModuleOption{
 			Key:   "debug.port",
-			Value: v.(string),
+			Value: strconv.Itoa(v.(int)),
 		})
 	}
 	if v, ok := d.GetOk("debug_path"); ok {
@@ -379,140 +390,116 @@ func resourceSmartInboundSecurityRead(ctx context.Context, d *schema.ResourceDat
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	val, err := moduleConfig.LookupOption("enforce_approved_scopes_to_restrict_permissions")
-	if err != nil {
-		return diag.FromErr(err)
-	}
-	d.Set("enforce_approved_scopes_to_restrict_permissions", val)
 
-	val, err = moduleConfig.LookupOption("trust_intra_cluster_tokens.modules")
-	if err != nil {
-		return diag.FromErr(err)
+	val, ok := moduleConfig.LookupOptionOk("enforce_approved_scopes_to_restrict_permissions")
+	if ok {
+		d.Set("enforce_approved_scopes_to_restrict_permissions", val)
 	}
-	d.Set("trust_intra_cluster_tokens_modules", val)
 
-	val, err = moduleConfig.LookupOption("cache_authentication.seconds")
-	if err != nil {
-		return diag.FromErr(err)
+	val, ok = moduleConfig.LookupOptionOk("trust_intra_cluster_tokens.modules")
+	if ok {
+		d.Set("trust_intra_cluster_tokens_modules", val)
 	}
-	d.Set("cache_authentication_seconds", val)
 
-	val, err = moduleConfig.LookupOption(("key_validation.prevent_token_key_reuse"))
-	if err != nil {
-		return diag.FromErr(err)
+	val, ok = moduleConfig.LookupOptionOk("cache_authentication.seconds")
+	if ok {
+		d.Set("cache_authentication_seconds", val)
 	}
-	d.Set("key_validation_prevent_token_key_reuse", val)
 
-	val, err = moduleConfig.LookupOption(("key_validation.require_key_expiry"))
-	if err != nil {
-		return diag.FromErr(err)
+	val, ok = moduleConfig.LookupOptionOk("key_validation.prevent_token_key_reuse")
+	if ok {
+		d.Set("key_validation_prevent_token_key_reuse", val)
 	}
-	d.Set("key_validation_require_key_expiry", val)
 
-	val, err = moduleConfig.LookupOption(("smart_configuration.scopes_supported"))
-	if err != nil {
-		return diag.FromErr(err)
+	val, ok = moduleConfig.LookupOptionOk("key_validation.require_key_expiry")
+	if ok {
+		d.Set("key_validation_require_key_expiry", val)
 	}
-	d.Set("smart_configuration_scopes_supported", val)
 
-	val, err = moduleConfig.LookupOption(("token_endpoint"))
-	if err != nil {
-		return diag.FromErr(err)
+	val, ok = moduleConfig.LookupOptionOk("smart_configuration.scopes_supported")
+	if ok {
+		d.Set("smart_configuration_scopes_supported", val)
 	}
-	d.Set("token_endpoint", val)
 
-	val, err = moduleConfig.LookupOption(("authorization_endpoint"))
-	if err != nil {
-		return diag.FromErr(err)
+	val, ok = moduleConfig.LookupOptionOk("token_endpoint")
+	if ok {
+		d.Set("token_endpoint", val)
 	}
-	d.Set("authorization_endpoint", val)
 
-	val, err = moduleConfig.LookupOption(("management_endpoint"))
-	if err != nil {
-		return diag.FromErr(err)
+	val, ok = moduleConfig.LookupOptionOk("authorization_endpoint")
+	if ok {
+		d.Set("authorization_endpoint", val)
 	}
-	d.Set("management_endpoint", val)
 
-	val, err = moduleConfig.LookupOption(("introspection_endpoint"))
-	if err != nil {
-		return diag.FromErr(err)
+	val, ok = moduleConfig.LookupOptionOk("management_endpoint")
+	if ok {
+		d.Set("management_endpoint", val)
 	}
-	d.Set("introspection_endpoint", val)
 
-	val, err = moduleConfig.LookupOption(("revocation_endpoint"))
-	if err != nil {
-		return diag.FromErr(err)
+	val, ok = moduleConfig.LookupOptionOk("introspection_endpoint")
+	if ok {
+		d.Set("introspection_endpoint", val)
 	}
-	d.Set("revocation_endpoint", val)
 
-	val, err = moduleConfig.LookupOption(("introspection_client.jwks_cache.mins"))
-	if err != nil {
-		return diag.FromErr(err)
+	val, ok = moduleConfig.LookupOptionOk("revocation_endpoint")
+	if ok {
+		d.Set("revocation_endpoint", val)
 	}
-	d.Set("introspection_client_jwks_cache_mins", val)
 
-	val, err = moduleConfig.LookupOption(("introspection_client.truststore.file"))
-	if err != nil {
-		return diag.FromErr(err)
+	val, ok = moduleConfig.LookupOptionOk("introspection_client.jwks_cache.mins")
+	if ok {
+		d.Set("introspection_client_jwks_cache_mins", val)
 	}
-	d.Set("introspection_client_truststore_file", val)
 
-	val, err = moduleConfig.LookupOption(("callback_script.text"))
-	if err != nil {
-		return diag.FromErr(err)
+	val, ok = moduleConfig.LookupOptionOk("introspection_client.truststore.file")
+	if ok {
+		d.Set("introspection_client_truststore_file", val)
 	}
-	d.Set("callback_script_text", val)
 
-	val, err = moduleConfig.LookupOption(("tfa.totp.issuer_name"))
-	if err != nil {
-		return diag.FromErr(err)
+	val, ok = moduleConfig.LookupOptionOk("callback_script.text")
+	if ok {
+		d.Set("callback_script_text", val)
 	}
-	d.Set("tfa_totp_issuer_name", val)
 
-	val, err = moduleConfig.LookupOption(("tfa.totp.lock_after_failed_attempts"))
-	if err != nil {
-		return diag.FromErr(err)
+	val, ok = moduleConfig.LookupOptionOk("tfa.totp.issuer_name")
+	if ok {
+		d.Set("tfa_totp_issuer_name", val)
 	}
-	d.Set("tfa_totp_lock_after_failed_attempts", val)
 
-	val, err = moduleConfig.LookupOption(("seed_servers.files"))
-	if err != nil {
-		return diag.FromErr(err)
+	val, ok = moduleConfig.LookupOptionOk("tfa.totp.lock_after_failed_attempts")
+	if ok {
+		d.Set("tfa_totp_lock_after_failed_attempts", val)
 	}
-	d.Set("seed_servers_file", val)
 
-	val, err = moduleConfig.LookupOption(("debug.debug_enabled"))
-	if err != nil {
-		return diag.FromErr(err)
+	val, ok = moduleConfig.LookupOptionOk("seed_servers.file")
+	if ok {
+		d.Set("seed_servers_file", val)
 	}
-	d.Set("debug_enabled", val)
+	val, ok = moduleConfig.LookupOptionOk("debug.debug_enabled")
+	if ok {
+		d.Set("debug_enabled", val)
+	}
+	val, ok = moduleConfig.LookupOptionOk("debug.secure")
+	if ok {
+		d.Set("debug_secure", val)
+	}
+	val, ok = moduleConfig.LookupOptionOk("debug.suspend")
+	if ok {
+		d.Set("debug_suspend", val)
+	}
 
-	val, err = moduleConfig.LookupOption(("debug.host"))
-	if err != nil {
-		return diag.FromErr(err)
+	val, ok = moduleConfig.LookupOptionOk("debug.host")
+	if ok {
+		d.Set("debug_host", val)
 	}
-	d.Set("debug_host", val)
-
-	val, err = moduleConfig.LookupOption(("debug.port"))
-	if err != nil {
-		return diag.FromErr(err)
+	val, ok = moduleConfig.LookupOptionOk("debug.port")
+	if ok {
+		d.Set("debug_port", val)
 	}
-	d.Set("debug_port", val)
-
-	val, err = moduleConfig.LookupOption(("debug.path"))
-	if err != nil {
-		return diag.FromErr(err)
+	val, ok = moduleConfig.LookupOptionOk("debug.path")
+	if ok {
+		d.Set("debug_path", val)
 	}
-	d.Set("debug_path", val)
-
-	options := make([]interface{}, len(moduleConfig.Options))
-	for i, option := range moduleConfig.Options {
-		options[i] = map[string]interface{}{
-			"key":   option.Key,
-			"value": option.Value,
-		}
-	}
-	d.Set("options", options)
 
 	// Set The Dependencies
 	dependencies := make([]interface{}, len(moduleConfig.Dependencies))
