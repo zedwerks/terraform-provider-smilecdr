@@ -5,16 +5,23 @@ resource "smilecdr_openid_client" "client1" {
   node_id                       = "Master"
   module_id                     = "smart_auth"
   access_token_validity_seconds = 300
-  allowed_grant_types           = ["AUTHORIZATION_CODE", "BLAH"]
+  allowed_grant_types           = ["REFRESH_TOKEN", "CLIENT_CREDENTIALS"]
   auto_approve_scopes = ["openid", "profile",
     "fhirUser",
     "launch",
     "launch/patient",
     "offline_access"
   ]
-  auto_grant_scopes              = ["openid", "offline_access"]
-  client_id                      = "client1"
-  client_name                    = "Client1"
+  auto_grant_scopes = ["openid", "offline_access"]
+  client_id         = "client1"
+  client_name       = "Client1"
+  client_secrets {
+    secret = "secret1"
+    description = "A secret for client1"
+  }
+  client_secrets {
+    secret = "secret2"
+  }
   fixed_scope                    = false
   refresh_token_validity_seconds = 86400
   registered_redirect_uris       = ["http://example-client1.com:6000", "http://example-client1.com:6001"]
@@ -27,7 +34,7 @@ resource "smilecdr_openid_client" "client1" {
     "launch/patient",
     "offline_access"
   ]
-  secret_required           = false
+  secret_required           = true
   secret_client_can_change  = false
   enabled                   = true
   can_introspect_any_tokens = true
@@ -36,9 +43,8 @@ resource "smilecdr_openid_client" "client1" {
   can_reissue_tokens        = false
   remember_approved_scopes  = false
   attestation_accepted      = false
-  public_jwks_uri = "http://example-client1.com/jwks"
+  public_jwks_uri           = "http://example-client1.com/jwks"
 }
-
 
 resource "smilecdr_openid_client" "client2" {
   node_id                       = "Master"

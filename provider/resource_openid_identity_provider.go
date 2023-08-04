@@ -31,8 +31,9 @@ func resourceOpenIdIdentityProvider() *schema.Resource {
 				Default:  "An OpenID Identity Provider",
 			},
 			"issuer": {
-				Type:     schema.TypeString,
-				Required: true,
+				Type:             schema.TypeString,
+				Required:         true,
+				ValidateDiagFunc: validations.ValidateDiagFunc(validation.IsURLWithHTTPorHTTPS),
 			},
 			"token_introspection_client_id": {
 				Type:             schema.TypeString,
@@ -40,8 +41,9 @@ func resourceOpenIdIdentityProvider() *schema.Resource {
 				ValidateDiagFunc: validations.ValidateDiagFunc(validation.StringIsNotWhiteSpace),
 			},
 			"token_introspection_client_secret": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:             schema.TypeString,
+				Optional:         true,
+				ValidateDiagFunc: validations.ValidateDiagFunc(validation.StringLenBetween(9, 512)),
 			},
 			"node_id": {
 				Type:     schema.TypeString,

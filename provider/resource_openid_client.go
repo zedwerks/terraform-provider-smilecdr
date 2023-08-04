@@ -72,14 +72,13 @@ func resourceOpenIdClient() *schema.Resource {
 				Required: true,
 			},
 			"client_secrets": {
-				Type:     schema.TypeSet,
+				Type:     schema.TypeList,
 				Optional: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"secret": {
 							Type:     schema.TypeString,
-							Optional: true,
-							Default:  "",
+							Required: true,
 						},
 						"description": {
 							Type:     schema.TypeString,
@@ -204,17 +203,47 @@ func resourceOpenIdClient() *schema.Resource {
 	}
 }
 
+func flattenClientSecrets(clientSecrets []smilecdr.ClientSecret) []interface{} {
+	secrets := make([]interface{}, len(clientSecrets))
+
+	for i, s := range clientSecrets {
+		secrets[i] = map[string]interface{}{
+			"secret":      s.Secret,
+			"description": s.Description,
+			"activation":  s.Activation,
+			"expiration":  s.Expiration,
+		}
+	}
+
+	return secrets
+}
+
 func resourceDataToOpenIdClient(d *schema.ResourceData) (*smilecdr.OpenIdClient, error) {
 
-	secrets := d.Get("client_secrets").(*schema.Set).List()
+	secrets := d.Get("client_secrets").([]interface{})
 	clientSecrets := make([]smilecdr.ClientSecret, len(secrets))
+	for _, secret := range secrets {
+		s := secret.(map[string]interface{})
+		clientSecrets = append(clientSecrets, smilecdr.ClientSecret{
+			Secret:      s["secret"].(string),
+			Description: s["description"].(string),
+			Activation:  s["activation"].(string),
+			Expiration:  s["expiration"].(string),
+		})
+	}
 
-	perms := d.Get("permissions").(*schema.Set).List()
-	permissions := make([]smilecdr.UserPermission, len(perms))
+	perms := d.Get("permissions").([]interface{})
+	userPermissions := make([]smilecdr.UserPermission, len(perms))
+	for _, perm := range perms {
+		p := perm.(map[string]interface{})
+		userPermissions = append(userPermissions, smilecdr.UserPermission{
+			Permission: p["permission"].(string),
+			Argument:   p["argument"].(string),
+		})
+	}
 
 	allowedGrantTypes := make([]string, 0)
 	allowedGrantTypesData, allowedGrantTypesOk := d.GetOk("allowed_grant_types")
-
 	if allowedGrantTypesOk {
 		for _, grant := range allowedGrantTypesData.(*schema.Set).List() {
 			allowedGrantTypes = append(allowedGrantTypes, grant.(string))
@@ -223,15 +252,14 @@ func resourceDataToOpenIdClient(d *schema.ResourceData) (*smilecdr.OpenIdClient,
 
 	autoApproveScopes := make([]string, 0)
 	autoApproveScopesData, autoApproveScopesOk := d.GetOk("auto_approve_scopes")
-
 	if autoApproveScopesOk {
 		for _, scope := range autoApproveScopesData.(*schema.Set).List() {
 			autoApproveScopes = append(autoApproveScopes, scope.(string))
 		}
 	}
+
 	autoGrantScopes := make([]string, 0)
 	autoGrantScopesData, autoGrantScopesOk := d.GetOk("auto_grant_scopes")
-
 	if autoGrantScopesOk {
 		for _, scope := range autoGrantScopesData.(*schema.Set).List() {
 			autoGrantScopes = append(autoGrantScopes, scope.(string))
@@ -240,7 +268,6 @@ func resourceDataToOpenIdClient(d *schema.ResourceData) (*smilecdr.OpenIdClient,
 
 	registeredRedirectUris := make([]string, 0)
 	registeredRedirectUrisData, registeredRedirectUrisOk := d.GetOk("registered_redirect_uris")
-
 	if registeredRedirectUrisOk {
 		for _, uri := range registeredRedirectUrisData.(*schema.Set).List() {
 			registeredRedirectUris = append(registeredRedirectUris, uri.(string))
@@ -249,7 +276,6 @@ func resourceDataToOpenIdClient(d *schema.ResourceData) (*smilecdr.OpenIdClient,
 
 	scopes := make([]string, 0)
 	scopesData, scopesOk := d.GetOk("scopes")
-
 	if scopesOk {
 		for _, scope := range scopesData.(*schema.Set).List() {
 			scopes = append(scopes, scope.(string))
@@ -278,7 +304,7 @@ func resourceDataToOpenIdClient(d *schema.ResourceData) (*smilecdr.OpenIdClient,
 		CanIntrospectOwnTokens:      d.Get("can_introspect_own_tokens").(bool),
 		AlwaysRequireApproval:       d.Get("always_require_approval").(bool),
 		CanReissueTokens:            d.Get("can_reissue_tokens").(bool),
-		Permissions:                 permissions,
+		Permissions:                 userPermissions,
 		AttestationAccepted:         d.Get("attestation_accepted").(bool),
 		PublicJwksUri:               d.Get("public_jwks_uri").(string),
 		ArchivedAt:                  d.Get("archived_at").(string),
@@ -325,6 +351,7 @@ func resourceOpenIdClientRead(ctx context.Context, d *schema.ResourceData, m int
 	if err != nil {
 		return diag.FromErr(err)
 	}
+
 	d.SetId(openIdClient.ClientId)
 
 	d.Set("pid", openIdClient.Pid)
@@ -335,7 +362,7 @@ func resourceOpenIdClientRead(ctx context.Context, d *schema.ResourceData, m int
 	d.Set("allowed_grant_types", openIdClient.AllowedGrantTypes)
 	d.Set("auto_approve_scopes", openIdClient.AutoApproveScopes)
 	d.Set("auto_grant_scopes", openIdClient.AutoGrantScopes)
-	d.Set("client_secrets", openIdClient.ClientSecrets)
+	d.Set("client_secrets", flattenClientSecrets(openIdClient.ClientSecrets))
 	d.Set("fixed_scope", openIdClient.FixedScope)
 	d.Set("refresh_token_validity_seconds", openIdClient.RefreshTokenValiditySeconds)
 	d.Set("registered_redirect_uris", openIdClient.RegisteredRedirectUris)
