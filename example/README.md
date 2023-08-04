@@ -2,7 +2,7 @@
 
 This deploys a single openid client.
 
-## Before you run.
+## Before you run
 
 Since this provider is not yet registered with hashicorp, you need to override the provider isntallation
 to allow it to find the compiled provider.
@@ -44,4 +44,3 @@ terraform apply
 
 Now goof around with the configuration files: add another client, modify a client, remove a line and
 re-run the plan and apply and you'll see the state mimic the changes.
-
