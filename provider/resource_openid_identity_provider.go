@@ -35,8 +35,9 @@ func resourceOpenIdIdentityProvider() *schema.Resource {
 				Required: true,
 			},
 			"token_introspection_client_id": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:             schema.TypeString,
+				Optional:         true,
+				ValidateDiagFunc: validations.ValidateDiagFunc(validation.StringIsNotWhiteSpace),
 			},
 			"token_introspection_client_secret": {
 				Type:     schema.TypeString,

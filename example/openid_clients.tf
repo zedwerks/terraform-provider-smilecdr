@@ -5,7 +5,7 @@ resource "smilecdr_openid_client" "client1" {
   node_id                       = "Master"
   module_id                     = "smart_auth"
   access_token_validity_seconds = 300
-  allowed_grant_types           = ["AUTHORIZATION_CODE", "REFRESH_TOKEN"]
+  allowed_grant_types           = ["AUTHORIZATION_CODE", "BLAH"]
   auto_approve_scopes = ["openid", "profile",
     "fhirUser",
     "launch",
@@ -30,7 +30,7 @@ resource "smilecdr_openid_client" "client1" {
   secret_required           = false
   secret_client_can_change  = false
   enabled                   = true
-  can_introspect_any_tokens = false
+  can_introspect_any_tokens = true
   can_introspect_own_tokens = false
   always_require_approval   = false
   can_reissue_tokens        = false
