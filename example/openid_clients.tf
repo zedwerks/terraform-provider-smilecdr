@@ -1,6 +1,7 @@
 # Copyright (c) Zed Werks Inc.
 # SPDX-License-Identifier: Apache-2.0
 
+
 resource "smilecdr_openid_client" "client1" {
   node_id                       = "Master"
   module_id                     = "smart_auth"
@@ -16,11 +17,11 @@ resource "smilecdr_openid_client" "client1" {
   client_id         = "client1"
   client_name       = "Client1"
   client_secrets {
-    secret = "secret1"
-    description = "A secret for client1"
+    secret     = "secret1234569900"
+    activation = "2023-08-05T00:09:53.702+00:00"
   }
   client_secrets {
-    secret = "secret2"
+    secret = "secret23456789"
   }
   fixed_scope                    = false
   refresh_token_validity_seconds = 86400

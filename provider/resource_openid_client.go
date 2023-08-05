@@ -5,6 +5,7 @@ package provider
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -77,22 +78,23 @@ func resourceOpenIdClient() *schema.Resource {
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"secret": {
-							Type:     schema.TypeString,
-							Required: true,
+							Type:             schema.TypeString,
+							Required:         true,
+							ValidateDiagFunc: validations.ValidateDiagFunc(validation.StringLenBetween(10, 256)),
 						},
 						"description": {
 							Type:     schema.TypeString,
-							Optional: true,
-							Default:  "",
+							Computed: true,
 						},
 						"activation": {
-							Type:         schema.TypeString,
-							Optional:     true,
-							ValidateFunc: validation.IsRFC3339Time,
+							Type:             schema.TypeString,
+							Optional:         true,
+							ValidateDiagFunc: validations.ValidateDiagFunc(validation.IsRFC3339Time),
 						},
 						"expiration": {
-							Type:     schema.TypeString,
-							Optional: true,
+							Type:             schema.TypeString,
+							Optional:         true,
+							ValidateDiagFunc: validations.ValidateDiagFunc(validation.IsRFC3339Time),
 						},
 					},
 				},
@@ -221,19 +223,23 @@ func flattenClientSecrets(clientSecrets []smilecdr.ClientSecret) []interface{} {
 func resourceDataToOpenIdClient(d *schema.ResourceData) (*smilecdr.OpenIdClient, error) {
 
 	secrets := d.Get("client_secrets").([]interface{})
-	clientSecrets := make([]smilecdr.ClientSecret, len(secrets))
+
+	clientSecrets := []smilecdr.ClientSecret{}
 	for _, secret := range secrets {
 		s := secret.(map[string]interface{})
-		clientSecrets = append(clientSecrets, smilecdr.ClientSecret{
-			Secret:      s["secret"].(string),
-			Description: s["description"].(string),
-			Activation:  s["activation"].(string),
-			Expiration:  s["expiration"].(string),
-		})
+		if s["secret"] != nil || s["secret"].(string) != "" {
+			secret := smilecdr.ClientSecret{
+				Secret:      s["secret"].(string),
+				Description: s["description"].(string),
+				Activation:  s["activation"].(string),
+				Expiration:  s["expiration"].(string),
+			}
+			clientSecrets = append(clientSecrets, secret)
+		}
 	}
 
-	perms := d.Get("permissions").([]interface{})
-	userPermissions := make([]smilecdr.UserPermission, len(perms))
+	perms := d.Get("permissions").(*schema.Set).List()
+	userPermissions := []smilecdr.UserPermission{}
 	for _, perm := range perms {
 		p := perm.(map[string]interface{})
 		userPermissions = append(userPermissions, smilecdr.UserPermission{
@@ -393,6 +399,14 @@ func resourceOpenIdClientUpdate(ctx context.Context, d *schema.ResourceData, m i
 	}
 
 	d.SetId(client.ClientId)
+
+	if d.HasChange("client_secrets") {
+		_, newValue := d.GetChange("client_secrets")
+		if newValue.(*schema.Set).Len() == 0 {
+			fmt.Println("Removing client secret")
+			client.ClientSecrets = []smilecdr.ClientSecret{}
+		}
+	}
 
 	_, err := c.PutOpenIdClient(*client)
 

@@ -103,6 +103,9 @@ func (c *Client) Put(endpoint string, body []byte) ([]byte, error) {
 	req.Header.Add("Content-Type", "application/json")
 	req.Header.Add("Accept", "application/json")
 
+	fmt.Println("PUT Request URI: ", uri)
+	fmt.Println("PUT Request Body: ", string(body))
+
 	resp, err := c.httpClient.Do(req)
 	if err != nil {
 		return nil, err
