@@ -11,10 +11,10 @@ resource "smilecdr_openid_identity_provider" "example_idp1" {
   federation_token_url                = "http://localhost:8800/token"
   federation_user_info_url            = "http://localhost:8800/userinfo"
   federation_jwk_set_url              = "http://localhost:8800/auth/jwks"
-  federation_auth_script_text         = local.authScriptFile1
-  federation_user_mapping_script_text = local.userMappingScriptFile
+  federation_auth_script_text         = local.auth_script_1
+  federation_user_mapping_script_text = local.user_mapping_script_1
   token_introspection_client_id       = "smile"
-  token_introspection_client_secret   = "client_secret"
+  token_introspection_client_secret   = "client_secret_goes_here"
   validation_jwk_text                 = ""
   validation_jwk_file                 = ""
 }
@@ -29,28 +29,10 @@ resource "smilecdr_openid_identity_provider" "example_idp2" {
   federation_token_url                = "https://example2.com/auth/token"
   federation_user_info_url            = "https://example2.com/auth/userinfo"
   federation_jwk_set_url              = "https://example2.com/auth/jwks"
-  federation_auth_script_text         = local.authScriptFile2
-  federation_user_mapping_script_text = local.userMappingScriptFile
+  federation_auth_script_text         = local.auth_script_2
+  federation_user_mapping_script_text = local.user_mapping_script_2
   token_introspection_client_id       = "smile"
-  token_introspection_client_secret   = "client_secret"
-  validation_jwk_text                 = ""
-  validation_jwk_file                 = ""
-}
-
-resource "smilecdr_openid_identity_provider" "example_idp3" {
-  node_id                             = "Master"
-  module_id                           = "smart_auth"
-  issuer                              = "http://example3.com/auth/issuer"
-  name                                = "example_idp3"
-  federation_authorization_url        = "http://example2.com/auth/authorize"
-  federation_request_scopes           = "openid profile fhirUser"
-  federation_token_url                = "https://example2.com/auth/token"
-  federation_user_info_url            = "https://example2.com/auth/userinfo"
-  federation_jwk_set_url              = "https://example2.com/auth/jwks"
-  federation_auth_script_text         = local.authScriptFile2
-  federation_user_mapping_script_text = local.userMappingScriptFile
-  token_introspection_client_id       = "smile"
-  token_introspection_client_secret   = "client_secret"
+  token_introspection_client_secret   = "client_secret_goes_here"
   validation_jwk_text                 = ""
   validation_jwk_file                 = ""
 }

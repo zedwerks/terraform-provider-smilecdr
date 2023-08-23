@@ -24,29 +24,31 @@ type OpenIdClient struct {
 	Pid                         int              `json:"pid,omitempty"`
 	NodeId                      string           `json:"nodeId,omitempty"`
 	ModuleId                    string           `json:"moduleId,omitempty"`
-	AccessTokenValiditySeconds  int              `json:"accessTokenValiditySeconds,omitempty"`
-	AllowedGrantTypes           []string         `json:"allowedGrantTypes,omitempty"`
-	AutoApproveScopes           []string         `json:"autoApproveScopes,omitempty"`
-	AutoGrantScopes             []string         `json:"autoGrantScopes,omitempty"`
 	ClientId                    string           `json:"clientId,omitempty"`
 	ClientName                  string           `json:"clientName,omitempty"`
-	ClientSecrets               []ClientSecret   `json:"clientSecrets,omitempty"`
-	FixedScope                  bool             `json:"fixedScope,omitempty"`
-	RefreshTokenValiditySeconds int              `json:"refreshTokenValiditySeconds,omitempty"`
-	RegisteredRedirectUris      []string         `json:"registeredRedirectUris,omitempty"`
-	Scopes                      []string         `json:"scopes,omitempty"`
-	SecretRequired              bool             `json:"secretRequired,omitempty"`
-	SecretClientCanChange       bool             `json:"secretClientCanChange,omitempty"`
 	Enabled                     bool             `json:"enabled,omitempty"`
+	AccessTokenValiditySeconds  int              `json:"accessTokenValiditySeconds,omitempty"`
+	AllowedGrantTypes           []string         `json:"allowedGrantTypes,omitempty"`
+	AlwaysRequireApproval       bool             `json:"alwaysRequireApproval,omitempty"`
+	AttestationAccepted         bool             `json:"attestationAccepted,omitempty"`
+	AutoApproveScopes           []string         `json:"autoApproveScopes,omitempty"`
+	AutoGrantScopes             []string         `json:"autoGrantScopes,omitempty"`
 	CanIntrospectAnyTokens      bool             `json:"canIntrospectAnyTokens,omitempty"`
 	CanIntrospectOwnTokens      bool             `json:"canIntrospectOwnTokens,omitempty"`
-	AlwaysRequireApproval       bool             `json:"alwaysRequireApproval,omitempty"`
 	CanReissueTokens            bool             `json:"canReissueTokens,omitempty"`
-	Permissions                 []UserPermission `json:"permissions,omitempty"`
-	AttestationAccepted         bool             `json:"rememberedScopes,omitempty"`
-	PublicJwksUri               string           `json:"publicJwksUri,omitempty"`
-	ArchivedAt                  string           `json:"archivedAt,omitempty"`
+	ClientSecrets               []ClientSecret   `json:"clientSecrets,omitempty"`
 	CreatedByAppSphere          bool             `json:"createdByAppSphere,omitempty"`
+	FixedScope                  bool             `json:"fixedScope,omitempty"`
+	JwksUrl                     string           `json:"jwksUrl,omitempty"`
+	Permissions                 []UserPermission `json:"permissions,omitempty"`
+	PublicJwks                  string           `json:"publicJwks,omitempty"`
+	RefreshTokenValiditySeconds int              `json:"refreshTokenValiditySeconds,omitempty"`
+	RegisteredRedirectUris      []string         `json:"registeredRedirectUris,omitempty"`
+	RememberApprovedScopes      bool             `json:"rememberApprovedScopes,omitempty"`
+	Scopes                      []string         `json:"scopes,omitempty"`
+	SecretClientCanChange       bool             `json:"secretClientCanChange,omitempty"`
+	SecretRequired              bool             `json:"secretRequired,omitempty"`
+	ArchivedAt                  string           `json:"archivedAt,omitempty"`
 }
 
 func (smilecdr *Client) GetOpenIdClients() ([]OpenIdClient, error) {

@@ -1,0 +1,133 @@
+// post_authorize_script.js
+// See SMART Callback Scripts for details at: 
+// https://smilecdr.com/docs/smart/smart_on_fhir_outbound_security_module.html#smart-callback-script
+// 
+// This script is invoked after the user has successfully authenticated with the OAuth2/OIDC server.
+// Applies to: SMART on FHIR Outbound Security Module
+// 
+
+/**
+ * This function is called immediately after the user has successfully authenticated in order to
+ * determine whether a session context needs to be selected by the user, and if so,
+ * to provide the list of available options to the user.
+ * @param theUserSession The authenticated user session (can be modified by the script)
+ * @param theContextSelectionChoices The list of available context selection choices (can be modified by the script)
+ */
+onSmartLoginPreContextSelection(theUserSession, theContextSelectionChoices) 
+{
+    Log.info(" * ContextSelectionChoices.haveChoices():" + theContextSelectionChoices.haveChoices());
+}
+
+/**
+ * This function is called just prior to the creation and issuing of a new
+ * access token.
+ * 
+ * @param theUserSession The authenticated user session (can be modified by the script)
+ * @param theAuthorizationRequestDetails Contains details about the authorization request
+ * 
+ * For specifications of the argument 'theUserSession', see the documentation for the UserSessionDetails object:
+ * https://smilecdr.com/docs/javascript_execution_environment/callback_models.html#usersessiondetails
+ * 
+ * For specifications of the argument 'theAuthorizationRequestDetails', see the documentation:
+ * https://smilecdr.com/docs/javascript_execution_environment/callback_models.html#oauth2authorizationrequestdetails
+ */
+function onTokenGenerating(theUserSession, theAuthorizationRequestDetails) 
+{ 
+    Log.info(" * UserSession.username: " + theUserSession.username);
+    Log.info(" * UserSession.external: " + theUserSession.external);
+    
+    var fhirContext = theUserSession.getFhirContext();
+
+    Log.info(" * UserSession FHIR Context: " + fhirContext.reference + " with role: " + fhirContext.role);
+    var launchResourceIds = theUserSession.getLaunchResourceIds();
+
+    for (const res in launchResourceIds) {
+        Log.info(" * UserSession Launch resourceId: " + res.resourceId + " with type: " + res.resourceType);
+    }
+
+    Log.info(" * Client ID: " + theAuthorizationRequestDetails.clientId);
+    Log.info(" * Member ID: " + theAuthorizationRequestDetails.memberId);
+
+    var launchParam = theAuthorizationRequestDetails.launch;
+
+    Log.info(" * Launch parameter: " + launchParam);
+
+    // Now, if the launch parameter is present, we now need to resolve that opaque launch parameter
+    // to a patient resource. This is done by calling the resolveLaunchParameter() function.
+    if (launchParam !== null) {
+        // sort out the patient resource id from the launch parameter
+        var resource = resolveLaunchParameter(launchParam);
+        theUserSession.addLaunchResourceId(resource.type, resource.value);
+    }
+}  
+
+/**
+ *  Called after the token has been issued, but before it it returned to the client.
+ * For specifications of the argument 'theDetails', see the documentation:
+ * https://smilecdr.com/docs/javascript_execution_environment/callback_models.html#smartonpostauthorizedetails
+ *  
+ * @param {*} theDetails 
+ */
+function onPostAuthorize(theDetails) 
+{
+    // Called after the token has been issued, but before it it returned to the client.
+    // For specifications of the argument 'theDetails', see the documentation for the
+    // https://smilecdr.com/docs/javascript_execution_environment/callback_models.html#smartonpostauthorizedetails
+    
+    Log.info(" * Access token: " + theDetails.accessToken);
+    Log.info(" * Authorized scopes: " + theDetails.grantedScopes);
+    Log.info(" * Requesting practitioner: " + theDetails.requestingPractitioner.identifier.value);
+}
+
+/**
+ * This is a custom helper function that resolves the context identifier, calling the external Context API
+ * and returning the patient identifier.
+ * 
+ * @param launchId The launch context parameter from the authorization request
+ * @returns The patient resource identifier
+ */
+const contextApi = "http://localhost:8088/context/";
+
+function resolveLaunchParameter(launchId)
+{
+    var token = authenticate();
+    var get = Http.get(contextApi + launchId);
+    get.addRequestHeader('Authorization', 'Bearer ' + token);
+    get.execute();
+    if (!get.isSuccess()) {
+        throw get.getFailureMessage();
+    }
+    var responseJson = get.getResponseAsJson();
+    Log.info(" * Response JSON: " + responseJson);
+    var resource = parameter[0].resource;
+    Log.info(" * Resource: " + resource);
+    return resource;
+}
+
+
+const clientId = "smile-cdr";
+const clientSecret = "kG3XHKcW80E4in3ftxaZnkXFTU89VBiu";
+const tokenEndpoint = "http://localhost:8080/auth/realms/poc/protocol/openid-connect/token";
+const basicCredentials = Base64.encode(clientId + ":" + clientSecret);
+const scope = "launch context openid";
+/**
+ * Client Credentials Grant authentication, returning a token for the smile cdr as client.
+ */
+function authenticate()
+{
+    var post = Http.post(tokenEndpoint);
+    post.addRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+    post.addRequestHeader('Authorization', 'Basic ' + basicCredentials);
+    post.setRequestBody("grant_type=client_credentials\n&scope=" + scope + "\n");
+
+    post.execute();
+    if (!post.isSuccess()) {
+        throw post.getFailureMessage();
+    }
+    var responseJson = post.getResponseAsJson();
+    Log.info(" * Client Credentials Grant authentication");
+    Log.info(" * Response JSON: " + responseJson);
+    var token = responseJson.access_token;
+    Log.info(" * Token: " + token);
+    return token;
+}

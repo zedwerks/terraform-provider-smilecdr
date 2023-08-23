@@ -21,7 +21,7 @@ resource "smilecdr_openid_client" "client1" {
     activation = "2023-08-05T00:09:53.702+00:00"
   }
   client_secrets {
-    secret = "secret23456789"
+    secret = "secret23456789aabb"
   }
   fixed_scope                    = false
   refresh_token_validity_seconds = 86400
@@ -44,7 +44,14 @@ resource "smilecdr_openid_client" "client1" {
   can_reissue_tokens        = false
   remember_approved_scopes  = false
   attestation_accepted      = false
-  public_jwks_uri           = "http://example-client1.com/jwks"
+  jwks_url                  = "http://example-client1.com/jwks"
+  permissions {
+    permission = "FHIR_WRITE_ALL_IN_COMPARTMENT"
+    argument   = "Patient/123"
+  }
+  permissions {
+    permission = "ROLE_FHIR_CLIENT"
+  }
 }
 
 resource "smilecdr_openid_client" "client2" {
@@ -98,4 +105,5 @@ resource "smilecdr_openid_client" "client2" {
   can_reissue_tokens        = false
   remember_approved_scopes  = false
   attestation_accepted      = false
+  public_jwks               = local.example_jwks
 }

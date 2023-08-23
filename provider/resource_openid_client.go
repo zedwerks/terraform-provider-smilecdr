@@ -36,6 +36,20 @@ func resourceOpenIdClient() *schema.Resource {
 				Optional: true,
 				Default:  "smart_auth",
 			},
+			"client_id": {
+				Type:             schema.TypeString,
+				Required:         true,
+				ValidateDiagFunc: validations.IsValidClientID,
+			},
+			"client_name": {
+				Type:     schema.TypeString,
+				Required: true,
+			},
+			"enabled": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default:  true,
+			},
 			"access_token_validity_seconds": {
 				Type:     schema.TypeInt,
 				Optional: true,
@@ -48,6 +62,16 @@ func resourceOpenIdClient() *schema.Resource {
 					Type:             schema.TypeString,
 					ValidateDiagFunc: validations.ValidateDiagFunc(validation.StringInSlice([]string{"AUTHORIZATION_CODE", "IMPLICIT", "REFRESH_TOKEN", "CLIENT_CREDENTIALS", "PASSWORD", "JWT_BEARER"}, false)),
 				},
+			},
+			"always_require_approval": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default:  false,
+			},
+			"attestation_accepted": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default:  false,
 			},
 			"auto_approve_scopes": {
 				Type:     schema.TypeSet,
@@ -63,14 +87,19 @@ func resourceOpenIdClient() *schema.Resource {
 					Type: schema.TypeString,
 				},
 			},
-			"client_id": {
-				Type:             schema.TypeString,
-				Required:         true,
-				ValidateDiagFunc: validations.IsValidClientID,
+			"can_introspect_any_tokens": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default:  false,
 			},
-			"client_name": {
-				Type:     schema.TypeString,
-				Required: true,
+			"can_introspect_own_tokens": {
+				Type:     schema.TypeBool,
+				Optional: true,
+			},
+			"can_reissue_tokens": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default:  false,
 			},
 			"client_secrets": {
 				Type:     schema.TypeList,
@@ -99,62 +128,19 @@ func resourceOpenIdClient() *schema.Resource {
 					},
 				},
 			},
+			"created_by_app_sphere": {
+				Type:     schema.TypeBool,
+				Computed: true,
+			},
 			"fixed_scope": {
 				Type:     schema.TypeBool,
 				Optional: true,
 				Default:  false,
 			},
-			"refresh_token_validity_seconds": {
-				Type:     schema.TypeInt,
-				Optional: true,
-				Default:  86400,
-			},
-			"registered_redirect_uris": {
-				Type:     schema.TypeSet,
-				Optional: true,
-				Elem: &schema.Schema{
-					Type:             schema.TypeString,
-					ValidateDiagFunc: validations.ValidateDiagFunc(validation.IsURLWithHTTPorHTTPS),
-				},
-			},
-			"scopes": {
-				Type:     schema.TypeSet,
-				Optional: true,
-				Elem:     &schema.Schema{Type: schema.TypeString},
-			},
-			"secret_required": {
-				Type:     schema.TypeBool,
-				Optional: true,
-				Default:  false,
-			},
-			"secret_client_can_change": {
-				Type:     schema.TypeBool,
-				Optional: true,
-				Default:  false,
-			},
-			"enabled": {
-				Type:     schema.TypeBool,
-				Optional: true,
-				Default:  true,
-			},
-			"can_introspect_any_tokens": {
-				Type:     schema.TypeBool,
-				Optional: true,
-				Default:  false,
-			},
-			"can_introspect_own_tokens": {
-				Type:     schema.TypeBool,
-				Optional: true,
-			},
-			"always_require_approval": {
-				Type:     schema.TypeBool,
-				Optional: true,
-				Default:  false,
-			},
-			"can_reissue_tokens": {
-				Type:     schema.TypeBool,
-				Optional: true,
-				Default:  false,
+			"jwks_url": {
+				Type:             schema.TypeString,
+				Optional:         true,
+				ValidateDiagFunc: validations.ValidateDiagFunc(validation.IsURLWithHTTPorHTTPS),
 			},
 			"permissions": {
 				Type:     schema.TypeSet,
@@ -174,29 +160,48 @@ func resourceOpenIdClient() *schema.Resource {
 					},
 				},
 			},
+			"public_jwks": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+			"refresh_token_validity_seconds": {
+				Type:     schema.TypeInt,
+				Optional: true,
+				Default:  86400,
+			},
+			"registered_redirect_uris": {
+				Type:     schema.TypeSet,
+				Optional: true,
+				Elem: &schema.Schema{
+					Type:             schema.TypeString,
+					ValidateDiagFunc: validations.ValidateDiagFunc(validation.IsURLWithHTTPorHTTPS),
+				},
+			},
 			"remember_approved_scopes": {
 				Type:     schema.TypeBool,
 				Optional: true,
 				Default:  false,
 			},
-			"attestation_accepted": {
+			"scopes": {
+				Type:     schema.TypeSet,
+				Optional: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+			},
+			"secret_client_can_change": {
 				Type:     schema.TypeBool,
 				Optional: true,
 				Default:  false,
 			},
-			"public_jwks_uri": {
-				Type:             schema.TypeString,
-				Optional:         true,
-				ValidateDiagFunc: validations.ValidateDiagFunc(validation.IsURLWithHTTPorHTTPS),
+			"secret_required": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default:  false,
 			},
 			"archived_at": {
 				Type:             schema.TypeString,
 				Optional:         true,
+				Default:          "",
 				ValidateDiagFunc: validations.ValidateDiagFunc(validation.IsRFC3339Time),
-			},
-			"created_by_app_sphere": {
-				Type:     schema.TypeBool,
-				Optional: true,
 			},
 		},
 		Importer: &schema.ResourceImporter{
@@ -290,31 +295,33 @@ func resourceDataToOpenIdClient(d *schema.ResourceData) (*smilecdr.OpenIdClient,
 
 	openidClient := &smilecdr.OpenIdClient{
 		Pid:                         d.Get("pid").(int),
-		ClientId:                    d.Get("client_id").(string),
-		ClientName:                  d.Get("client_name").(string),
 		NodeId:                      d.Get("node_id").(string),
 		ModuleId:                    d.Get("module_id").(string),
+		ClientId:                    d.Get("client_id").(string),
+		ClientName:                  d.Get("client_name").(string),
+		Enabled:                     d.Get("enabled").(bool),
 		AccessTokenValiditySeconds:  d.Get("access_token_validity_seconds").(int),
 		AllowedGrantTypes:           allowedGrantTypes,
+		AlwaysRequireApproval:       d.Get("always_require_approval").(bool),
+		AttestationAccepted:         d.Get("attestation_accepted").(bool),
 		AutoApproveScopes:           autoApproveScopes,
 		AutoGrantScopes:             autoGrantScopes,
-		ClientSecrets:               clientSecrets,
-		FixedScope:                  d.Get("fixed_scope").(bool),
-		RefreshTokenValiditySeconds: d.Get("refresh_token_validity_seconds").(int),
-		RegisteredRedirectUris:      registeredRedirectUris,
-		Scopes:                      scopes,
-		SecretRequired:              d.Get("secret_required").(bool),
-		SecretClientCanChange:       d.Get("secret_client_can_change").(bool),
-		Enabled:                     d.Get("enabled").(bool),
 		CanIntrospectAnyTokens:      d.Get("can_introspect_any_tokens").(bool),
 		CanIntrospectOwnTokens:      d.Get("can_introspect_own_tokens").(bool),
-		AlwaysRequireApproval:       d.Get("always_require_approval").(bool),
 		CanReissueTokens:            d.Get("can_reissue_tokens").(bool),
-		Permissions:                 userPermissions,
-		AttestationAccepted:         d.Get("attestation_accepted").(bool),
-		PublicJwksUri:               d.Get("public_jwks_uri").(string),
-		ArchivedAt:                  d.Get("archived_at").(string),
+		ClientSecrets:               clientSecrets,
 		CreatedByAppSphere:          d.Get("created_by_app_sphere").(bool),
+		FixedScope:                  d.Get("fixed_scope").(bool),
+		JwksUrl:                     d.Get("jwks_url").(string),
+		Permissions:                 userPermissions,
+		PublicJwks:                  d.Get("public_jwks").(string),
+		RefreshTokenValiditySeconds: d.Get("refresh_token_validity_seconds").(int),
+		RegisteredRedirectUris:      registeredRedirectUris,
+		RememberApprovedScopes:      d.Get("remember_approved_scopes").(bool),
+		Scopes:                      scopes,
+		SecretClientCanChange:       d.Get("secret_client_can_change").(bool),
+		SecretRequired:              d.Get("secret_required").(bool),
+		ArchivedAt:                  d.Get("archived_at").(string),
 	}
 
 	return openidClient, nil
@@ -324,6 +331,8 @@ func resourceDataToOpenIdClient(d *schema.ResourceData) (*smilecdr.OpenIdClient,
 func resourceOpenIdClientCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 
 	c := m.(*smilecdr.Client)
+
+	d.Set("created_by_app_sphere", false) // If we create a client, it is not created by AppSphere
 
 	client, mErr := resourceDataToOpenIdClient(d)
 	if mErr != nil {
@@ -361,30 +370,33 @@ func resourceOpenIdClientRead(ctx context.Context, d *schema.ResourceData, m int
 	d.SetId(openIdClient.ClientId)
 
 	d.Set("pid", openIdClient.Pid)
-	d.Set("client_name", openIdClient.ClientName)
 	d.Set("node_id", openIdClient.NodeId)
 	d.Set("module_id", openIdClient.ModuleId)
+	d.Set("client_id", openIdClient.ClientId)
+	d.Set("client_name", openIdClient.ClientName)
+	d.Set("enabled", openIdClient.Enabled)
 	d.Set("access_token_validity_seconds", openIdClient.AccessTokenValiditySeconds)
 	d.Set("allowed_grant_types", openIdClient.AllowedGrantTypes)
+	d.Set("always_require_approval", openIdClient.AlwaysRequireApproval)
+	d.Set("attestation_accepted", openIdClient.AttestationAccepted)
 	d.Set("auto_approve_scopes", openIdClient.AutoApproveScopes)
 	d.Set("auto_grant_scopes", openIdClient.AutoGrantScopes)
-	d.Set("client_secrets", flattenClientSecrets(openIdClient.ClientSecrets))
-	d.Set("fixed_scope", openIdClient.FixedScope)
-	d.Set("refresh_token_validity_seconds", openIdClient.RefreshTokenValiditySeconds)
-	d.Set("registered_redirect_uris", openIdClient.RegisteredRedirectUris)
-	d.Set("scopes", openIdClient.Scopes)
-	d.Set("secret_required", openIdClient.SecretRequired)
-	d.Set("secret_client_can_change", openIdClient.SecretClientCanChange)
-	d.Set("enabled", openIdClient.Enabled)
 	d.Set("can_introspect_any_tokens", openIdClient.CanIntrospectAnyTokens)
 	d.Set("can_introspect_own_tokens", openIdClient.CanIntrospectOwnTokens)
-	d.Set("always_require_approval", openIdClient.AlwaysRequireApproval)
 	d.Set("can_reissue_tokens", openIdClient.CanReissueTokens)
-	d.Set("permissions", openIdClient.Permissions)
-	d.Set("attestation_accepted", openIdClient.AttestationAccepted)
-	d.Set("public_jwks_uri", openIdClient.PublicJwksUri)
-	d.Set("archived_at", openIdClient.ArchivedAt)
+	d.Set("client_secrets", flattenClientSecrets(openIdClient.ClientSecrets))
 	d.Set("created_by_app_sphere", openIdClient.CreatedByAppSphere)
+	d.Set("fixed_scope", openIdClient.FixedScope)
+	d.Set("jwks_url", openIdClient.JwksUrl)
+	d.Set("permissions", openIdClient.Permissions)
+	d.Set("public_jwks", openIdClient.PublicJwks)
+	d.Set("refresh_token_validity_seconds", openIdClient.RefreshTokenValiditySeconds)
+	d.Set("registered_redirect_uris", openIdClient.RegisteredRedirectUris)
+	d.Set("remember_approved_scopes", openIdClient.RememberApprovedScopes)
+	d.Set("scopes", openIdClient.Scopes)
+	d.Set("secret_client_can_change", openIdClient.SecretClientCanChange)
+	d.Set("secret_required", openIdClient.SecretRequired)
+	d.Set("archived_at", openIdClient.ArchivedAt)
 	return diags
 
 }
