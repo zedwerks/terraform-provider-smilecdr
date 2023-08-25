@@ -24,9 +24,9 @@ function onTokenGenerating(theUserSession, theAuthorizationRequestDetails)
     Log.info(" * UserSession.username: " + theUserSession.username);
     Log.info(" * UserSession.external: " + theUserSession.external);
     
-    var fhirContext = theUserSession.getFhirContext();
+    var fhirUser = theUserSession.fhirUserUrl;
 
-    Log.info(" * UserSession FHIR Context: " + fhirContext.reference + " with role: " + fhirContext.role);
+    Log.info(" * UserSession FHIR User: " + fhirUser);
     var launchResourceIds = theUserSession.getLaunchResourceIds();
 
     for (const res in launchResourceIds) {
@@ -110,12 +110,9 @@ function resolveLaunchParameter(launchId)
  */
 function authenticate()
 {
-    const basicCredentials = Base64.encode(clientId + ":" + clientSecret);
-
     var post = Http.post(tokenEndpoint);
     post.addRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-    post.addRequestHeader('Authorization', 'Basic ' + basicCredentials);
-    post.setRequestBody("grant_type=client_credentials\n&scope=" + scope + "\n");
+    post.setRequestBody("client_id=" + clientId + "\n&client_secret=" + clientSecret + "\n&grant_type=client_credentials\n&scope=" + scope + "\n");
 
     post.execute();
     if (!post.isSuccess()) {
