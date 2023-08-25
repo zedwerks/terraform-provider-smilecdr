@@ -7,18 +7,6 @@
 // 
 
 /**
- * This function is called immediately after the user has successfully authenticated in order to
- * determine whether a session context needs to be selected by the user, and if so,
- * to provide the list of available options to the user.
- * @param theUserSession The authenticated user session (can be modified by the script)
- * @param theContextSelectionChoices The list of available context selection choices (can be modified by the script)
- */
-onSmartLoginPreContextSelection(theUserSession, theContextSelectionChoices) 
-{
-    Log.info(" * ContextSelectionChoices.haveChoices():" + theContextSelectionChoices.haveChoices());
-}
-
-/**
  * This function is called just prior to the creation and issuing of a new
  * access token.
  * 
