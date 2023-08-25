@@ -42,5 +42,5 @@ terraform plan
 terraform apply
 ```
 
-Now goof around with the configuration files: add another client, modify a client, remove a line and
+Now play around with the configuration files: add another client, modify a client, remove a line and
 re-run the plan and apply and you'll see the state mimic the changes.

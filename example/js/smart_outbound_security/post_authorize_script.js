@@ -48,7 +48,7 @@ function onTokenGenerating(theUserSession, theAuthorizationRequestDetails)
     Log.info(" * Client ID: " + theAuthorizationRequestDetails.clientId);
     Log.info(" * Member ID: " + theAuthorizationRequestDetails.memberId);
 
-    var launchParam = theAuthorizationRequestDetails.launch;
+    var launchParam = theAuthorizationRequestDetails.getLaunch();
 
     Log.info(" * Launch parameter: " + launchParam);
 
@@ -57,7 +57,11 @@ function onTokenGenerating(theUserSession, theAuthorizationRequestDetails)
     if (launchParam !== null) {
         // sort out the patient resource id from the launch parameter
         var resource = resolveLaunchParameter(launchParam);
-        theUserSession.addLaunchResourceId(resource.type, resource.value);
+        if (resource.type === 'patient')
+        {
+            var patient = getPatientResource(resource.value, resource.system);
+            theUserSession.addLaunchResourceId('Patient', patient.identifier);
+        }
     }
 }  
 
@@ -105,16 +109,20 @@ function resolveLaunchParameter(launchId)
 }
 
 
-const clientId = "smile-cdr";
-const clientSecret = "kG3XHKcW80E4in3ftxaZnkXFTU89VBiu";
-const tokenEndpoint = "http://localhost:8080/auth/realms/poc/protocol/openid-connect/token";
-const basicCredentials = Base64.encode(clientId + ":" + clientSecret);
-const scope = "launch context openid";
+const clientId = Environment.getProperty('js.contextApi.clientId') || "smile-cdr";
+const clientSecret = Environment.getProperty('js.contextApi.clientSecret') || "kG3XHKcW80E4in3ftxaZnkXFTU89VBiu";
+const tokenEndpoint = Environment.getProperty('js.contextApi.tokenEndpoint') || "http://localhost:8080/auth/realms/poc/protocol/openid-connect/token";
+const scope = Environment.getProperty('js.contextApi.scope') || "launch context openid";
+
 /**
- * Client Credentials Grant authentication, returning a token for the smile cdr as client.
+ * Client Credentials Grant authentication, returning a token for smile cdr auth server
+ * as client application to the context api.
+ * @returns The token
  */
 function authenticate()
 {
+    const basicCredentials = Base64.encode(clientId + ":" + clientSecret);
+
     var post = Http.post(tokenEndpoint);
     post.addRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
     post.addRequestHeader('Authorization', 'Basic ' + basicCredentials);
@@ -130,4 +138,29 @@ function authenticate()
     var token = responseJson.access_token;
     Log.info(" * Token: " + token);
     return token;
+}
+
+/**
+ * This function retrieves the patient resource from the FHIR server.
+ * This can interact with the fhir server that is set up as a
+ * module dependency of this outbound security module.
+ * 
+ * @param {*} idValue
+ * @param {*} systemValue
+ * @returns The patient resource
+ * @throws "Patient not found"
+ */
+function getPatientResource(idValue, systemValue)
+{
+    var patientList = Fhir.search()
+        .forResource('Patient')
+        .whereToken('identifier', systemValue, idValue)
+        .asList();
+
+    if (patientList.length === 0) {
+        Log.info(" * Patient not found");
+        throw "Patient not found";
+    }
+    Log.info(" * Patient found: " + patientList[0].id);
+    return patientList[0];
 }
