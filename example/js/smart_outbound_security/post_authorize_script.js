@@ -90,7 +90,11 @@ function onPostAuthorize(theDetails)
  * @param launchId The launch context parameter from the authorization request
  * @returns The patient resource identifier
  */
-const contextApi = "http://localhost:8088/context/";
+const clientId = Environment.getProperty('js.contextApi.clientId') || "smile-cdr";
+const clientSecret = Environment.getProperty('js.contextApi.clientSecret') || "ck1mvyXGf1GJTSE8YNlrePIt1xDisM1N";
+const tokenEndpoint = Environment.getProperty('js.contextApi.tokenEndpoint') || "http://localhost:8080/auth/realms/poc/protocol/openid-connect/token";
+const scope = Environment.getProperty('js.contextApi.scope') || "launch context openid";
+const contextApi = Environment.getProperty('js.contextApi.url') || "http://smart-context:8088/api/context/";
 
 function resolveLaunchParameter(launchId)
 {
@@ -109,10 +113,7 @@ function resolveLaunchParameter(launchId)
 }
 
 
-const clientId = Environment.getProperty('js.contextApi.clientId') || "smile-cdr";
-const clientSecret = Environment.getProperty('js.contextApi.clientSecret') || "kG3XHKcW80E4in3ftxaZnkXFTU89VBiu";
-const tokenEndpoint = Environment.getProperty('js.contextApi.tokenEndpoint') || "http://localhost:8080/auth/realms/poc/protocol/openid-connect/token";
-const scope = Environment.getProperty('js.contextApi.scope') || "launch context openid";
+
 
 /**
  * Client Credentials Grant authentication, returning a token for smile cdr auth server
