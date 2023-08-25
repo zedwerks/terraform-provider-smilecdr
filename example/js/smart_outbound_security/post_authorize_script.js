@@ -83,7 +83,7 @@ function onPostAuthorize(theDetails)
 
 function resolveLaunchParameter(launchId)
 {
-    const contextApi = Environment.getEnv('js_SMILE_CONTEXT_API_URL') || "http://smart-context:8088/api/context/";
+    const contextApi = Environment.getEnv('JS_SMILE_CONTEXT_API_URL') || "http://smart-context:8088/api/context/";
 
     var token = authenticate();
     var get = Http.get(contextApi + launchId);
@@ -106,20 +106,38 @@ function resolveLaunchParameter(launchId)
  */
 function authenticate()
 {
-    const clientId = Environment.getEnv('js_SMILE_CONTEXT_API_CLIENT') || "smile-cdr";
-    const clientSecret = Environment.getEnv('js_SMILE_CONTEXT_API_CLIENT_SECRET') || "ck1mvyXGf1GJTSE8YNlrePIt1xDisM1N";
-    const tokenEndpoint = Environment.getEnv('js_SMILE_CONTEXT_API_TOKEN_URL') || "http://keycloak:8080/auth/realms/poc/protocol/openid-connect/token";
-    const scope = Environment.getEnv('js_SMILE_CONTEXT_API_SCOPE') ||  "context.read";
+    const clientId = Environment.getEnv('JS_SMILE_CONTEXT_API_CLIENT') || "smile-cdr";
+    const clientSecret = Environment.getEnv('JS_SMILE_CONTEXT_API_CLIENT_SECRET');
+    const tokenEndpoint = Environment.getEnv('JS_SMILE_CONTEXT_API_TOKEN_URL');
+    const scope = Environment.getEnv('JS_SMILE_CONTEXT_API_SCOPE') ||  "context";
 
-    Log.info(" * Client Credentials Grant to token endpoint: " + tokenEndpoint);
+    if (clientSecret === null) {
+        Log.warn(" * Client Credentials Grant authentication failed");
+        Log.warn(" * Client secret not set");
+        return null;
+    }
+    if (tokenEndpoint === null) {
+        Log.warn(" * Client Credentials Grant authentication failed");
+        Log.warn(" * Token endpoint not set");
+        return null;
+    }
+
+    Log.info(" * Client Credentials Grant token endpoint Url: " + tokenEndpoint);
 
     var post = Http.post(tokenEndpoint);
     post.setContentType('application/x-www-form-urlencoded');
-    post.setContentString("client_id=" + clientId + "&client_secret=" + clientSecret + "&grant_type=client_credentials&scope=" + scope + "\n");
-
+    post.addRequestHeader('Accept', 'application/json');
+    var clientIdEncoded = Converter.urlEncodeString(clientId);
+    var clientSecretEncoded = Converter.urlEncodeString(clientSecret);
+    var scopeEncoded = Converter.urlEncodeString(scope);
+    var formContent = "client_id=" + clientIdEncoded + "&client_secret=" + clientSecretEncoded + "&grant_type=client_credentials&scope=" + scopeEncoded;
+    
+    post.setContentString(formContent);
     post.execute();
+
     if (!post.isSuccess()) {
         Log.warn(" * Client Credentials Grant authentication failed");
+        Log.warn(" * Response: " + post.getFailureMessage());
         return null;
     }
     var responseJson = post.getResponseAsJson();
