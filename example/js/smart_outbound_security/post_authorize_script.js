@@ -78,11 +78,11 @@ function onPostAuthorize(theDetails)
  * @param launchId The launch context parameter from the authorization request
  * @returns The patient resource identifier
  */
-const clientId = Environment.getProperty('js.contextApi.clientId') || "smile-cdr";
-const clientSecret = Environment.getProperty('js.contextApi.clientSecret') || "ck1mvyXGf1GJTSE8YNlrePIt1xDisM1N";
-const tokenEndpoint = Environment.getProperty('js.contextApi.tokenEndpoint') || "http://localhost:8080/auth/realms/poc/protocol/openid-connect/token";
-const scope = Environment.getProperty('js.contextApi.scope') || "launch context openid";
-const contextApi = Environment.getProperty('js.contextApi.url') || "http://smart-context:8088/api/context/";
+const clientId = Environment.getEnv('js.contextApi.clientId') || "smile-cdr";
+const clientSecret = Environment.getEnv('js.contextApi.clientSecret') || "ck1mvyXGf1GJTSE8YNlrePIt1xDisM1N";
+const tokenEndpoint = Environment.getEnv('js.contextApi.token') || "http://keycloak:8080/auth/realms/poc/protocol/openid-connect/token";
+const scope = Environment.getEnv('js.contextApi.scope') || "launch context openid";
+const contextApi = Environment.getEnv('js.contextApi.url') || "http://smart-context:8088/api/context/";
 
 function resolveLaunchParameter(launchId)
 {
