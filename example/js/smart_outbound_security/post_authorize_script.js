@@ -111,8 +111,8 @@ function resolveLaunchParameter(launchId)
 function authenticate()
 {
     var post = Http.post(tokenEndpoint);
-    post.addRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-    post.setRequestBody("client_id=" + clientId + "\n&client_secret=" + clientSecret + "\n&grant_type=client_credentials\n&scope=" + scope + "\n");
+    post.setContentType('application/x-www-form-urlencoded');
+    post.setContentString("client_id=" + clientId + "\n&client_secret=" + clientSecret + "\n&grant_type=client_credentials\n&scope=" + scope + "\n");
 
     post.execute();
     if (!post.isSuccess()) {
