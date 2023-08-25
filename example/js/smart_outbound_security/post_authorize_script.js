@@ -78,14 +78,13 @@ function onPostAuthorize(theDetails)
  * @param launchId The launch context parameter from the authorization request
  * @returns The patient resource identifier
  */
-const clientId = Environment.getEnv('js.contextApi.clientId') || "smile-cdr";
-const clientSecret = Environment.getEnv('js.contextApi.clientSecret') || "ck1mvyXGf1GJTSE8YNlrePIt1xDisM1N";
-const tokenEndpoint = Environment.getEnv('js.contextApi.token') || "http://keycloak:8080/auth/realms/poc/protocol/openid-connect/token";
-const scope = "context:read";
-const contextApi = Environment.getEnv('js.contextApi.url') || "http://smart-context:8088/api/context/";
+
+
 
 function resolveLaunchParameter(launchId)
 {
+    const contextApi = Environment.getEnv('js_SMILE_CONTEXT_API_URL') || "http://smart-context:8088/api/context/";
+
     var token = authenticate();
     var get = Http.get(contextApi + launchId);
     get.addRequestHeader('Authorization', 'Bearer ' + token);
@@ -107,11 +106,16 @@ function resolveLaunchParameter(launchId)
  */
 function authenticate()
 {
+    const clientId = Environment.getEnv('js_SMILE_CONTEXT_API_CLIENT') || "smile-cdr";
+    const clientSecret = Environment.getEnv('js_SMILE_CONTEXT_API_CLIENT_SECRET') || "ck1mvyXGf1GJTSE8YNlrePIt1xDisM1N";
+    const tokenEndpoint = Environment.getEnv('js_SMILE_CONTEXT_API_TOKEN_URL') || "http://keycloak:8080/auth/realms/poc/protocol/openid-connect/token";
+    const scope = Environment.getEnv('js_SMILE_CONTEXT_API_SCOPE') ||  "context.read";
+
     Log.info(" * Client Credentials Grant to token endpoint: " + tokenEndpoint);
 
     var post = Http.post(tokenEndpoint);
     post.setContentType('application/x-www-form-urlencoded');
-    post.setContentString("client_id=" + clientId + "\n&client_secret=" + clientSecret + "\n&grant_type=client_credentials\n&scope=" + scope + "\n");
+    post.setContentString("client_id=" + clientId + "&client_secret=" + clientSecret + "&grant_type=client_credentials&scope=" + scope + "\n");
 
     post.execute();
     if (!post.isSuccess()) {
