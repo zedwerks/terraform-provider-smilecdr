@@ -81,7 +81,7 @@ function onPostAuthorize(theDetails)
 const clientId = Environment.getEnv('js.contextApi.clientId') || "smile-cdr";
 const clientSecret = Environment.getEnv('js.contextApi.clientSecret') || "ck1mvyXGf1GJTSE8YNlrePIt1xDisM1N";
 const tokenEndpoint = Environment.getEnv('js.contextApi.token') || "http://keycloak:8080/auth/realms/poc/protocol/openid-connect/token";
-const scope = Environment.getEnv('js.contextApi.scope') || "launch context openid";
+const scope = "context:read";
 const contextApi = Environment.getEnv('js.contextApi.url') || "http://smart-context:8088/api/context/";
 
 function resolveLaunchParameter(launchId)
@@ -100,9 +100,6 @@ function resolveLaunchParameter(launchId)
     return resource;
 }
 
-
-
-
 /**
  * Client Credentials Grant authentication, returning a token for smile cdr auth server
  * as client application to the context api.
@@ -110,13 +107,16 @@ function resolveLaunchParameter(launchId)
  */
 function authenticate()
 {
+    Log.info(" * Client Credentials Grant to token endpoint: " + tokenEndpoint);
+
     var post = Http.post(tokenEndpoint);
     post.setContentType('application/x-www-form-urlencoded');
     post.setContentString("client_id=" + clientId + "\n&client_secret=" + clientSecret + "\n&grant_type=client_credentials\n&scope=" + scope + "\n");
 
     post.execute();
     if (!post.isSuccess()) {
-        throw post.getFailureMessage();
+        Log.warn(" * Client Credentials Grant authentication failed");
+        return null;
     }
     var responseJson = post.getResponseAsJson();
     Log.info(" * Client Credentials Grant authentication");
