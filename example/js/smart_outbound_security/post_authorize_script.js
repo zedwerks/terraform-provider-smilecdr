@@ -19,11 +19,10 @@
  * For specifications of the argument 'theAuthorizationRequestDetails', see the documentation:
  * https://smilecdr.com/docs/javascript_execution_environment/callback_models.html#oauth2authorizationrequestdetails
  */
-function onTokenGenerating(theUserSession, theAuthorizationRequestDetails) 
-{ 
+function onTokenGenerating(theUserSession, theAuthorizationRequestDetails) {
     Log.info(" * UserSession.username: " + theUserSession.username);
     Log.info(" * UserSession.external: " + theUserSession.external);
-    
+
     var fhirUser = theUserSession.fhirUserUrl;
 
     Log.info(" * UserSession FHIR User: " + fhirUser);
@@ -45,13 +44,17 @@ function onTokenGenerating(theUserSession, theAuthorizationRequestDetails)
     if (launchParam !== null) {
         // sort out the patient resource id from the launch parameter
         var resource = resolveLaunchParameter(launchParam);
-        if (resource.type === 'patient')
-        {
+        if (resource.type === 'patient') {
             var patient = getPatientResource(resource.value, resource.system);
-            theUserSession.addLaunchResourceId('Patient', patient.identifier);
+            if (patient !== null) {
+                theUserSession.addLaunchResourceId('Patient', patient.identifier);
+            }
+        }
+        else if (resource.type === 'encounter') {
+            Log.warn(" * Encounter Context type not supported");
         }
     }
-}  
+}
 
 /**
  *  Called after the token has been issued, but before it it returned to the client.
@@ -60,41 +63,48 @@ function onTokenGenerating(theUserSession, theAuthorizationRequestDetails)
  *  
  * @param {*} theDetails 
  */
-function onPostAuthorize(theDetails) 
-{
+function onPostAuthorize(theDetails) {
     // Called after the token has been issued, but before it it returned to the client.
     // For specifications of the argument 'theDetails', see the documentation for the
     // https://smilecdr.com/docs/javascript_execution_environment/callback_models.html#smartonpostauthorizedetails
-    
-    Log.info(" * Access token: " + theDetails.accessToken);
-    Log.info(" * Authorized scopes: " + theDetails.grantedScopes);
-    Log.info(" * Requesting practitioner: " + theDetails.requestingPractitioner.identifier.value);
+
+    if (theDetails !== null) {
+        Log.info(" * Access token: " + theDetails.accessToken);
+        Log.info(" * Authorized scopes: " + theDetails.grantedScopes);
+    }
 }
 
 /**
  * This is a custom helper function that resolves the context identifier, calling the external Context API
  * and returning the patient identifier.
  * 
+ * Expects payload as defined by the smart-context project. See github.com/zedwerks/smart-context
+ * 
  * @param launchId The launch context parameter from the authorization request
  * @returns The patient resource identifier
  */
-
-
-
-function resolveLaunchParameter(launchId)
-{
-    const contextApi = Environment.getEnv('JS_SMILE_CONTEXT_API_URL') || "http://smart-context:8088/api/context/";
+function resolveLaunchParameter(launchId) {
+    const contextApi = Environment.getEnv('JS_SMILE_CONTEXT_API_URL') || "http://smart-context:8088/api/context";
 
     var token = authenticate();
-    var get = Http.get(contextApi + launchId);
+    var contextUrl = contextApi + "/" + launchId;
+    var get = Http.get(contextUrl);
+
+    Log.info(" * GET Context: " + contextUrl);
+    Log.debug(" * Token: " + token);
+
+    get.addRequestHeader('Accept', 'application/json');
     get.addRequestHeader('Authorization', 'Bearer ' + token);
+
     get.execute();
     if (!get.isSuccess()) {
+        Log.error(" * Failed to GET context");
+        Log.error(" * Response: " + get.getFailureMessage());
         throw get.getFailureMessage();
     }
-    var responseJson = get.getResponseAsJson();
-    Log.info(" * Response JSON: " + responseJson);
-    var resource = parameter[0].resource;
+    var responseJson = get.parseResponseAsJson();
+    Log.info(" * Context Response.resourceType: " + responseJson.resourceType);
+    var resource = responseJson.parameter[0].resource;
     Log.info(" * Resource: " + resource);
     return resource;
 }
@@ -104,12 +114,11 @@ function resolveLaunchParameter(launchId)
  * as client application to the context api.
  * @returns The token
  */
-function authenticate()
-{
+function authenticate() {
     const clientId = Environment.getEnv('JS_SMILE_CONTEXT_API_CLIENT') || "smile-cdr";
     const clientSecret = Environment.getEnv('JS_SMILE_CONTEXT_API_CLIENT_SECRET');
     const tokenEndpoint = Environment.getEnv('JS_SMILE_CONTEXT_API_TOKEN_URL');
-    const scope = Environment.getEnv('JS_SMILE_CONTEXT_API_SCOPE') ||  "context";
+    const scope = Environment.getEnv('JS_SMILE_CONTEXT_API_SCOPE') || "context";
 
     if (clientSecret === null) {
         Log.warn(" * Client Credentials Grant authentication failed");
@@ -121,9 +130,8 @@ function authenticate()
         Log.warn(" * Token endpoint not set");
         return null;
     }
-
-    Log.info(" * Client Credentials Grant token endpoint Url: " + tokenEndpoint);
-
+    Log.info(" * Client Credentials Grant Token Url: " + tokenEndpoint);
+    Log.info(" * Client Credentials Grant Client Id: " + clientId);
     var post = Http.post(tokenEndpoint);
     post.setContentType('application/x-www-form-urlencoded');
     post.addRequestHeader('Accept', 'application/json');
@@ -131,7 +139,7 @@ function authenticate()
     var clientSecretEncoded = Converter.urlEncodeString(clientSecret);
     var scopeEncoded = Converter.urlEncodeString(scope);
     var formContent = "client_id=" + clientIdEncoded + "&client_secret=" + clientSecretEncoded + "&grant_type=client_credentials&scope=" + scopeEncoded;
-    
+
     post.setContentString(formContent);
     post.execute();
 
@@ -140,9 +148,8 @@ function authenticate()
         Log.warn(" * Response: " + post.getFailureMessage());
         return null;
     }
-    var responseJson = post.getResponseAsJson();
+    var responseJson = post.parseResponseAsJson();
     Log.info(" * Client Credentials Grant authentication");
-    Log.info(" * Response JSON: " + responseJson);
     var token = responseJson.access_token;
     Log.info(" * Token: " + token);
     return token;
@@ -158,8 +165,7 @@ function authenticate()
  * @returns The patient resource
  * @throws "Patient not found"
  */
-function getPatientResource(idValue, systemValue)
-{
+function getPatientResource(idValue, systemValue) {
     var patientList = Fhir.search()
         .forResource('Patient')
         .whereToken('identifier', systemValue, idValue)
