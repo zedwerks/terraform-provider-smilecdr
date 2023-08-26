@@ -1,10 +1,47 @@
-// post_authorize_script.js
-// See SMART Callback Scripts for details at: 
-// https://smilecdr.com/docs/smart/smart_on_fhir_outbound_security_module.html#smart-callback-script
-// 
-// This script is invoked after the user has successfully authenticated with the OAuth2/OIDC server.
-// Applies to: SMART on FHIR Outbound Security Module
-// 
+/**  post_authorize_script.js
+ * See SMART Callback Scripts for details at: 
+ * @see https://smilecdr.com/docs/smart/smart_on_fhir_outbound_security_module.html#smart-callback-script
+ *
+ * This script is invoked after the user has successfully authenticated with the OAuth2/OIDC server.
+ * Applies to: SMART on FHIR Outbound Security Module
+ * 
+ */
+
+/**
+ * This function is called immediately after the user has authenticated in order to determine whether a session
+ * context needs to be selected by the user, and to supply the options that will be presented to the user.
+ * 
+ * @see https://smilecdr.com/docs/smart/smart_on_fhir_outbound_security_module.html#smart-callback-script
+ * 
+ *
+ * @param theUserSession     Contains details about the logged in user and their session.
+ * @param theContextSelectionChoices This object should be manipulated in the
+ *                                   function in order to provide the choices
+ *                                   the user can select from.
+ */
+function onSmartLoginPreContextSelection(theUserSession, theContextSelectionChoices) {
+
+    var isEhrLaunch = theUserSession.isEhrLaunch();
+
+    if (theUserSession !== null && theUserSession.approvedScopes !== null) {
+        for (const aScope in theUserSession.approvedScopes) {
+            Log.info(" * UserSession - Approved Scope: " + aScope);
+        }
+    }
+
+    // Check that there is not launch parameter already set
+    var launchResourceIds = theUserSession.getLaunchResourceIds();
+    if (launchResourceIds !== null) {
+        Log.info(" * Launch resourceIds already set.");
+        return;
+    }
+    else {
+        Log.info(" * Launch resourceIds not set");
+        // standalone launch.. Need to figure out how to get the patient resource id
+        // maybe custom query form? or just a text field?
+        // Manually adding them here as per Smile's example is not feasible.
+    }
+}
 
 /**
  * This function is called just prior to the creation and issuing of a new
@@ -14,10 +51,10 @@
  * @param theAuthorizationRequestDetails Contains details about the authorization request
  * 
  * For specifications of the argument 'theUserSession', see the documentation for the UserSessionDetails object:
- * https://smilecdr.com/docs/javascript_execution_environment/callback_models.html#usersessiondetails
+ * @see https://smilecdr.com/docs/javascript_execution_environment/callback_models.html#usersessiondetails
  * 
  * For specifications of the argument 'theAuthorizationRequestDetails', see the documentation:
- * https://smilecdr.com/docs/javascript_execution_environment/callback_models.html#oauth2authorizationrequestdetails
+ * @see https://smilecdr.com/docs/javascript_execution_environment/callback_models.html#oauth2authorizationrequestdetails
  */
 function onTokenGenerating(theUserSession, theAuthorizationRequestDetails) {
     Log.info(" * UserSession.username: " + theUserSession.username);
@@ -47,7 +84,10 @@ function onTokenGenerating(theUserSession, theAuthorizationRequestDetails) {
         if (resource.type === 'patient') {
             var patient = getPatientResource(resource.value, resource.system);
             if (patient !== null) {
-                theUserSession.addLaunchResourceId('Patient', patient.identifier);
+                //patient.addAuthority('FHIR_READ_ALL_IN_SCOPE', 'Patient', patient.id);
+                Log.info(" * UserSession: Adding launch resource id: " + patient.id);
+                theUserSession.addLaunchResourceId('Patient', patient.id);
+                theAuthorizationRequestDetails.addAccessTokenClaim('patient', patient.id);
             }
         }
         else if (resource.type === 'encounter') {
@@ -57,9 +97,9 @@ function onTokenGenerating(theUserSession, theAuthorizationRequestDetails) {
 }
 
 /**
- *  Called after the token has been issued, but before it it returned to the client.
+ * Called after the token has been issued, but before it it returned to the client.
  * For specifications of the argument 'theDetails', see the documentation:
- * https://smilecdr.com/docs/javascript_execution_environment/callback_models.html#smartonpostauthorizedetails
+ * @see https://smilecdr.com/docs/javascript_execution_environment/callback_models.html#smartonpostauthorizedetails
  *  
  * @param {*} theDetails 
  */
@@ -70,10 +110,28 @@ function onPostAuthorize(theDetails) {
 
     if (theDetails !== null) {
         Log.info(" * Access token: " + theDetails.accessToken);
-        Log.info(" * Authorized scopes: " + theDetails.grantedScopes);
+        Log.info(" * Granted scopes: " + theDetails.grantedScopes);
     }
 }
+/**
+ * This method is called when an authorization is requested, BEFORE the
+ * token is created and access is granted
+ * 
+ * @param theRequest The incoming theRequest
+ * @param theOutcomeFactory This object is a factory for a successful
+ *      response or a failure response
+ * @see https://smilecdr.com/docs/security/callback_scripts.html#function-onsmartloginprecontextselection
+ * @returns {*}
+ */
+function authenticate(theRequest, theOutcomeFactory) {
+    var outcome = theOutcomeFactory.newSuccess();
+    //  More work to do to properly support CODAP. For now, just return success
+    return outcome;
+}
 
+// ====================================================================================================================
+//  Support functions
+// ====================================================================================================================
 /**
  * This is a custom helper function that resolves the context identifier, calling the external Context API
  * and returning the patient identifier.
@@ -86,7 +144,7 @@ function onPostAuthorize(theDetails) {
 function resolveLaunchParameter(launchId) {
     const contextApi = Environment.getEnv('JS_SMILE_CONTEXT_API_URL') || "http://smart-context:8088/api/context";
 
-    var token = authenticate();
+    var token = clientAuthForContextApi();
     var contextUrl = contextApi + "/" + launchId;
     var get = Http.get(contextUrl);
 
@@ -114,7 +172,7 @@ function resolveLaunchParameter(launchId) {
  * as client application to the context api.
  * @returns The token
  */
-function authenticate() {
+function clientAuthForContextApi() {
     const clientId = Environment.getEnv('JS_SMILE_CONTEXT_API_CLIENT') || "smile-cdr";
     const clientSecret = Environment.getEnv('JS_SMILE_CONTEXT_API_CLIENT_SECRET');
     const tokenEndpoint = Environment.getEnv('JS_SMILE_CONTEXT_API_TOKEN_URL');
