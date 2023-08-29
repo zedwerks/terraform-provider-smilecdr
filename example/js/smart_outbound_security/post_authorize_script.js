@@ -21,31 +21,36 @@
  */
 function onSmartLoginPreContextSelection(theUserSession, theContextSelectionChoices) {
 
-    var isEhrLaunch = theUserSession.isEhrLaunch();
-
     if (theUserSession !== null && theUserSession.approvedScopes !== null) {
         for (const aScope in theUserSession.approvedScopes) {
             Log.info(" * UserSession - Approved Scope: " + aScope);
         }
     }
 
-    // Check that there is not launch parameter already set
+    // Check that there is not launch resource parameter already set for this session.
     var launchResourceIds = theUserSession.getLaunchResourceIds();
-    if (launchResourceIds !== null) {
+    if (launchResourceIds !== null && launchResourceIds.length > 0) {
         Log.info(" * Launch resourceIds already set.");
+        for (const res in launchResourceIds) {
+            Log.info(" * Launch resourceId: " + res.resourceId + " with type: " + res.resourceType);
+        }
         return;
     }
     else {
         Log.info(" * Launch resourceIds not set");
-        // standalone launch.. Need to figure out how to get the patient resource id
-        // maybe custom query form? or just a text field?
-        // Manually adding them here as per Smile's example is not feasible.
+        // standalone launch. We need to set the launch resource parameter
+        // TBD... from a picker?
     }
+    return;
 }
 
 /**
  * This function is called just prior to the creation and issuing of a new
  * access token.
+ * 
+ * This function is primarily used in order to customize the SMART Launch Context(s)
+ * associated with a particular session (i.e. because the launch context is maintained
+ * in a third-party application and needs to be looked up during the auth flow).
  * 
  * @param theUserSession The authenticated user session (can be modified by the script)
  * @param theAuthorizationRequestDetails Contains details about the authorization request
@@ -67,6 +72,7 @@ function onTokenGenerating(theUserSession, theAuthorizationRequestDetails) {
 
     for (const res in launchResourceIds) {
         Log.info(" * UserSession Launch resourceId: " + res.resourceId + " with type: " + res.resourceType);
+        // tbd... add existing resourceId(s) to bearer token.
     }
 
     Log.info(" * Client ID: " + theAuthorizationRequestDetails.clientId);
@@ -81,18 +87,28 @@ function onTokenGenerating(theUserSession, theAuthorizationRequestDetails) {
     if (launchParam !== null) {
         // sort out the patient resource id from the launch parameter
         var resource = resolveLaunchParameter(launchParam);
-        if (resource.type === 'patient') {
+        if (resource.resourceType === 'Patient') {
             var patient = getPatientResource(resource.value, resource.system);
             if (patient !== null) {
                 //patient.addAuthority('FHIR_READ_ALL_IN_SCOPE', 'Patient', patient.id);
-                Log.info(" * UserSession: Adding launch resource id: " + patient.id);
+                Log.info(" * UserSession: Adding launch patient.id: " + patient.id);
                 theUserSession.addLaunchResourceId('Patient', patient.id);
                 theAuthorizationRequestDetails.addAccessTokenClaim('patient', patient.id);
             }
+            else {
+                Log.warn(" * Patient not found");
+            }
         }
-        else if (resource.type === 'encounter') {
+        else if (resource.resourceType === 'Encounter') {
             Log.warn(" * Encounter Context type not supported");
         }
+        else {
+            Log.warn(" * Context resource.resourceType not supported: " + resource.resourceType);
+        }
+    }
+    else {
+        Log.warn(" * No launch parameter found. This is NOT EHR-launched");
+        return;
     }
 }
 
@@ -132,6 +148,7 @@ function authenticate(theRequest, theOutcomeFactory) {
 // ====================================================================================================================
 //  Support functions
 // ====================================================================================================================
+
 /**
  * This is a custom helper function that resolves the context identifier, calling the external Context API
  * and returning the patient identifier.
@@ -149,7 +166,7 @@ function resolveLaunchParameter(launchId) {
     var get = Http.get(contextUrl);
 
     Log.info(" * GET Context: " + contextUrl);
-    Log.debug(" * Token: " + token);
+    //Log.debug(" * Token: " + token);
 
     get.addRequestHeader('Accept', 'application/json');
     get.addRequestHeader('Authorization', 'Bearer ' + token);
@@ -163,7 +180,11 @@ function resolveLaunchParameter(launchId) {
     var responseJson = get.parseResponseAsJson();
     Log.info(" * Context Response.resourceType: " + responseJson.resourceType);
     var resource = responseJson.parameter[0].resource;
-    Log.info(" * Resource: " + resource);
+    if (resource === null) {
+        Log.error(" * Failed to GET context");
+        return null;
+    }
+    Log.info(" * Response resource.type: " + resource.type);
     return resource;
 }
 
@@ -209,7 +230,7 @@ function clientAuthForContextApi() {
     var responseJson = post.parseResponseAsJson();
     Log.info(" * Client Credentials Grant authentication");
     var token = responseJson.access_token;
-    Log.info(" * Token: " + token);
+    // Log.debug(" * Client Credentials Grant Token: " + token);
     return token;
 }
 
@@ -223,7 +244,15 @@ function clientAuthForContextApi() {
  * @returns The patient resource
  * @throws "Patient not found"
  */
+
 function getPatientResource(idValue, systemValue) {
+
+    Log.info(" * Searching for patient with identifier: " + systemValue + "|" + idValue)
+    //var client = FhirClientFactory.newClient('http://127.0.0.1:8000/');
+    //var patientList = client.search()
+
+    // This supposed to work when we have set the FHIR 
+    // server that is set up as a module dependency of this outbound security module.
     var patientList = Fhir.search()
         .forResource('Patient')
         .whereToken('identifier', systemValue, idValue)
