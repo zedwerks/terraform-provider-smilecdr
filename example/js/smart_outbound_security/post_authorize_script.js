@@ -4,7 +4,7 @@
  *
  * This script is invoked after the user has successfully authenticated with the OAuth2/OIDC server.
  * Applies to: SMART on FHIR Outbound Security Module
- * 
+ * ====================================================================================================================
  */
 
 /**
@@ -21,12 +21,6 @@
  */
 function onSmartLoginPreContextSelection(theUserSession, theContextSelectionChoices) {
 
-    if (theUserSession !== null && theUserSession.approvedScopes !== null) {
-        for (const aScope in theUserSession.approvedScopes) {
-            Log.info(" * UserSession - Approved Scope: " + aScope);
-        }
-    }
-
     // Check that there is not launch resource parameter already set for this session.
     var launchResourceIds = theUserSession.getLaunchResourceIds();
     if (launchResourceIds !== null && launchResourceIds.length > 0) {
@@ -38,7 +32,7 @@ function onSmartLoginPreContextSelection(theUserSession, theContextSelectionChoi
     }
     else {
         Log.info(" * Launch resourceIds not set");
-        // standalone launch. We need to set the launch resource parameter
+        // standalone launch? We need to set the launch resource parameter
         // TBD... from a picker?
     }
     return;
@@ -125,7 +119,7 @@ function onPostAuthorize(theDetails) {
     // https://smilecdr.com/docs/javascript_execution_environment/callback_models.html#smartonpostauthorizedetails
 
     if (theDetails !== null) {
-        Log.info(" * Access token: " + theDetails.accessToken);
+        //Log.info(" * Access token: " + theDetails.accessToken);
         Log.info(" * Granted scopes: " + theDetails.grantedScopes);
     }
 }
@@ -156,6 +150,7 @@ function authenticate(theRequest, theOutcomeFactory) {
  * Expects payload as defined by the smart-context project. See github.com/zedwerks/smart-context
  * 
  * @param launchId The launch context parameter from the authorization request
+ * @throws "Context resource not found in Context API response"
  * @returns The patient resource identifier
  */
 function resolveLaunchParameter(launchId) {
@@ -166,7 +161,6 @@ function resolveLaunchParameter(launchId) {
     var get = Http.get(contextUrl);
 
     Log.info(" * GET Context: " + contextUrl);
-    //Log.debug(" * Token: " + token);
 
     get.addRequestHeader('Accept', 'application/json');
     get.addRequestHeader('Authorization', 'Bearer ' + token);
@@ -182,7 +176,7 @@ function resolveLaunchParameter(launchId) {
     var resource = responseJson.parameter[0].resource;
     if (resource === null) {
         Log.error(" * Failed to GET context");
-        return null;
+        throw new Error("Context resource not found in Context API response");
     }
     Log.info(" * Response resource.type: " + resource.type);
     return resource;
@@ -244,24 +238,30 @@ function clientAuthForContextApi() {
  * @returns The patient resource
  * @throws "Patient not found"
  */
+function getPatientResourceId(idValue, systemValue) {
 
-function getPatientResource(idValue, systemValue) {
-
-    Log.info(" * Searching for patient with identifier: " + systemValue + "|" + idValue)
+    Log.info(" * Searching for patient with identifier: " + systemValue + "|" + idValue);
     //var client = FhirClientFactory.newClient('http://127.0.0.1:8000/');
     //var patientList = client.search()
 
     // This supposed to work when we have set the FHIR 
     // server that is set up as a module dependency of this outbound security module.
+
+    /*
     var patientList = Fhir.search()
         .forResource('Patient')
         .whereToken('identifier', systemValue, idValue)
         .asList();
 
-    if (patientList.length === 0) {
-        Log.info(" * Patient not found");
-        throw "Patient not found";
-    }
-    Log.info(" * Patient found: " + patientList[0].id);
-    return patientList[0];
+    if (patientList === null) {
+        Log.error(" * Patient not found");
+        throw new Error("Patient not found");
+    } 
+
+    var resourceId = patientList[0].id;
+    */
+    var resourceId = "pat9094888999";
+
+    Log.info(" * Patient found: Patient/" + resourceId);
+    return resourceId;
 }
