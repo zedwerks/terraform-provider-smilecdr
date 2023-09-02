@@ -82,12 +82,11 @@ function onTokenGenerating(theUserSession, theAuthorizationRequestDetails) {
         // sort out the patient resource id from the launch parameter
         var resource = resolveLaunchParameter(launchParam);
         if (resource.resourceType === 'Patient') {
-            var patient = getPatientResource(resource.value, resource.system);
-            if (patient !== null) {
-                //patient.addAuthority('FHIR_READ_ALL_IN_SCOPE', 'Patient', patient.id);
-                Log.info(" * UserSession: Adding launch patient.id: " + patient.id);
-                theUserSession.addLaunchResourceId('Patient', patient.id);
-                theAuthorizationRequestDetails.addAccessTokenClaim('patient', patient.id);
+            var patientId = getPatientResourceId(resource.value, resource.system);
+            if (patientId !== null) {
+                Log.info(" * UserSession: addLaunchResourceId for patient: " + patientId);
+                theUserSession.addLaunchResourceId('Patient', patientId);
+                theAuthorizationRequestDetails.addAccessTokenClaim('patient', patientId);
             }
             else {
                 Log.warn(" * Patient not found");
