@@ -1,10 +1,10 @@
-/**  post_authorize_script.js
+/** ====================================================================================================================
  * See SMART Callback Scripts for details at: 
  * @see https://smilecdr.com/docs/smart/smart_on_fhir_outbound_security_module.html#smart-callback-script
  *
  * This script is invoked after the user has successfully authenticated with the OAuth2/OIDC server.
  * Applies to: SMART on FHIR Outbound Security Module
- * ====================================================================================================================
+ * ===================================================================================================================== 
  */
 
 /**
@@ -240,8 +240,12 @@ function clientAuthForContextApi() {
 function getPatientResourceId(idValue, systemValue) {
 
     Log.info(" * Searching for patient with identifier: " + systemValue + "|" + idValue);
-    //var client = FhirClientFactory.newClient('http://127.0.0.1:8000/');
-    //var patientList = client.search()
+    /*
+    * var client = FhirClientFactory.newClient('http://127.0.0.1:8000/');
+    var patientList = client.search().forResource('Patient')
+        .whereToken('identifier', systemValue, idValue)
+        .asList();
+    */
 
     // This supposed to work when we have set the FHIR 
     // server that is set up as a module dependency of this outbound security module.
