@@ -19,6 +19,9 @@
  *                                   function in order to provide the choices
  *                                   the user can select from.
  */
+
+import { Fhir } from "smilecdr/fhir";
+
 function onSmartLoginPreContextSelection(theUserSession, theContextSelectionChoices) {
 
     // Check that there is not launch resource parameter already set for this session.
@@ -240,31 +243,23 @@ function clientAuthForContextApi() {
 function getPatientResourceId(idValue, systemValue) {
 
     Log.info(" * Searching for patient with identifier: " + systemValue + "|" + idValue);
-    /*
-    * var client = FhirClientFactory.newClient('http://127.0.0.1:8000/');
-    var patientList = client.search().forResource('Patient')
-        .whereToken('identifier', systemValue, idValue)
-        .asList();
-    */
 
     // This supposed to work when we have set the FHIR 
     // server that is set up as a module dependency of this outbound security module.
 
-    /*
     var patientList = Fhir.search()
         .forResource('Patient')
         .whereToken('identifier', systemValue, idValue)
         .asList();
 
-    if (patientList === null) {
+    if (patientList === null || patientList.length === 0) {
         Log.error(" * Patient not found");
         throw new Error("Patient not found");
-    } 
+    }
 
+    Log.info(conditionList[0].toJson());
     var resourceId = patientList[0].id;
-    */
-    var resourceId = "pat9094888999";
-
+    //resourceId = "pat9094888999";
     Log.info(" * Patient found: Patient/" + resourceId);
     return resourceId;
 }
