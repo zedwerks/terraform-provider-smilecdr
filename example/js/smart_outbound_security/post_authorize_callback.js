@@ -20,8 +20,6 @@
  *                                   the user can select from.
  */
 
-import { Fhir } from "smilecdr/fhir";
-
 function onSmartLoginPreContextSelection(theUserSession, theContextSelectionChoices) {
 
     // Check that there is not launch resource parameter already set for this session.

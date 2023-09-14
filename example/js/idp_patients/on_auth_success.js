@@ -1,4 +1,4 @@
-// federationAuthScript.js
+// on_auth_success.js
 // This script is used to authenticate the user against the federation provider
 // ------------
 // When using Federated OAuth2/OIDC Login, 
@@ -14,8 +14,6 @@ function onAuthenticationSuccess(theOutcome, theOutcomeFactory, theContext) {
     
     // This Identity Provider is for Patient Portal. It retrieves the patientId as HDID claim.
     var patientId = theContext.getClaim('hdid');
-
-
   
        // Add a log line for troubleshooting
    Log.info("User " + theOutcome.getUsername() + " has authorized for patient: " + patientId + " with scopes: " + theContext.getApprovedScopes());

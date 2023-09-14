@@ -1,0 +1,144 @@
+# Copyright (c) Zed Werks Inc.
+# SPDX-License-Identifier: Apache-2.0
+
+resource "smilecdr_smart_outbound_security" "smart_auth_outbound" {
+  module_id                                  = "smart_auth_outbound"
+  node_id                                    = "Master"
+  anonymous_account_username                 = "ANONYMOUS"
+  anonymous_access_enabled                   = false
+  saml_authentication_enabled                = false
+  cors_allowed_headers                       = "Access-Control-Allow-Methods, Access-Control-Allow-Origin, Authorization, Content-Type, X-Requested-With"
+  cors_enabled                               = true
+  cors_origins                               = "*"
+  davinci_native_consent_handling            = false
+  http_access_log_appenders                  = ["console", "lra"]
+  http_listener_bind_address                 = "0.0.0.0"
+  http_listener_context_path                 = "/"
+  http_listener_endpoint_health_path         = "/health-check"
+  http_listener_unhealthy_response_code      = 500
+  http_listener_https_forwarding_assumed     = false
+  http_listener_port                         = 9201
+  http_listener_respect_forward_headers      = false
+  http_request_maximum_request_header_size   = 8
+  http_request_maximum_response_header_size  = 8
+  http_request_read_idle_timeout             = 40000
+  http_request_thread_pool_accept_queue_size = 10
+  http_request_thread_pool_max_size          = 10
+  http_request_thread_pool_min_size          = 8
+  http_security_block_http_head              = true
+  http_security_block_http_options           = true
+  http_security_frame_options_allow_from     = ""
+  http_security_pin_host                     = "localhost"
+  http_security_suppress_error_details       = true
+  http_security_suppress_platform_info       = true
+  javascript_debug_enabled                   = true
+  javascript_debug_host_address              = "localhost"
+  javascript_debug_path                      = "/google-chrome"
+  javascript_debug_port                      = "9999"
+  javascript_debug_secure                    = false
+  javascript_debug_suspend                   = false
+  // jwks_keystore_id = "jwks_keystore"
+  oidc_http_client_jwks_cache_timeout = 45
+  // oidc_http_client_truststore_file =
+  oidc_http_client_truststore_password = "changeit"
+  oidc_cache_authorization_tokens      = 4000
+  oidc_client_secret_encoding          = "SHA256_100000_ROUND"
+  oidc_client_secret_expiry_duration   = 730
+  oidc_issuer_url                      = "https://localhost:9443/auth/realms/master"
+  oidc_pkce_plain_challenge_supported  = false
+  oidc_pkce_required                   = false
+  oidc_rotate_token_after_use          = true
+  oidc_smart_capabilities_list = [
+    "launch-ehr",
+    "launch-standalone",
+    "launch-patient",
+    "launch-encounter",
+    "launch-related-person",
+    "launch-user",
+    "launch-patient-encounter",
+    "launch-patient-related-person",
+    "launch-patient-user",
+    "launch-encounter-related-person",
+    "launch-encounter-user",
+    "launch-related-person-user",
+    "launch-patient-encounter-user",
+    "launch-patient-related-person-user",
+    "launch-encounter-related-person-user",
+    "launch-patient-encounter-related-person-user",
+    "launch",
+    "launch-context",
+    "launch-everything",
+    "launch-ehr-scope",
+    "launch-standalone-scope",
+    "launch-patient-scope",
+    "launch-encounter-scope",
+    "launch-related-person-scope",
+    "launch-user-scope",
+    "launch-patient-encounter-scope",
+    "launch-patient-related-person-scope",
+    "launch-patient-user-scope",
+    "launch-encounter-related-person-scope",
+    "launch-encounter-user-scope",
+    "launch-related-person-user-scope",
+    "launch-patient-encounter-related-person-scope",
+    "launch-patient-encounter-user-scope",
+    "launch-patient-related-person-user-scope",
+    "launch-encounter-related-person-user-scope",
+    "launch-patient-encounter-related-person-user-scope",
+    "launch-scope",
+    "launch-context-scope",
+    "launch-everything-scope",
+    "patient/*.read",
+    "patient/*.write",
+    "patient/*.*"
+  ]
+  oidc_federate_mode_enabled = true
+  // smart_callback_post_authorize_script_file = "post_authorize.js"
+  smart_callback_post_authorize_script_text = local.post_authorize_callback
+  // codap_authorization_script_file = 
+  codap_authorization_script_text = local.codap_authorization_callback
+  codap_enabled                   = true
+
+  smart_login_skin_approval_template          = "/userapprove.html"
+  smart_login_skin_context_selection_template = "/contextselect.html"
+  smart_login_skin_error_template             = "/usererror.html"
+  // smart_login_skin_user_registration_forgot_password_template_step1 = "/userforgotpassword1.html"
+  // smart_login_skin_user_registration_forgot_password_template_step2 = "/userforgotpassword2.html"
+  // smart_login_skin_user_registration_forgot_password_template_step3 = "/userforgotpassword3.html"
+  // smart_login_skin_federated_oath2_template = "/federatedoauth2.html"
+  // smart_login_skin_login_template           = "/userlogin.html"
+  // smart_login_skin_user_registration_template_step1 = "/userregister1.html"
+  // smart_login_skin_user_registration_template_step2 = "/userregister2.html"
+  // smart_login_skin_session_management_template = "/sessionmanagement.html"
+  // smart_login_skin_2fa_template = "/2fa.html"
+  // smart_login_skin_terms_of_service_template = "/termsofservice.html"
+  // smart_login_skin_webjar_id = "smart_login_skin.jar"
+  smart_login_terms_of_service_version        = "Version 1"
+  smart_authorization_allowed_audience_list   = "lra"
+  smart_authorization_email_from_address      = "noreply@phsa.ca"
+  smart_authorization_enforce_approved_scopes = true
+  smart_authorization_scopes_supported = "launch, fhirUser, openid, profile, patient/*.read, patient/*.write, patient/*.*"
+  // openid_connect_server_pre_seed_file = "openid_connect_server_pre_seed.json"
+  // openid_connect_client_pre_seed_file = "openid_connect_client_pre_seed.json"
+  sessions_in_memory = false
+  sessions_max_concurrent_sessions_per_user = 3
+  sessions_scavenger_interval_ms = 30000
+  sessions_timeout_mins = 30
+  tls_client_auth_enabled = false
+  tls_enabled = true
+  //tls_keystore_filename = "keystore.jks"
+  tls_keystore_key_alias = "smilecdr"
+  tls_keystore_key_password = "changeit"
+  tls_keystore_password = "changeit"
+  tls_cipher_allow_list = ""
+  tls_cipher_deny_list = ""
+  tls_protocol_allow_list = ""
+  tls_protocol_deny_list = ""
+  // tls_truststore_filename = "truststore.jks"
+  // tls_truststore_password = "changeit"
+
+  dependency_local_inbound_security = "SECURITY_IN_UP"
+  dependency_fhir_persistence_module = "PERSISTANCE_ALL"
+  dependency_saml_authentication_module = "SECURITY_IN_SAML"
+  // dependency_self_registration_provider_module = ""
+}

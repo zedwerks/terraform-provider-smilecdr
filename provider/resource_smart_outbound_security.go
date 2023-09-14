@@ -417,8 +417,8 @@ func resourceSmartOutboundSecurity() *schema.Resource {
 				Description: "This is the ID of the WebJar to use as a skin for the SMART Outbound Security module for login and approval screens. This should take the form groupId:artifactId:versionId.",
 			},
 			// SMART Login Terms of Service Options ------------------------
-			"smart_login_terms_of_service": {
-				Type:     schema.TypeBool,
+			"smart_login_terms_of_service_version": {
+				Type:     schema.TypeString,
 				Optional: true,
 				Default:  false,
 			},
@@ -1016,7 +1016,7 @@ func smartOutboundSecurityResourceToModuleConfig(d *schema.ResourceData) (*smile
 		})
 	}
 	// SMART Login Terms of Service Options ------------------------
-	if v, ok := d.GetOk("smart_login_terms_of_service"); ok {
+	if v, ok := d.GetOk("smart_login_terms_of_service_version"); ok {
 		moduleConfig.Options = append(moduleConfig.Options, smilecdr.ModuleOption{
 			Key:   "tos.version_string",
 			Value: v.(string),
@@ -1501,7 +1501,7 @@ func resourceSmartOutboundSecurityRead(ctx context.Context, d *schema.ResourceDa
 	// SMART Login Terms of Service Options ------------------------
 	val, ok = moduleConfig.LookupOptionOk("tos.version_string")
 	if ok {
-		d.Set("smart_login_terms_of_service", val)
+		d.Set("smart_login_terms_of_service_version", val)
 	}
 	// SMART Authorization Options ------------------------
 	val, ok = moduleConfig.LookupOptionOk("allowed_audience_list")

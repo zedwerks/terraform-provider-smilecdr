@@ -1,7 +1,6 @@
 # Copyright (c) Zed Werks Inc.
 # SPDX-License-Identifier: Apache-2.0
 
-
 resource "smilecdr_openid_client" "client1" {
   node_id                       = "Master"
   module_id                     = "smart_auth"
