@@ -5,6 +5,7 @@ package provider
 
 import (
 	"context"
+	"strconv"
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
@@ -595,14 +596,14 @@ func smartOutboundSecurityResourceToModuleConfig(d *schema.ResourceData) (*smile
 	if v, ok := d.GetOk("anonymous_access_enabled"); ok {
 		moduleConfig.Options = append(moduleConfig.Options, smilecdr.ModuleOption{
 			Key:   "anonymous.access.enabled",
-			Value: v.(string),
+			Value: strconv.FormatBool(v.(bool)),
 		})
 	}
 
 	if v, ok := d.GetOk("saml_authentication_enabled"); ok {
 		moduleConfig.Options = append(moduleConfig.Options, smilecdr.ModuleOption{
 			Key:   "saml.enabled",
-			Value: v.(string),
+			Value: strconv.FormatBool(v.(bool)),
 		})
 	}
 	// CORS Options ------------------------
@@ -615,7 +616,7 @@ func smartOutboundSecurityResourceToModuleConfig(d *schema.ResourceData) (*smile
 	if v, ok := d.GetOk("cors_enabled"); ok {
 		moduleConfig.Options = append(moduleConfig.Options, smilecdr.ModuleOption{
 			Key:   "cors.enable",
-			Value: v.(string),
+			Value: strconv.FormatBool(v.(bool)),
 		})
 	}
 	if v, ok := d.GetOk("cors_origins"); ok {
@@ -628,7 +629,7 @@ func smartOutboundSecurityResourceToModuleConfig(d *schema.ResourceData) (*smile
 	if v, ok := d.GetOk("davinci_native_consent_handling"); ok {
 		moduleConfig.Options = append(moduleConfig.Options, smilecdr.ModuleOption{
 			Key:   "davinci.consent_handling",
-			Value: v.(string),
+			Value: strconv.FormatBool(v.(bool)),
 		})
 	}
 	// HTTP Access Log Options ------------------------
@@ -664,7 +665,7 @@ func smartOutboundSecurityResourceToModuleConfig(d *schema.ResourceData) (*smile
 	if v, ok := d.GetOk("http_listener_unhealthy_response_code"); ok {
 		moduleConfig.Options = append(moduleConfig.Options, smilecdr.ModuleOption{
 			Key:   "endpoint_health.status_code_if_unhealthy",
-			Value: v.(string),
+			Value: strconv.Itoa(v.(int)),
 		})
 	}
 	if v, ok := d.GetOk("http_listener_https_forwarding_assumed"); ok {
@@ -676,64 +677,64 @@ func smartOutboundSecurityResourceToModuleConfig(d *schema.ResourceData) (*smile
 	if v, ok := d.GetOk("http_listener_port"); ok {
 		moduleConfig.Options = append(moduleConfig.Options, smilecdr.ModuleOption{
 			Key:   "port",
-			Value: v.(string),
+			Value: strconv.Itoa(v.(int)),
 		})
 	}
 	if v, ok := d.GetOk("http_listener_respect_forward_headers"); ok {
 		moduleConfig.Options = append(moduleConfig.Options, smilecdr.ModuleOption{
 			Key:   "respect_forward_headers",
-			Value: v.(string),
+			Value: strconv.FormatBool(v.(bool)),
 		})
 	}
 	// HTTP Request Pool Options ------------------------
 	if v, ok := d.GetOk("http_request_maximum_request_header_size"); ok {
 		moduleConfig.Options = append(moduleConfig.Options, smilecdr.ModuleOption{
 			Key:   "max_header_size.request.kb",
-			Value: v.(string),
+			Value: strconv.Itoa(v.(int)),
 		})
 	}
 	if v, ok := d.GetOk("http_request_maximum_response_header_size"); ok {
 		moduleConfig.Options = append(moduleConfig.Options, smilecdr.ModuleOption{
 			Key:   "max_header_size.response.kb",
-			Value: v.(string),
+			Value: strconv.Itoa(v.(int)),
 		})
 	}
 	if v, ok := d.GetOk("http_request_read_idle_timeout"); ok {
 		moduleConfig.Options = append(moduleConfig.Options, smilecdr.ModuleOption{
 			Key:   "read_idle_timeout.millis",
-			Value: v.(string),
+			Value: strconv.Itoa(v.(int)),
 		})
 	}
 
 	if v, ok := d.GetOk("http_request_thread_pool_accept_queue_size"); ok {
 		moduleConfig.Options = append(moduleConfig.Options, smilecdr.ModuleOption{
 			Key:   "thread_pool.accept_queue_size",
-			Value: v.(string),
+			Value: strconv.Itoa(v.(int)),
 		})
 	}
 	if v, ok := d.GetOk("http_request_thread_pool_max_size"); ok {
 		moduleConfig.Options = append(moduleConfig.Options, smilecdr.ModuleOption{
 			Key:   "threadpool.max",
-			Value: v.(string),
+			Value: strconv.Itoa(v.(int)),
 		})
 	}
 	if v, ok := d.GetOk("http_request_thread_pool_min_size"); ok {
 		moduleConfig.Options = append(moduleConfig.Options, smilecdr.ModuleOption{
 			Key:   "threadpool.min",
-			Value: v.(string),
+			Value: strconv.Itoa(v.(int)),
 		})
 	}
 	// HTTP Security Options --------------------------------
 	if v, ok := d.GetOk("http_security_block_http_head"); ok {
 		moduleConfig.Options = append(moduleConfig.Options, smilecdr.ModuleOption{
 			Key:   "block_http_head",
-			Value: v.(string),
+			Value: strconv.FormatBool(v.(bool)),
 		})
 	}
 	if v, ok := d.GetOk("http_security_block_http_options"); ok {
 		moduleConfig.Options = append(moduleConfig.Options, smilecdr.ModuleOption{
 			Key:   "block_http_options",
-			Value: v.(string),
+			Value: strconv.FormatBool(v.(bool)),
 		})
 	}
 	if v, ok := d.GetOk("http_security_custom_response_headers"); ok {
@@ -761,20 +762,20 @@ func smartOutboundSecurityResourceToModuleConfig(d *schema.ResourceData) (*smile
 	if v, ok := d.GetOk("http_security_suppress_error_details"); ok {
 		moduleConfig.Options = append(moduleConfig.Options, smilecdr.ModuleOption{
 			Key:   "suppress_error_details",
-			Value: v.(string),
+			Value: strconv.FormatBool(v.(bool)),
 		})
 	}
 	if v, ok := d.GetOk("http_security_suppress_platform_info"); ok {
 		moduleConfig.Options = append(moduleConfig.Options, smilecdr.ModuleOption{
 			Key:   "suppress_platform_info",
-			Value: v.(string),
+			Value: strconv.FormatBool(v.(bool)),
 		})
 	}
 	// JavaScript Execution Environment Options ------------------------
 	if v, ok := d.GetOk("javascript_debug_enabled"); ok {
 		moduleConfig.Options = append(moduleConfig.Options, smilecdr.ModuleOption{
 			Key:   "debug.debug_enabled",
-			Value: v.(string),
+			Value: strconv.FormatBool(v.(bool)),
 		})
 	}
 	if v, ok := d.GetOk("javascript_debug_host_address"); ok {
@@ -792,19 +793,19 @@ func smartOutboundSecurityResourceToModuleConfig(d *schema.ResourceData) (*smile
 	if v, ok := d.GetOk("javascript_debug_port"); ok {
 		moduleConfig.Options = append(moduleConfig.Options, smilecdr.ModuleOption{
 			Key:   "debug.port",
-			Value: v.(string),
+			Value: strconv.Itoa(v.(int)),
 		})
 	}
 	if v, ok := d.GetOk("javascript_debug_secure"); ok {
 		moduleConfig.Options = append(moduleConfig.Options, smilecdr.ModuleOption{
 			Key:   "debug.secure",
-			Value: v.(string),
+			Value: strconv.FormatBool(v.(bool)),
 		})
 	}
 	if v, ok := d.GetOk("javascript_debug_suspend"); ok {
 		moduleConfig.Options = append(moduleConfig.Options, smilecdr.ModuleOption{
 			Key:   "debug.suspend",
-			Value: v.(string),
+			Value: strconv.FormatBool(v.(bool)),
 		})
 	}
 	// JWKS Options --------------------------------
@@ -818,7 +819,7 @@ func smartOutboundSecurityResourceToModuleConfig(d *schema.ResourceData) (*smile
 	if v, ok := d.GetOk("oidc_http_client_jwks_cache_timeout"); ok {
 		moduleConfig.Options = append(moduleConfig.Options, smilecdr.ModuleOption{
 			Key:   "introspection_client.jwks_cache.mins",
-			Value: v.(string),
+			Value: strconv.Itoa(v.(int)),
 		})
 	}
 	if v, ok := d.GetOk("oidc_http_client_truststore_file"); ok {
@@ -837,21 +838,21 @@ func smartOutboundSecurityResourceToModuleConfig(d *schema.ResourceData) (*smile
 	if v, ok := d.GetOk("oidc_pkce_required"); ok {
 		moduleConfig.Options = append(moduleConfig.Options, smilecdr.ModuleOption{
 			Key:   "pkce.required",
-			Value: v.(string),
+			Value: strconv.FormatBool(v.(bool)),
 		})
 	}
 
 	if v, ok := d.GetOk("oidc_pkce_plain_challenge_supported"); ok {
 		moduleConfig.Options = append(moduleConfig.Options, smilecdr.ModuleOption{
 			Key:   "pkce.plain_challenge_supported",
-			Value: v.(string),
+			Value: strconv.FormatBool(v.(bool)),
 		})
 	}
 
 	if v, ok := d.GetOk("oidc_cache_authorization_tokens"); ok {
 		moduleConfig.Options = append(moduleConfig.Options, smilecdr.ModuleOption{
 			Key:   "cache.authorized_tokens.millis",
-			Value: v.(string),
+			Value: strconv.Itoa(v.(int)),
 		})
 	}
 
@@ -865,7 +866,7 @@ func smartOutboundSecurityResourceToModuleConfig(d *schema.ResourceData) (*smile
 	if v, ok := d.GetOk("oidc_client_secret_expiry_duration"); ok {
 		moduleConfig.Options = append(moduleConfig.Options, smilecdr.ModuleOption{
 			Key:   "client_secret.expiry_duration_days",
-			Value: v.(string),
+			Value: strconv.Itoa(v.(int)),
 		})
 	}
 
@@ -878,7 +879,7 @@ func smartOutboundSecurityResourceToModuleConfig(d *schema.ResourceData) (*smile
 	if v, ok := d.GetOk("oidc_rotate_token_after_use"); ok {
 		moduleConfig.Options = append(moduleConfig.Options, smilecdr.ModuleOption{
 			Key:   "rotate_refresh_token_after_use",
-			Value: v.(string),
+			Value: strconv.FormatBool(v.(bool)),
 		})
 	}
 	if v, ok := d.GetOk("oidc_smart_capabilities_list"); ok {
@@ -895,7 +896,7 @@ func smartOutboundSecurityResourceToModuleConfig(d *schema.ResourceData) (*smile
 	if v, ok := d.GetOk("oauth2_federation_enabled"); ok {
 		moduleConfig.Options = append(moduleConfig.Options, smilecdr.ModuleOption{
 			Key:   "federate_mode.enabled",
-			Value: v.(string),
+			Value: strconv.FormatBool(v.(bool)),
 		})
 	}
 	// SMART Callback Script Options ------------------------
@@ -927,7 +928,7 @@ func smartOutboundSecurityResourceToModuleConfig(d *schema.ResourceData) (*smile
 	if v, ok := d.GetOk("codap_enabled"); ok {
 		moduleConfig.Options = append(moduleConfig.Options, smilecdr.ModuleOption{
 			Key:   "codap.enabled",
-			Value: v.(string),
+			Value: strconv.FormatBool(v.(bool)),
 		})
 	}
 	// SMART Login Skin Options ------------------------
@@ -1038,7 +1039,7 @@ func smartOutboundSecurityResourceToModuleConfig(d *schema.ResourceData) (*smile
 	if v, ok := d.GetOk("smart_authorization_enforce_approved_scopes"); ok {
 		moduleConfig.Options = append(moduleConfig.Options, smilecdr.ModuleOption{
 			Key:   "enforce_approved_scopes_to_restrict_permissions",
-			Value: v.(string),
+			Value: strconv.FormatBool(v.(bool)),
 		})
 	}
 	if v, ok := d.GetOk("smart_authorization_scopes_supported"); ok {
@@ -1064,38 +1065,38 @@ func smartOutboundSecurityResourceToModuleConfig(d *schema.ResourceData) (*smile
 	if v, ok := d.GetOk("sessions_in_memory"); ok {
 		moduleConfig.Options = append(moduleConfig.Options, smilecdr.ModuleOption{
 			Key:   "sessions.inmemory",
-			Value: v.(string),
+			Value: strconv.FormatBool(v.(bool)),
 		})
 	}
 	if v, ok := d.GetOk("sessions_max_concurrent_sessions_per_user"); ok {
 		moduleConfig.Options = append(moduleConfig.Options, smilecdr.ModuleOption{
 			Key:   "sessions.maximum_concurrent",
-			Value: v.(string),
+			Value: strconv.Itoa(v.(int)),
 		})
 	}
 	if v, ok := d.GetOk("sessions_scavenger_interval_ms"); ok {
 		moduleConfig.Options = append(moduleConfig.Options, smilecdr.ModuleOption{
 			Key:   "sessions.scavenger.interval.millis",
-			Value: v.(string),
+			Value: strconv.Itoa(v.(int)),
 		})
 	}
 	if v, ok := d.GetOk("sessions_timeout_mins"); ok {
 		moduleConfig.Options = append(moduleConfig.Options, smilecdr.ModuleOption{
 			Key:   "sessions.timeout.mins",
-			Value: v.(string),
+			Value: strconv.Itoa(v.(int)),
 		})
 	}
 	// TLS Options --------------------------------
 	if v, ok := d.GetOk("tls_client_auth_enabled"); ok {
 		moduleConfig.Options = append(moduleConfig.Options, smilecdr.ModuleOption{
 			Key:   "tls.clientauth.enabled",
-			Value: v.(string),
+			Value: strconv.FormatBool(v.(bool)),
 		})
 	}
 	if v, ok := d.GetOk("tls_enabled"); ok {
 		moduleConfig.Options = append(moduleConfig.Options, smilecdr.ModuleOption{
 			Key:   "tls.enabled",
-			Value: v.(string),
+			Value: strconv.FormatBool(v.(bool)),
 		})
 	}
 	if v, ok := d.GetOk("tls_keystore_filename"); ok {

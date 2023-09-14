@@ -98,7 +98,6 @@ resource "smilecdr_smart_outbound_security" "smart_auth_outbound" {
   // codap_authorization_script_file = 
   codap_authorization_script_text = local.codap_authorization_callback
   codap_enabled                   = true
-
   smart_login_skin_approval_template          = "/userapprove.html"
   smart_login_skin_context_selection_template = "/contextselect.html"
   smart_login_skin_error_template             = "/usererror.html"
