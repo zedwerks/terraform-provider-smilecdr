@@ -8,22 +8,21 @@ import (
 	"fmt"
 )
 
-type ModuleConfig struct {
-	NodeId       string               `json:"nodeId,omitempty"`
-	ModuleId     string               `json:"moduleId,omitempty"`
-	ModuleType   string               `json:"moduleType,omitempty"`
-	Options      []ModuleOption       `json:"options,omitempty"`
-	Dependencies []ModuleDependencies `json:"dependencies,omitempty"`
-}
-
 type ModuleOption struct {
 	Key   string `json:"key,omitempty"`
 	Value string `json:"value,omitempty"`
 }
 
-type ModuleDependencies struct {
+type ModuleDependency struct {
 	ModuleId string `json:"moduleId,omitempty"`
 	Type     string `json:"type,omitempty"`
+}
+
+type ModuleConfig struct {
+	ModuleId     string             `json:"moduleId,omitempty"`
+	ModuleType   string             `json:"moduleType,omitempty"`
+	Options      []ModuleOption     `json:"options,omitempty"`
+	Dependencies []ModuleDependency `json:"dependencies,omitempty"`
 }
 
 func (moduleConfig *ModuleConfig) LookupOptionOk(key string) (string, bool) {
@@ -50,7 +49,7 @@ func (smilecdr *Client) GetModuleConfigs() ([]ModuleConfig, error) {
 	return modules, err
 }
 
-func (smilecdr *Client) GetModuleConfig(nodeId, moduleId string) (ModuleConfig, error) {
+func (smilecdr *Client) GetModuleConfig(nodeId string, moduleId string) (ModuleConfig, error) {
 	var module ModuleConfig
 	var endpoint = fmt.Sprintf("/module-config/%s/%s", nodeId, moduleId)
 	jsonBody, getErr := smilecdr.Get(endpoint)
@@ -67,10 +66,9 @@ func (smilecdr *Client) GetModuleConfig(nodeId, moduleId string) (ModuleConfig, 
 	return module, err
 }
 
-func (smilecdr *Client) PostModuleConfig(module ModuleConfig) (ModuleConfig, error) {
+func (smilecdr *Client) PostModuleConfig(nodeId string, module ModuleConfig) (ModuleConfig, error) {
 	var newModule ModuleConfig
 	var moduleId = module.ModuleId
-	var nodeId = module.NodeId
 
 	fmt.Println("PostModuleConfig: ", module)
 
@@ -91,10 +89,9 @@ func (smilecdr *Client) PostModuleConfig(module ModuleConfig) (ModuleConfig, err
 	return newModule, err
 }
 
-func (smilecdr *Client) PutModuleConfig(module ModuleConfig) (ModuleConfig, error) {
+func (smilecdr *Client) PutModuleConfig(nodeId string, module ModuleConfig) (ModuleConfig, error) {
 	var newModule ModuleConfig
 	var moduleId = module.ModuleId
-	var nodeId = module.NodeId
 
 	var endpoint = fmt.Sprintf("/module-config/%s/%s/set", nodeId, moduleId)
 	jsonBody, _ := json.Marshal(module)
@@ -113,7 +110,7 @@ func (smilecdr *Client) PutModuleConfig(module ModuleConfig) (ModuleConfig, erro
 	return newModule, err
 }
 
-func (smilecdr *Client) DeleteModuleConfig(nodeId, moduleId string) error {
+func (smilecdr *Client) DeleteModuleConfig(nodeId string, moduleId string) error {
 	var endpoint = fmt.Sprintf("/module-config/%s/%s/archive", nodeId, moduleId)
 	_, err := smilecdr.Delete(endpoint)
 	return err

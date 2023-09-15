@@ -12,10 +12,7 @@ import (
 	"github.com/zedwerks/terraform-smilecdr/smilecdr"
 )
 
-type exampleProvider struct {
-}
-
-func New() *schema.Provider {
+func Provider() *schema.Provider {
 	return &schema.Provider{
 		Schema: map[string]*schema.Schema{
 			"base_url": {

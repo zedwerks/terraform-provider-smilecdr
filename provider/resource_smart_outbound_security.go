@@ -251,6 +251,18 @@ func resourceSmartOutboundSecurity() *schema.Resource {
 				Optional: true,
 			},
 			// OpenID Connect (OIDC) Options ------------------------
+			"oidc_pkce_required": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Default:     false,
+				Description: "If this setting is enabled, the server will require the use of PKCE for all Authorization Code SMART Auth flows. Enabling this setting also disallows the use of the OAuth2 Implicit Grant type, since this flow does not support PKCE.",
+			},
+			"oidc_pkce_plain_challenge_supported": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Default:     true,
+				Description: "If this setting is enabled, the server will allow the use of the plain PKCE challenge method. This is not recommended, but is supported for backwards compatibility.",
+			},
 			"oidc_cache_authorization_tokens": {
 				Type:     schema.TypeInt,
 				Optional: true,
@@ -285,18 +297,7 @@ func resourceSmartOutboundSecurity() *schema.Resource {
 				ValidateDiagFunc: validations.ValidateDiagFunc(validation.IsURLWithHTTPorHTTPS),
 				Description:      "This is the URL that will be placed in OpenID Connect tokens as the iss (issuer) token. The value should be the URL to the identity server.",
 			},
-			"oidc_pkce_plain_challenge_supported": {
-				Type:        schema.TypeBool,
-				Optional:    true,
-				Default:     true,
-				Description: "If this setting is enabled, the server will allow the use of the plain PKCE challenge method. This is not recommended, but is supported for backwards compatibility.",
-			},
-			"oidc_pkce_required": {
-				Type:        schema.TypeBool,
-				Optional:    true,
-				Default:     false,
-				Description: "If this setting is enabled, the server will require the use of PKCE for all Authorization Code SMART Auth flows. Enabling this setting also disallows the use of the OAuth2 Implicit Grant type, since this flow does not support PKCE.",
-			},
+
 			"oidc_rotate_token_after_use": {
 				Type:        schema.TypeBool,
 				Optional:    true,
@@ -583,7 +584,6 @@ func smartOutboundSecurityResourceToModuleConfig(d *schema.ResourceData) (*smile
 	moduleConfig := &smilecdr.ModuleConfig{
 		ModuleId:   d.Get("module_id").(string),
 		ModuleType: d.Get("module_type").(string),
-		NodeId:     d.Get("node_id").(string),
 	}
 
 	// User Authentication Options ------------------------
@@ -671,7 +671,7 @@ func smartOutboundSecurityResourceToModuleConfig(d *schema.ResourceData) (*smile
 	if v, ok := d.GetOk("http_listener_https_forwarding_assumed"); ok {
 		moduleConfig.Options = append(moduleConfig.Options, smilecdr.ModuleOption{
 			Key:   "https_forwarding_assumed",
-			Value: v.(string),
+			Value: strconv.FormatBool(v.(bool)),
 		})
 	}
 	if v, ok := d.GetOk("http_listener_port"); ok {
@@ -1161,26 +1161,26 @@ func smartOutboundSecurityResourceToModuleConfig(d *schema.ResourceData) (*smile
 	}
 	// Dependencies --------------------------------
 	if v, ok := d.GetOk("dependency_local_inbound_security"); ok {
-		moduleConfig.Dependencies = append(moduleConfig.Dependencies, smilecdr.ModuleDependencies{
+		moduleConfig.Dependencies = append(moduleConfig.Dependencies, smilecdr.ModuleDependency{
 			ModuleId: "local_security",
 			Type:     v.(string),
 		})
 
 	}
 	if v, ok := d.GetOk("dependency_fhir_persistence_module"); ok {
-		moduleConfig.Dependencies = append(moduleConfig.Dependencies, smilecdr.ModuleDependencies{
+		moduleConfig.Dependencies = append(moduleConfig.Dependencies, smilecdr.ModuleDependency{
 			ModuleId: "persistence",
 			Type:     v.(string),
 		})
 	}
 	if v, ok := d.GetOk("dependency_saml_authentication_module"); ok {
-		moduleConfig.Dependencies = append(moduleConfig.Dependencies, smilecdr.ModuleDependencies{
+		moduleConfig.Dependencies = append(moduleConfig.Dependencies, smilecdr.ModuleDependency{
 			ModuleId: "security_in_saml",
 			Type:     v.(string),
 		})
 	}
 	if v, ok := d.GetOk("dependency_self_service_user_management_module"); ok {
-		moduleConfig.Dependencies = append(moduleConfig.Dependencies, smilecdr.ModuleDependencies{
+		moduleConfig.Dependencies = append(moduleConfig.Dependencies, smilecdr.ModuleDependency{
 			ModuleId: "self_service_user_management",
 			Type:     v.(string),
 		})
@@ -1193,12 +1193,13 @@ func resourceSmartOutboundSecurityCreate(ctx context.Context, d *schema.Resource
 	c := m.(*smilecdr.Client)
 
 	moduleConfig, err := smartOutboundSecurityResourceToModuleConfig(d)
+	nodeId := d.Get("node_id").(string)
 
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	module, err := c.PostModuleConfig(*moduleConfig)
+	module, err := c.PostModuleConfig(nodeId, *moduleConfig)
 
 	if err != nil {
 		return diag.FromErr(err)
@@ -1229,11 +1230,19 @@ func resourceSmartOutboundSecurityRead(ctx context.Context, d *schema.ResourceDa
 	}
 	val, ok = moduleConfig.LookupOptionOk("anonymous.access.enabled")
 	if ok {
-		d.Set("anonymous_access_enabled", val)
+		boolVal, err := strconv.ParseBool(val)
+		if err != nil {
+			return diag.FromErr(err)
+		}
+		d.Set("anonymous_access_enabled", boolVal)
 	}
 	val, ok = moduleConfig.LookupOptionOk("saml.enabled")
 	if ok {
-		d.Set("saml_authentication_enabled", val)
+		boolVal, err := strconv.ParseBool(val)
+		if err != nil {
+			return diag.FromErr(err)
+		}
+		d.Set("saml_authentication_enabled", boolVal)
 	}
 	val, ok = moduleConfig.LookupOptionOk("cors.allowed_headers")
 	if ok {
@@ -1241,7 +1250,11 @@ func resourceSmartOutboundSecurityRead(ctx context.Context, d *schema.ResourceDa
 	}
 	val, ok = moduleConfig.LookupOptionOk("cors.enable")
 	if ok {
-		d.Set("cors_enabled", val)
+		boolVal, err := strconv.ParseBool(val)
+		if err != nil {
+			return diag.FromErr(err)
+		}
+		d.Set("cors_enabled", boolVal)
 	}
 	val, ok = moduleConfig.LookupOptionOk("cors.origins")
 	if ok {
@@ -1250,7 +1263,11 @@ func resourceSmartOutboundSecurityRead(ctx context.Context, d *schema.ResourceDa
 	// Da Vinci Options ------------------------
 	val, ok = moduleConfig.LookupOptionOk("davinci.consent_handling")
 	if ok {
-		d.Set("davinci_native_consent_handling", val)
+		boolVal, err := strconv.ParseBool(val)
+		if err != nil {
+			return diag.FromErr(err)
+		}
+		d.Set("davinci_native_consent_handling", boolVal)
 	}
 	// HTTP Access Log Options ------------------------
 	val, ok = moduleConfig.LookupOptionOk("access_log.appenders")
@@ -1273,49 +1290,93 @@ func resourceSmartOutboundSecurityRead(ctx context.Context, d *schema.ResourceDa
 	}
 	val, ok = moduleConfig.LookupOptionOk("endpoint_health.status_code_if_unhealthy")
 	if ok {
-		d.Set("http_listener_unhealthy_response_code", val)
+		intVal, err := strconv.Atoi(val)
+		if err != nil {
+			return diag.FromErr(err)
+		}
+		d.Set("http_listener_unhealthy_response_code", intVal)
 	}
 	val, ok = moduleConfig.LookupOptionOk("https_forwarding_assumed")
 	if ok {
-		d.Set("http_listener_https_forwarding_assumed", val)
+		boolVal, err := strconv.ParseBool(val)
+		if err != nil {
+			return diag.FromErr(err)
+		}
+		d.Set("http_listener_https_forwarding_assumed", boolVal)
 	}
 	val, ok = moduleConfig.LookupOptionOk("port")
 	if ok {
-		d.Set("http_listener_port", val)
+		intVal, err := strconv.Atoi(val)
+		if err != nil {
+			return diag.FromErr(err)
+		}
+		d.Set("http_listener_port", intVal)
 	}
 	val, ok = moduleConfig.LookupOptionOk("respect_forward_headers")
 	if ok {
-		d.Set("http_listener_respect_forward_headers", val)
+		boolVal, err := strconv.ParseBool(val)
+		if err != nil {
+			return diag.FromErr(err)
+		}
+		d.Set("http_listener_respect_forward_headers", boolVal)
 	}
 	// HTTP Request Pool Options ------------------------
 	val, ok = moduleConfig.LookupOptionOk("max_header_size.request.kb")
 	if ok {
-		d.Set("http_request_maximum_request_header_size", val)
+		intVal, err := strconv.Atoi(val)
+		if err != nil {
+			return diag.FromErr(err)
+		}
+		d.Set("http_request_maximum_request_header_size", intVal)
 	}
 	val, ok = moduleConfig.LookupOptionOk("max_header_size.response.kb")
 	if ok {
-		d.Set("http_request_maximum_response_header_size", val)
+		intVal, err := strconv.Atoi(val)
+		if err != nil {
+			return diag.FromErr(err)
+		}
+		d.Set("http_request_maximum_response_header_size", intVal)
 	}
 	val, ok = moduleConfig.LookupOptionOk("read_idle_timeout.millis")
 	if ok {
-		d.Set("http_request_read_idle_timeout", val)
+		intVal, err := strconv.Atoi(val)
+		if err != nil {
+			return diag.FromErr(err)
+		}
+		d.Set("http_request_read_idle_timeout", intVal)
 	}
 	val, ok = moduleConfig.LookupOptionOk("thread_pool.accept_queue_size")
 	if ok {
-		d.Set("http_request_thread_pool_accept_queue_size", val)
+		intVal, err := strconv.Atoi(val)
+		if err != nil {
+			return diag.FromErr(err)
+		}
+		d.Set("http_request_thread_pool_accept_queue_size", intVal)
 	}
 	val, ok = moduleConfig.LookupOptionOk("threadpool.max")
 	if ok {
-		d.Set("http_request_thread_pool_max_size", val)
+		intVal, err := strconv.Atoi(val)
+		if err != nil {
+			return diag.FromErr(err)
+		}
+		d.Set("http_request_thread_pool_max_size", intVal)
 	}
 	val, ok = moduleConfig.LookupOptionOk("threadpool.min")
 	if ok {
-		d.Set("http_request_thread_pool_min_size", val)
+		intVal, err := strconv.Atoi(val)
+		if err != nil {
+			return diag.FromErr(err)
+		}
+		d.Set("http_request_thread_pool_min_size", intVal)
 	}
 	// HTTP Security Options --------------------------------
 	val, ok = moduleConfig.LookupOptionOk("block_http_head")
 	if ok {
-		d.Set("http_security_block_http_head", val)
+		boolVal, err := strconv.ParseBool(val)
+		if err != nil {
+			return diag.FromErr(err)
+		}
+		d.Set("http_security_block_http_head", boolVal)
 	}
 	val, ok = moduleConfig.LookupOptionOk("custom_response_headers")
 	if ok {
@@ -1332,16 +1393,28 @@ func resourceSmartOutboundSecurityRead(ctx context.Context, d *schema.ResourceDa
 	}
 	val, ok = moduleConfig.LookupOptionOk("suppress_error_details")
 	if ok {
-		d.Set("http_security_suppress_error_details", val)
+		boolVal, err := strconv.ParseBool(val)
+		if err != nil {
+			return diag.FromErr(err)
+		}
+		d.Set("http_security_suppress_error_details", boolVal)
 	}
 	val, ok = moduleConfig.LookupOptionOk("suppress_platform_info")
 	if ok {
-		d.Set("http_security_suppress_platform_info", val)
+		boolVal, err := strconv.ParseBool(val)
+		if err != nil {
+			return diag.FromErr(err)
+		}
+		d.Set("http_security_suppress_platform_info", boolVal)
 	}
 	// JavaScript Execution Environment Options ------------------------
 	val, ok = moduleConfig.LookupOptionOk("debug.debug_enabled")
 	if ok {
-		d.Set("javascript_debug_enabled", val)
+		boolVal, err := strconv.ParseBool(val)
+		if err != nil {
+			return diag.FromErr(err)
+		}
+		d.Set("javascript_debug_enabled", boolVal)
 	}
 	val, ok = moduleConfig.LookupOptionOk("debug.host_address")
 	if ok {
@@ -1353,15 +1426,27 @@ func resourceSmartOutboundSecurityRead(ctx context.Context, d *schema.ResourceDa
 	}
 	val, ok = moduleConfig.LookupOptionOk("debug.port")
 	if ok {
-		d.Set("javascript_debug_port", val)
+		intVal, err := strconv.Atoi(val)
+		if err != nil {
+			return diag.FromErr(err)
+		}
+		d.Set("javascript_debug_port", intVal)
 	}
 	val, ok = moduleConfig.LookupOptionOk("debug.secure")
 	if ok {
-		d.Set("javascript_debug_secure", val)
+		boolVal, err := strconv.ParseBool(val)
+		if err != nil {
+			return diag.FromErr(err)
+		}
+		d.Set("javascript_debug_secure", boolVal)
 	}
 	val, ok = moduleConfig.LookupOptionOk("debug.suspend")
 	if ok {
-		d.Set("javascript_debug_suspend", val)
+		boolVal, err := strconv.ParseBool(val)
+		if err != nil {
+			return diag.FromErr(err)
+		}
+		d.Set("javascript_debug_suspend", boolVal)
 	}
 	// JWKS Options --------------------------------
 	val, ok = moduleConfig.LookupOptionOk("openid.signing.keystore_id")
@@ -1371,7 +1456,11 @@ func resourceSmartOutboundSecurityRead(ctx context.Context, d *schema.ResourceDa
 	// OIDC Token Validation Options ------------------------
 	val, ok = moduleConfig.LookupOptionOk("introspection_client.jwks_cache.mins")
 	if ok {
-		d.Set("oidc_http_client_jwks_cache_timeout", val)
+		intVal, err := strconv.Atoi(val)
+		if err != nil {
+			return diag.FromErr(err)
+		}
+		d.Set("oidc_http_client_jwks_cache_timeout", intVal)
 	}
 	val, ok = moduleConfig.LookupOptionOk("introspection_client.truststore.file")
 	if ok {
@@ -1382,17 +1471,29 @@ func resourceSmartOutboundSecurityRead(ctx context.Context, d *schema.ResourceDa
 		d.Set("oidc_http_client_truststore_password", val)
 	}
 	// OpenID Connect (OIDC) Options ------------------------
-	val, ok = moduleConfig.LookupOptionOk("pkce.plain_challenge_supported")
-	if ok {
-		d.Set("oidc_pkce_plain_challenge_supported", val)
-	}
 	val, ok = moduleConfig.LookupOptionOk("pkce.required")
 	if ok {
-		d.Set("oidc_pkce_required", val)
+		boolVal, err := strconv.ParseBool(val)
+		if err != nil {
+			return diag.FromErr(err)
+		}
+		d.Set("oidc_pkce_required", boolVal)
+	}
+	val, ok = moduleConfig.LookupOptionOk("pkce.plain_challenge_supported")
+	if ok {
+		boolVal, err := strconv.ParseBool(val)
+		if err != nil {
+			return diag.FromErr(err)
+		}
+		d.Set("oidc_pkce_plain_challenge_supported", boolVal)
 	}
 	val, ok = moduleConfig.LookupOptionOk("cache.authorized_tokens.millis")
 	if ok {
-		d.Set("oidc_cache_authorization_tokens", val)
+		intVal, err := strconv.Atoi(val)
+		if err != nil {
+			return diag.FromErr(err)
+		}
+		d.Set("oidc_cache_authorization_tokens", intVal)
 	}
 	val, ok = moduleConfig.LookupOptionOk("client_secret.encoding")
 	if ok {
@@ -1400,7 +1501,11 @@ func resourceSmartOutboundSecurityRead(ctx context.Context, d *schema.ResourceDa
 	}
 	val, ok = moduleConfig.LookupOptionOk("client_secret.expiry_duration_days")
 	if ok {
-		d.Set("oidc_client_secret_expiry_duration", val)
+		intVal, err := strconv.Atoi(val)
+		if err != nil {
+			return diag.FromErr(err)
+		}
+		d.Set("oidc_client_secret_expiry_duration", intVal)
 	}
 	val, ok = moduleConfig.LookupOptionOk("issuer.url")
 	if ok {
@@ -1408,7 +1513,11 @@ func resourceSmartOutboundSecurityRead(ctx context.Context, d *schema.ResourceDa
 	}
 	val, ok = moduleConfig.LookupOptionOk("rotate_refresh_token_after_use")
 	if ok {
-		d.Set("oidc_rotate_token_after_use", val)
+		boolVal, err := strconv.ParseBool(val)
+		if err != nil {
+			return diag.FromErr(err)
+		}
+		d.Set("oidc_rotate_token_after_use", boolVal)
 	}
 	val, ok = moduleConfig.LookupOptionOk("smart_capabilities_list")
 	if ok {
@@ -1418,7 +1527,11 @@ func resourceSmartOutboundSecurityRead(ctx context.Context, d *schema.ResourceDa
 	// OAuth2/OIDC Federation Options ------------------------
 	val, ok = moduleConfig.LookupOptionOk("federate_mode.enabled")
 	if ok {
-		d.Set("oauth2_federation_enabled", val)
+		boolVal, err := strconv.ParseBool(val)
+		if err != nil {
+			return diag.FromErr(err)
+		}
+		d.Set("oauth2_federation_enabled", boolVal)
 	}
 	// SMART Callback Script Options ------------------------
 	val, ok = moduleConfig.LookupOptionOk("post_authorize_script.file")
@@ -1440,7 +1553,11 @@ func resourceSmartOutboundSecurityRead(ctx context.Context, d *schema.ResourceDa
 	}
 	val, ok = moduleConfig.LookupOptionOk("codap.enabled")
 	if ok {
-		d.Set("codap_enabled", val)
+		boolVal, err := strconv.ParseBool(val)
+		if err != nil {
+			return diag.FromErr(err)
+		}
+		d.Set("codap_enabled", boolVal)
 	}
 	// SMART Login Skin Options ------------------------
 	val, ok = moduleConfig.LookupOptionOk("skin.approve_page.template")
@@ -1515,7 +1632,11 @@ func resourceSmartOutboundSecurityRead(ctx context.Context, d *schema.ResourceDa
 	}
 	val, ok = moduleConfig.LookupOptionOk("enforce_approved_scopes_to_restrict_permissions")
 	if ok {
-		d.Set("smart_authorization_enforce_approved_scopes", val)
+		boolVal, err := strconv.ParseBool(val)
+		if err != nil {
+			return diag.FromErr(err)
+		}
+		d.Set("smart_authorization_enforce_approved_scopes", boolVal)
 	}
 	val, ok = moduleConfig.LookupOptionOk("smart_configuration.scopes_supported")
 	if ok {
@@ -1533,28 +1654,52 @@ func resourceSmartOutboundSecurityRead(ctx context.Context, d *schema.ResourceDa
 	// Sessions Options ------------------------
 	val, ok = moduleConfig.LookupOptionOk("sessions.inmemory")
 	if ok {
-		d.Set("sessions_in_memory", val)
+		boolVal, err := strconv.ParseBool(val)
+		if err != nil {
+			return diag.FromErr(err)
+		}
+		d.Set("sessions_in_memory", boolVal)
 	}
 	val, ok = moduleConfig.LookupOptionOk("sessions.maximum_concurrent")
 	if ok {
-		d.Set("sessions_max_concurrent_sessions_per_user", val)
+		intVal, err := strconv.Atoi(val)
+		if err != nil {
+			return diag.FromErr(err)
+		}
+		d.Set("sessions_max_concurrent_sessions_per_user", intVal)
 	}
 	val, ok = moduleConfig.LookupOptionOk("sessions.scavenger.interval.millis")
 	if ok {
-		d.Set("sessions_scavenger_interval_ms", val)
+		intVal, err := strconv.Atoi(val)
+		if err != nil {
+			return diag.FromErr(err)
+		}
+		d.Set("sessions_scavenger_interval_ms", intVal)
 	}
 	val, ok = moduleConfig.LookupOptionOk("sessions.timeout.mins")
 	if ok {
-		d.Set("sessions_timeout_mins", val)
+		intVal, err := strconv.Atoi(val)
+		if err != nil {
+			return diag.FromErr(err)
+		}
+		d.Set("sessions_timeout_mins", intVal)
 	}
 	// TLS Options --------------------------------
 	val, ok = moduleConfig.LookupOptionOk("tls.clientauth.enabled")
 	if ok {
-		d.Set("tls_client_auth_enabled", val)
+		boolVal, err := strconv.ParseBool(val)
+		if err != nil {
+			return diag.FromErr(err)
+		}
+		d.Set("tls_client_auth_enabled", boolVal)
 	}
 	val, ok = moduleConfig.LookupOptionOk("tls.enabled")
 	if ok {
-		d.Set("tls_enabled", val)
+		boolVal, err := strconv.ParseBool(val)
+		if err != nil {
+			return diag.FromErr(err)
+		}
+		d.Set("tls_enabled", boolVal)
 	}
 	val, ok = moduleConfig.LookupOptionOk("tls.keystore.file")
 	if ok {
@@ -1620,6 +1765,8 @@ func resourceSmartOutboundSecurityUpdate(ctx context.Context, d *schema.Resource
 
 	c := m.(*smilecdr.Client)
 
+	nodeId := d.Get("node_id").(string)
+
 	moduleConfig, err := smartOutboundSecurityResourceToModuleConfig(d)
 
 	if err != nil {
@@ -1627,7 +1774,7 @@ func resourceSmartOutboundSecurityUpdate(ctx context.Context, d *schema.Resource
 	}
 	d.SetId(moduleConfig.ModuleId) // the primary resource identifier. must be unique.
 
-	_, pErr := c.PutModuleConfig(*moduleConfig)
+	_, pErr := c.PutModuleConfig(nodeId, *moduleConfig)
 
 	if pErr != nil {
 		return diag.FromErr(pErr)

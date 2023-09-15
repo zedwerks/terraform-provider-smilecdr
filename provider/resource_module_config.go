@@ -77,7 +77,6 @@ func resourceToModuleConfig(d *schema.ResourceData) (*smilecdr.ModuleConfig, err
 	moduleConfig := &smilecdr.ModuleConfig{
 		ModuleId:   d.Get("module_id").(string),
 		ModuleType: d.Get("module_type").(string),
-		NodeId:     d.Get("node_id").(string),
 	}
 
 	options := d.Get("options").([]interface{})
@@ -92,7 +91,7 @@ func resourceToModuleConfig(d *schema.ResourceData) (*smilecdr.ModuleConfig, err
 	dependencies := d.Get("dependencies").([]interface{})
 	for _, dependency := range dependencies {
 		dependencyMap := dependency.(map[string]interface{})
-		moduleConfig.Dependencies = append(moduleConfig.Dependencies, smilecdr.ModuleDependencies{
+		moduleConfig.Dependencies = append(moduleConfig.Dependencies, smilecdr.ModuleDependency{
 			ModuleId: dependencyMap["module_id"].(string),
 			Type:     dependencyMap["type"].(string),
 		})
@@ -105,11 +104,13 @@ func resourceModuleConfigCreate(ctx context.Context, d *schema.ResourceData, m i
 	c := m.(*smilecdr.Client)
 
 	moduleConfig, mErr := resourceToModuleConfig(d)
+	nodeId := d.Get("node_id").(string)
+
 	if mErr != nil {
 		return diag.FromErr(mErr)
 	}
 
-	_, err := c.PostModuleConfig(*moduleConfig)
+	_, err := c.PostModuleConfig(nodeId, *moduleConfig)
 
 	if err != nil {
 		return diag.FromErr(err)
@@ -131,7 +132,6 @@ func resourceModuleConfigRead(ctx context.Context, d *schema.ResourceData, m int
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	d.Set("node_id", moduleConfig.NodeId)
 	d.Set("module_id", moduleConfig.ModuleId)
 	d.Set("module_type", moduleConfig.ModuleType)
 
@@ -161,13 +161,15 @@ func resourceModuleConfigUpdate(ctx context.Context, d *schema.ResourceData, m i
 	c := m.(*smilecdr.Client)
 
 	moduleConfig, mErr := resourceToModuleConfig(d)
+	nodeId := d.Get("node_id").(string)
+
 	if mErr != nil {
 		return diag.FromErr(mErr)
 	}
 
 	d.SetId(moduleConfig.ModuleId)
 
-	_, err := c.PutModuleConfig(*moduleConfig)
+	_, err := c.PutModuleConfig(nodeId, *moduleConfig)
 
 	if err != nil {
 		return diag.FromErr(err)

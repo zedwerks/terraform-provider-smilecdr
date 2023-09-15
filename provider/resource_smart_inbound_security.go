@@ -195,7 +195,6 @@ func inboundSecurityResourceToModuleConfig(d *schema.ResourceData) (*smilecdr.Mo
 	moduleConfig := &smilecdr.ModuleConfig{
 		ModuleId:   d.Get("module_id").(string),
 		ModuleType: d.Get("module_type").(string),
-		NodeId:     d.Get("node_id").(string),
 	}
 
 	if v, ok := d.GetOk("enforce_approved_scopes_to_restrict_permissions"); ok {
@@ -338,20 +337,10 @@ func inboundSecurityResourceToModuleConfig(d *schema.ResourceData) (*smilecdr.Mo
 		})
 	}
 
-	// Add any other options that are not in the schema
-	options := d.Get("options").([]interface{})
-	for _, option := range options {
-		optionMap := option.(map[string]interface{})
-		moduleConfig.Options = append(moduleConfig.Options, smilecdr.ModuleOption{
-			Key:   optionMap["key"].(string),
-			Value: optionMap["value"].(string),
-		})
-	}
-
 	dependencies := d.Get("dependencies").([]interface{})
 	for _, dependency := range dependencies {
 		dependencyMap := dependency.(map[string]interface{})
-		moduleConfig.Dependencies = append(moduleConfig.Dependencies, smilecdr.ModuleDependencies{
+		moduleConfig.Dependencies = append(moduleConfig.Dependencies, smilecdr.ModuleDependency{
 			ModuleId: dependencyMap["module_id"].(string),
 			Type:     dependencyMap["type"].(string),
 		})
@@ -364,12 +353,13 @@ func resourceSmartInboundSecurityCreate(ctx context.Context, d *schema.ResourceD
 	c := m.(*smilecdr.Client)
 
 	moduleConfig, err := inboundSecurityResourceToModuleConfig(d)
+	nodeId := d.Get("node_id").(string)
 
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	module, err := c.PostModuleConfig(*moduleConfig)
+	module, err := c.PostModuleConfig(nodeId, *moduleConfig)
 
 	if err != nil {
 		return diag.FromErr(err)
@@ -518,13 +508,14 @@ func resourceSmartInboundSecurityUpdate(ctx context.Context, d *schema.ResourceD
 	c := m.(*smilecdr.Client)
 
 	moduleConfig, err := inboundSecurityResourceToModuleConfig(d)
+	nodeId := d.Get("node_id").(string)
 
 	if err != nil {
 		return diag.FromErr(err)
 	}
 	d.SetId(moduleConfig.ModuleId) // the primary resource identifier. must be unique.
 
-	_, pErr := c.PutModuleConfig(*moduleConfig)
+	_, pErr := c.PutModuleConfig(nodeId, *moduleConfig)
 
 	if pErr != nil {
 		return diag.FromErr(pErr)

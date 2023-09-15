@@ -13,39 +13,76 @@ import (
 )
 
 func TestSmileCdrOpenIdClientBasic(t *testing.T) {
-
-	clientId := "test-client"
-	clientName := "Test Client"
-	callbackUrl := "https://example.com/callback"
-
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckSmileCdrOpenIdClientDestroy,
+		CheckDestroy: testAccOpenIdClientDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCheckSmileCdrOpenIdClientConfig(clientId, clientName, callbackUrl),
+				Config: testAccMaxOpenIdClientConfig(),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckSmileCdrOpenIdClientExists("smilecdr_openid_client.new"),
+					testAccOpenIdClientExists("smilecdr_openid_client.max"),
 				),
+			},
+			{
+				ResourceName:      "smilecdr_openid_client.max",
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})
 }
-func testAccCheckSmileCdrOpenIdClientConfig(clientId, name, callbackUrl string) string {
-	return fmt.Sprintf(`
-	resource "smilecdr_openid_client" "new" {
-		{
-			client_id = %s
-    		client_name = %s
-			allowed_grant_types = ["AUTHORIZATION_CODE"]
-			callback_uris = [%s]
-  		}
-	}
-	`, clientId, name, callbackUrl)
+
+func testAccMaxOpenIdClientConfig() string {
+	return `resource "smilecdr_openid_client" "max" {		
+		node_id                       = "Master"
+		module_id                     = "smart_auth_federated"
+		access_token_validity_seconds = 300
+		allowed_grant_types           = ["REFRESH_TOKEN", "CLIENT_CREDENTIALS"]
+		auto_approve_scopes = ["openid", "profile", "fhirUser", "launch", "launch/patient" ]
+  		auto_grant_scopes = ["openid", "offline_access"]
+  		client_id         = "max"
+  		client_name       = "Client1"
+  		client_secrets {
+			secret     = "secret1234569900"
+			activation = "2023-08-05T00:09:53.702+00:00"
+		}
+		client_secrets {
+			secret = "secret23456789aabb"
+		}
+		fixed_scope                    = false
+		refresh_token_validity_seconds = 86400
+		registered_redirect_uris       = ["http://example-client1.com:6000", "http://example-client1.com:6001"]
+		scopes = [
+			"openid",
+			"profile",
+			"fhirUser",
+			"patient/*.read",
+			"launch",
+			"launch/patient",
+			"offline_access"
+		]
+		secret_required           = true
+		secret_client_can_change  = false
+		enabled                   = true
+		can_introspect_any_tokens = true
+		can_introspect_own_tokens = false
+		always_require_approval   = false
+		can_reissue_tokens        = false
+		remember_approved_scopes  = false
+		attestation_accepted      = false
+		jwks_url                  = "http://example-client1.com/jwks"
+		permissions {
+			permission = "FHIR_WRITE_ALL_IN_COMPARTMENT"
+			argument   = "Patient/123"
+		}
+		permissions {
+			permission = "ROLE_FHIR_CLIENT"
+		}	
+	}`
 }
 
-func testAccCheckSmileCdrOpenIdClientExists(n string) resource.TestCheckFunc {
+func testAccOpenIdClientExists(n string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 
@@ -61,7 +98,7 @@ func testAccCheckSmileCdrOpenIdClientExists(n string) resource.TestCheckFunc {
 	}
 }
 
-func testAccCheckSmileCdrOpenIdClientDestroy(s *terraform.State) error {
+func testAccOpenIdClientDestroy(s *terraform.State) error {
 	c := testAccProvider.Meta().(*smilecdr.Client)
 
 	for _, rs := range s.RootModule().Resources {
