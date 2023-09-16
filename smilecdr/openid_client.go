@@ -65,18 +65,21 @@ func (smilecdr *Client) GetOpenIdClients() ([]OpenIdClient, error) {
 
 func (smilecdr *Client) GetOpenIdClient(nodeId string, moduleId string, clientId string) (OpenIdClient, error) {
 	var client OpenIdClient
+	var err error
 	var endpoint = fmt.Sprintf("/openid-connect-clients/%s/%s/%s", nodeId, moduleId, clientId)
-	jsonBody, getErr := smilecdr.Get(endpoint)
-	if getErr != nil {
-		fmt.Println("error during Get in GetOpenIdClient:", getErr)
-		return client, getErr
-	}
-
-	err := json.Unmarshal(jsonBody, &client)
+	jsonBody, err := smilecdr.Get(endpoint)
 	if err != nil {
-		fmt.Println("error parsing Get response JSON:", err)
+		fmt.Println("error during Get in GetOpenIdClient:", err)
+		return client, err
 	}
 
+	if jsonBody != nil {
+		fmt.Println("GET Response jsonBody:", string(jsonBody))
+		err = json.Unmarshal(jsonBody, &client)
+		if err != nil {
+			fmt.Println("error parsing Get response JSON:", err)
+		}
+	}
 	return client, err
 }
 
@@ -88,7 +91,7 @@ func (smilecdr *Client) PostOpenIdClient(client OpenIdClient) (OpenIdClient, err
 	var endpoint = fmt.Sprintf("/openid-connect-clients/%s/%s", nodeId, moduleId)
 	jsonBody, _ := json.Marshal(client)
 
-	fmt.Println("jsonBody:", string(jsonBody))
+	fmt.Println("POST Request jsonBody:", string(jsonBody))
 
 	jsonBody, postErr := smilecdr.Post(endpoint, jsonBody)
 	if postErr != nil {
@@ -105,7 +108,6 @@ func (smilecdr *Client) PostOpenIdClient(client OpenIdClient) (OpenIdClient, err
 }
 
 func (smilecdr *Client) PutOpenIdClient(client OpenIdClient) (OpenIdClient, error) {
-	var newClient OpenIdClient
 	var nodeId = client.NodeId
 	var moduleId = client.ModuleId
 	var clientId = client.ClientId
@@ -114,20 +116,14 @@ func (smilecdr *Client) PutOpenIdClient(client OpenIdClient) (OpenIdClient, erro
 
 	jsonBody, _ := json.Marshal(client)
 
-	fmt.Println("jsonBody:", string(jsonBody))
-
-	jsonBody, putErr := smilecdr.Put(endpoint, jsonBody)
-	if putErr != nil {
-		fmt.Println("error during Put in PutOpenIdClient:", putErr)
-		return newClient, putErr
-	}
-
-	err := json.Unmarshal(jsonBody, &newClient)
+	resp, err := smilecdr.Put(endpoint, jsonBody)
 	if err != nil {
-		fmt.Println("error parsing Put response JSON:", err)
+		fmt.Println("error during Put in PutOpenIdClient:", err)
+		fmt.Println("ResponseBody:", string(resp))
+		return client, err
 	}
 
-	return newClient, err
+	return client, nil
 }
 
 func (smilecdr *Client) DeleteOpenIdClient(nodeId string, moduleId string, clientId string) error {

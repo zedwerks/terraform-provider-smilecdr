@@ -432,6 +432,8 @@ func resourceOpenIdClientUpdate(ctx context.Context, d *schema.ResourceData, m i
 
 func resourceOpenIdClientDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 
+	fmt.Println("Deleting OpenIdClient")
+
 	var diags diag.Diagnostics
 
 	d.Set("archived_at", time.Now().Format(time.RFC3339))

@@ -2,8 +2,9 @@
 # SPDX-License-Identifier: Apache-2.0
 
 resource "smilecdr_openid_client" "client1" {
+  depends_on = [ smilecdr_smart_outbound_security.smart_auth_federated ]
   node_id                       = "Master"
-  module_id                     = "smart_auth"
+  module_id                     = "smart_auth_federated"
   access_token_validity_seconds = 300
   allowed_grant_types           = ["REFRESH_TOKEN", "CLIENT_CREDENTIALS"]
   auto_approve_scopes = ["openid", "profile",

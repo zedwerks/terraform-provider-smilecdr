@@ -3,8 +3,9 @@
 
 
 resource "smilecdr_openid_client" "postman" {
+  depends_on = [ smilecdr_smart_outbound_security.smart_auth_federated ]
   node_id                       = "Master"
-  module_id                     = "smart_auth"
+  module_id                     = "smart_auth_federated"
   access_token_validity_seconds = 300
   allowed_grant_types           = ["REFRESH_TOKEN", "AUTHORIZATION_CODE"]
   auto_approve_scopes = ["openid", "profile",

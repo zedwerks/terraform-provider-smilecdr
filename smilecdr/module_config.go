@@ -90,24 +90,19 @@ func (smilecdr *Client) PostModuleConfig(nodeId string, module ModuleConfig) (Mo
 }
 
 func (smilecdr *Client) PutModuleConfig(nodeId string, module ModuleConfig) (ModuleConfig, error) {
-	var newModule ModuleConfig
 	var moduleId = module.ModuleId
 
 	var endpoint = fmt.Sprintf("/module-config/%s/%s/set", nodeId, moduleId)
 	jsonBody, _ := json.Marshal(module)
 
-	jsonBody, putErr := smilecdr.Put(endpoint, jsonBody)
+	resp, putErr := smilecdr.Put(endpoint, jsonBody)
 	if putErr != nil {
 		fmt.Println("error during Put in PutModuleConfig:", putErr)
-		return newModule, putErr
+		fmt.Println("ResponseBody:", string(resp))
+		return module, putErr
 	}
 
-	err := json.Unmarshal(jsonBody, &newModule)
-	if err != nil {
-		fmt.Println("error parsing Put response JSON:", err)
-	}
-
-	return newModule, err
+	return module, nil
 }
 
 func (smilecdr *Client) DeleteModuleConfig(nodeId string, moduleId string) error {

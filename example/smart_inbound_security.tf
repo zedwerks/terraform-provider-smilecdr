@@ -22,7 +22,7 @@ resource "smilecdr_smart_inbound_security" "ex1_smart_inbound" {
   revocation_endpoint                             = "http://localhost:8080/auth/realms/poc/protocol/openid-connect/revoke"
   introspection_client_jwks_cache_mins            = 10
   introspection_client_truststore_file            = "file://somefile.jks"
-  callback_script_text                            = local.callbackScriptFile
+  callback_script_text                            = local.inbound_callback_script
   tfa_totp_issuer_name                            = "issuerName"
   tfa_totp_lock_after_failed_attempts             = 2
   seed_servers_file                               = "seedServers.txt"

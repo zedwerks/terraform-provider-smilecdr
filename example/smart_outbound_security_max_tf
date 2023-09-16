@@ -11,7 +11,7 @@ resource "smilecdr_smart_outbound_security" "smart_auth_outbound" {
   cors_enabled                               = true
   cors_origins                               = "*"
   davinci_native_consent_handling            = false
-  http_access_log_appenders                  = ["console", "lra"]
+  http_access_log_appenders                  = "appender-a\nappender-b"
   http_listener_bind_address                 = "0.0.0.0"
   http_listener_context_path                 = "/"
   http_listener_endpoint_health_path         = "/health-check"

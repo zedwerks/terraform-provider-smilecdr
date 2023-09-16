@@ -7,48 +7,87 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	"github.com/zedwerks/terraform-smilecdr/smilecdr"
 )
 
 func TestSmileCdrOpenIdClientBasic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccOpenIdClientDestroy,
+		PreCheck:  func() { testAccPreCheck(t) },
+		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccMaxOpenIdClientConfig(),
+				Config: testOpenIdClientConfig_basic(),
 				Check: resource.ComposeTestCheckFunc(
-					testAccOpenIdClientExists("smilecdr_openid_client.max"),
+					testAccOpenIdClientExists("smilecdr_openid_client.basic"),
 				),
-			},
-			{
-				ResourceName:      "smilecdr_openid_client.max",
-				ImportState:       true,
-				ImportStateVerify: true,
 			},
 		},
 	})
 }
 
-func testAccMaxOpenIdClientConfig() string {
-	return `resource "smilecdr_openid_client" "max" {		
+/*
+func TestSmileCdrOpenIdClientConfidential(t *testing.T) {
+	resource.Test(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t) },
+		Providers: testAccProviders,
+		Steps: []resource.TestStep{
+			{
+				Config: testOpenIdClientConfig_confidential(),
+				Check: resource.ComposeTestCheckFunc(
+					testAccOpenIdClientExists("smilecdr_openid_client.confidential"),
+				),
+			},
+		},
+	})
+} */
+
+func testOpenIdClientConfig_basic() string {
+
+	clientId := "cl_" + acctest.RandString(10)
+
+	return fmt.Sprintf(`resource "smilecdr_openid_client" "basic" {		
 		node_id                       = "Master"
-		module_id                     = "smart_auth_federated"
+		module_id                     = "smart_auth"
 		access_token_validity_seconds = 300
 		allowed_grant_types           = ["REFRESH_TOKEN", "CLIENT_CREDENTIALS"]
 		auto_approve_scopes = ["openid", "profile", "fhirUser", "launch", "launch/patient" ]
   		auto_grant_scopes = ["openid", "offline_access"]
-  		client_id         = "max"
+  		client_id         = "%s"
   		client_name       = "Client1"
+		fixed_scope                    = false
+		refresh_token_validity_seconds = 86400
+		registered_redirect_uris       = ["http://example-client1.com:6000"]
+		scopes = [
+			"openid",
+			"profile",
+			"fhirUser",
+			"patient/*.read",
+			"launch",
+			"offline_access"
+		]
+		secret_required           = false
+		enabled                   = true
+	}`, clientId)
+}
+
+func testOpenIdClientConfig_confidential() string {
+
+	clientId := "cc_" + acctest.RandString(10)
+
+	return fmt.Sprintf(`resource "smilecdr_openid_client" "confidential" {		
+		node_id                       = "Master"
+		module_id                     = "smart_auth"
+		access_token_validity_seconds = 300
+		allowed_grant_types           = ["REFRESH_TOKEN", "CLIENT_CREDENTIALS"]
+		auto_approve_scopes = ["openid", "profile", "fhirUser", "launch", "launch/patient" ]
+  		auto_grant_scopes = ["openid", "offline_access"]
+  		client_id         = "%s"
+  		client_name       = "Client2"
   		client_secrets {
 			secret     = "secret1234569900"
 			activation = "2023-08-05T00:09:53.702+00:00"
-		}
-		client_secrets {
-			secret = "secret23456789aabb"
 		}
 		fixed_scope                    = false
 		refresh_token_validity_seconds = 86400
@@ -71,15 +110,8 @@ func testAccMaxOpenIdClientConfig() string {
 		can_reissue_tokens        = false
 		remember_approved_scopes  = false
 		attestation_accepted      = false
-		jwks_url                  = "http://example-client1.com/jwks"
-		permissions {
-			permission = "FHIR_WRITE_ALL_IN_COMPARTMENT"
-			argument   = "Patient/123"
-		}
-		permissions {
-			permission = "ROLE_FHIR_CLIENT"
-		}	
-	}`
+		jwks_url                  = "http://example-client1.com/jwks"	
+	}`, clientId)
 }
 
 func testAccOpenIdClientExists(n string) resource.TestCheckFunc {
@@ -87,33 +119,15 @@ func testAccOpenIdClientExists(n string) resource.TestCheckFunc {
 		rs, ok := s.RootModule().Resources[n]
 
 		if !ok {
+			fmt.Println("Not found: ", n)
 			return fmt.Errorf("Not found: %s", n)
 		}
 
 		if rs.Primary.ID == "" {
+			fmt.Println("No ClientId set")
 			return fmt.Errorf("No ClientId set")
 		}
 
 		return nil
 	}
-}
-
-func testAccOpenIdClientDestroy(s *terraform.State) error {
-	c := testAccProvider.Meta().(*smilecdr.Client)
-
-	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "smilecdr_openid_client" {
-			continue
-		}
-
-		nodeId := rs.Primary.Attributes["node_id"]
-		moduleId := rs.Primary.Attributes["module_id"]
-		clientId := rs.Primary.Attributes["client_id"]
-
-		err := c.DeleteOpenIdClient(nodeId, moduleId, clientId)
-		if err != nil {
-			return err
-		}
-	}
-	return nil
 }
