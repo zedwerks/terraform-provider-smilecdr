@@ -37,6 +37,8 @@ func (c *Client) Get(endpoint string) ([]byte, error) {
 	req.Header.Add("Authorization", c.authHeader)
 	req.Header.Add("Accept", "application/json")
 
+	fmt.Println("GET Request URI: ", uri)
+
 	resp, err := c.httpClient.Do(req)
 	if err != nil {
 		fmt.Println("error making HTTP Get Request: ", err)
@@ -46,14 +48,14 @@ func (c *Client) Get(endpoint string) ([]byte, error) {
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		fmt.Println("received non-200 OK status code:", resp.StatusCode)
+		fmt.Println("Http GET: received non-200 OK status code:", resp.StatusCode)
 		// Handle the error condition here
 		return nil, err
 	}
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		fmt.Println("error reading HTTP Get Response Body:", err)
+		fmt.Println("Http GET: error reading Response Body:", err)
 		return nil, err
 	}
 
@@ -72,15 +74,14 @@ func (c *Client) Post(endpoint string, body []byte) ([]byte, error) {
 
 	resp, err := c.httpClient.Do(req)
 	if err != nil {
-		fmt.Println("error making HTTP Post Request: ", err)
+		fmt.Println("Http Post: error during request: ", err)
 		return nil, err
 	}
 
 	defer resp.Body.Close()
 
-	if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusCreated {
-		fmt.Println("received non-200 OK or 201 Created status code:", resp.StatusCode)
-		// Handle the error condition here
+	if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusCreated && resp.StatusCode != http.StatusNoContent {
+		fmt.Println("Post(): Did not receive 200, 201 or 204. Received this status code:", resp.StatusCode)
 		return nil, err
 	}
 
@@ -137,6 +138,8 @@ func (c *Client) Delete(endpoint string) ([]byte, error) {
 	req.Header.Add("Authorization", c.authHeader)
 	req.Header.Add("Accept", "application/json")
 
+	fmt.Println("DELETE Request URI: ", uri)
+
 	resp, err := c.httpClient.Do(req)
 	if err != nil {
 		fmt.Println("error making HTTP Delete Request: ", err)
@@ -145,9 +148,8 @@ func (c *Client) Delete(endpoint string) ([]byte, error) {
 
 	defer resp.Body.Close()
 
-	if resp.StatusCode != http.StatusOK {
-		fmt.Println("received non-200 OK status code:", resp.StatusCode)
-		// Handle the error condition here
+	if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusNoContent {
+		fmt.Println("Expected 200, or 204, instead received status code:", resp.StatusCode)
 		return nil, err
 	}
 

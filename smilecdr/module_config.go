@@ -70,10 +70,10 @@ func (smilecdr *Client) PostModuleConfig(nodeId string, module ModuleConfig) (Mo
 	var newModule ModuleConfig
 	var moduleId = module.ModuleId
 
-	fmt.Println("PostModuleConfig: ", module)
-
 	var endpoint = fmt.Sprintf("/module-config/%s/%s/create", nodeId, moduleId)
 	jsonBody, _ := json.Marshal(module)
+
+	fmt.Println("PostModuleConfig: ", string(jsonBody))
 
 	jsonBody, postErr := smilecdr.Post(endpoint, jsonBody)
 	if postErr != nil {

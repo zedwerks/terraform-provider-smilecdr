@@ -51,6 +51,12 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}
 	var diags diag.Diagnostics
 	var baseUrl string
 
+	diags = append(diags, diag.Diagnostic{
+		Severity: diag.Warning,
+		Summary:  "Warning Message Summary",
+		Detail:   "This is the detailed warning message from providerConfigure",
+	})
+
 	username := d.Get("username").(string)
 	password := d.Get("password").(string)
 	baseUrl = d.Get("base_url").(string)

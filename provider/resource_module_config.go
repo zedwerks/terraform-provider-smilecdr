@@ -5,6 +5,7 @@ package provider
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -115,6 +116,8 @@ func resourceModuleConfigCreate(ctx context.Context, d *schema.ResourceData, m i
 	if err != nil {
 		return diag.FromErr(err)
 	}
+
+	fmt.Printf("Successfully created module config: %s/%s\n", nodeId, moduleConfig.ModuleId)
 
 	d.SetId(moduleConfig.ModuleId) // the primary resource identifier. must be unique.
 

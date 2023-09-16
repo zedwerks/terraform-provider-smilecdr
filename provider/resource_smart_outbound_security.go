@@ -56,26 +56,22 @@ func resourceSmartOutboundSecurity() *schema.Resource {
 			"saml_authentication_enabled": {
 				Type:        schema.TypeBool,
 				Optional:    true,
-				Default:     false,
 				Description: "If enabled, the server will allow authentication via SAML. This will enable the SAML authentication module, which will allow users to authenticate via SAML. See SAML Authentication for more information.",
 			},
 			// CORS Options ------------------------
 			"cors_allowed_headers": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Default:     "",
 				Description: "A comma-separated list of allowable request headers for the CORS filter. These will be added in addition to the default headers required for Smile CDR's default functionality.",
 			},
 			"cors_enabled": {
 				Type:        schema.TypeBool,
 				Optional:    true,
-				Default:     false,
 				Description: "Should this endpoint allow the use of CORS? Enable this item only if you understand what it is doing.",
 			},
 			"cors_origins": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Default:     "*",
 				Description: "A comma-separated list of allowable origins for the CORS filter. For example: https://example.com, https://try.smilecdr.com:9201. You may also use the wildcard value * to allow CORS for all domains, however this is generally not considered a good practice for production systems serving sensitive data.",
 			},
 			// Davinci Options ------------------------
@@ -86,16 +82,14 @@ func resourceSmartOutboundSecurity() *schema.Resource {
 			},
 			// HTTP Access Log Options ------------------------
 			"http_access_log_appenders": {
-				Type:        schema.TypeList,
+				Type:        schema.TypeString,
 				Optional:    true,
-				Elem:        &schema.Schema{Type: schema.TypeString},
 				Description: "A list of appenders to use for HTTP access logging. Each appender should be specified as a single line in the format: appender-name",
 			},
 			// HTTP Listener Options ------------------------
 			"http_listener_bind_address": {
 				Type:     schema.TypeString,
 				Optional: true,
-				Default:  "0.0.0.0",
 			},
 			"http_listener_context_path": {
 				Type:     schema.TypeString,
@@ -105,17 +99,14 @@ func resourceSmartOutboundSecurity() *schema.Resource {
 			"http_listener_endpoint_health_path": {
 				Type:     schema.TypeString,
 				Optional: true,
-				Default:  "/endpoint-health",
 			},
 			"http_listener_unhealthy_response_code": {
 				Type:     schema.TypeInt,
 				Optional: true,
-				Default:  503, // 503 Service Unavailable
 			},
 			"http_listener_https_forwarding_assumed": {
 				Type:     schema.TypeBool,
 				Optional: true,
-				Default:  false,
 			},
 			"http_listener_port": {
 				Type:     schema.TypeInt,
@@ -124,23 +115,19 @@ func resourceSmartOutboundSecurity() *schema.Resource {
 			"http_listener_respect_forward_headers": {
 				Type:     schema.TypeBool,
 				Optional: true,
-				Default:  false,
 			},
 			// HTTP Request Pool Options ------------------------
 			"http_request_maximum_request_header_size": {
 				Type:     schema.TypeInt,
 				Optional: true,
-				Default:  8,
 			},
 			"http_request_maximum_response_header_size": {
 				Type:     schema.TypeInt,
 				Optional: true,
-				Default:  8,
 			},
 			"http_request_read_idle_timeout": {
 				Type:     schema.TypeInt,
 				Optional: true,
-				Default:  30000,
 			},
 			"http_request_thread_pool_accept_queue_size": {
 				Type:     schema.TypeInt,
@@ -149,24 +136,20 @@ func resourceSmartOutboundSecurity() *schema.Resource {
 			"http_request_thread_pool_max_size": {
 				Type:     schema.TypeInt,
 				Optional: true,
-				Default:  10,
 			},
 			"http_request_thread_pool_min_size": {
 				Type:     schema.TypeInt,
 				Optional: true,
-				Default:  5,
 			},
 			// HTTP Security Options --------------------------------
 			"http_security_block_http_head": {
 				Type:        schema.TypeBool,
 				Optional:    true,
-				Default:     false,
 				Description: "If set, the server will reject the HTTP HEAD verb. This verb is considered insecure in some environments.",
 			},
 			"http_security_block_http_options": {
 				Type:        schema.TypeBool,
 				Optional:    true,
-				Default:     false,
 				Description: "If set, the server will reject the HTTP OPTIONS verb. This verb is considered insecure in some environments.",
 			},
 			"http_security_custom_response_headers": {
@@ -190,45 +173,37 @@ func resourceSmartOutboundSecurity() *schema.Resource {
 			"http_security_suppress_error_details": {
 				Type:     schema.TypeBool,
 				Optional: true,
-				Default:  false,
 			},
 			"http_security_suppress_platform_info": {
 				Type:     schema.TypeBool,
 				Optional: true,
-				Default:  false,
 			},
 			// JavaScript Execution Environment Options ------------------------
 			"javascript_debug_enabled": {
 				Type:        schema.TypeBool,
 				Optional:    true,
-				Default:     false,
 				Description: "Enable remote JavaScript debugging.",
 			},
 			"javascript_debug_host_address": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Default:     "localhost",
 				Description: "The hostname of the server running Smile CDR",
 			},
 			"javascript_debug_path": {
 				Type:     schema.TypeString,
 				Optional: true,
-				Default:  "",
 			},
 			"javascript_debug_port": {
 				Type:     schema.TypeInt,
 				Optional: true,
-				Default:  9930,
 			},
 			"javascript_debug_secure": {
 				Type:     schema.TypeBool,
 				Optional: true,
-				Default:  false,
 			},
 			"javascript_debug_suspend": {
 				Type:     schema.TypeBool,
 				Optional: true,
-				Default:  true,
 			},
 			// JWKS Options --------------------------------
 			"jwks_keystore_id": {
@@ -240,7 +215,6 @@ func resourceSmartOutboundSecurity() *schema.Resource {
 			"oidc_http_client_jwks_cache_timeout": {
 				Type:     schema.TypeInt,
 				Optional: true,
-				Default:  30,
 			},
 			"oidc_http_client_truststore_file": {
 				Type:     schema.TypeString,
@@ -254,24 +228,20 @@ func resourceSmartOutboundSecurity() *schema.Resource {
 			"oidc_pkce_required": {
 				Type:        schema.TypeBool,
 				Optional:    true,
-				Default:     false,
 				Description: "If this setting is enabled, the server will require the use of PKCE for all Authorization Code SMART Auth flows. Enabling this setting also disallows the use of the OAuth2 Implicit Grant type, since this flow does not support PKCE.",
 			},
 			"oidc_pkce_plain_challenge_supported": {
 				Type:        schema.TypeBool,
 				Optional:    true,
-				Default:     true,
 				Description: "If this setting is enabled, the server will allow the use of the plain PKCE challenge method. This is not recommended, but is supported for backwards compatibility.",
 			},
 			"oidc_cache_authorization_tokens": {
 				Type:     schema.TypeInt,
 				Optional: true,
-				Default:  3000,
 			},
 			"oidc_client_secret_encoding": {
 				Type:     schema.TypeString,
 				Optional: true,
-				Default:  "BCRYPT_12_ROUND",
 				ValidateDiagFunc: validations.ValidateDiagFunc(validation.StringInSlice([]string{
 					"SHA256_1000_ROUND",
 					"SHA256_10000_ROUND",
@@ -288,7 +258,6 @@ func resourceSmartOutboundSecurity() *schema.Resource {
 			"oidc_client_secret_expiry_duration": {
 				Type:        schema.TypeInt,
 				Optional:    true,
-				Default:     365,
 				Description: "Select the expiry duration in days for Smile CDR generated client secrets. Note this value will be added to the activation date of the secret to calculate the expiration date for the secret during the client creation process via the REST path register-client-and-generate-secret.",
 			},
 			"oidc_issuer_url": {
@@ -301,7 +270,6 @@ func resourceSmartOutboundSecurity() *schema.Resource {
 			"oidc_rotate_token_after_use": {
 				Type:        schema.TypeBool,
 				Optional:    true,
-				Default:     false,
 				Description: "If enabled, each time a refresh token is used to obtain a new access token, the refresh token will be invalidated and a new one automatically issued with the new access token.",
 			},
 			"oidc_smart_capabilities_list": {
@@ -316,7 +284,6 @@ func resourceSmartOutboundSecurity() *schema.Resource {
 			"oidc_federate_mode_enabled": {
 				Type:        schema.TypeBool,
 				Optional:    true,
-				Default:     false,
 				Description: "When enabled, this server will federate to a federated OAuth2/OIDC server instead of prompting the user for credentials. See Federated OAuth2/OIDC Login for more information.",
 			},
 			// SMART Callback Script Options ------------------------
@@ -344,7 +311,6 @@ func resourceSmartOutboundSecurity() *schema.Resource {
 			"codap_enabled": {
 				Type:     schema.TypeBool,
 				Optional: true,
-				Default:  false,
 			},
 			// SMART Login Skin Options ------------------------
 			"smart_login_skin_approval_template": {
@@ -422,7 +388,6 @@ func resourceSmartOutboundSecurity() *schema.Resource {
 			"smart_login_terms_of_service_version": {
 				Type:     schema.TypeString,
 				Optional: true,
-				Default:  false,
 			},
 			// SMART Authorization Options ------------------------
 			"smart_authorization_allowed_audience_list": {
@@ -433,12 +398,11 @@ func resourceSmartOutboundSecurity() *schema.Resource {
 			"smart_authorization_email_from_address": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Default:     "noreply@unknown.com",
 				Description: "Forgotten password related emails will be sent from this email address.",
 			},
 			"smart_authorization_enforce_approved_scopes": {
 				Type:        schema.TypeBool,
-				Required:    true,
+				Optional:    true,
 				Description: "When enabled, permission will be stripped from a user's session if they are not supported by an approved SMART on FHIR scope. For example, any FHIR write permissions will be removed from a session if the user has not approved (or a client is set to auto-approve) a scope such as Patient/*.write",
 			},
 			"smart_authorization_scopes_supported": {
@@ -462,38 +426,32 @@ func resourceSmartOutboundSecurity() *schema.Resource {
 			"sessions_in_memory": {
 				Type:        schema.TypeBool,
 				Optional:    true,
-				Default:     false,
 				Description: "If enabled, any HTTP sessions created for this listener will be stored only in memory, as opposed to being persisted in the database. This may lead to a performance boost in some situations but also prevents sessions from working in some clustered configurations or surviving a restart of the system. Note that not all listeners even create sessions (e.g. FHIR endpoints do not) so this setting may have no effect",
 			},
 			"sessions_max_concurrent_sessions_per_user": {
 				Type:        schema.TypeInt,
 				Optional:    true,
-				Default:     0,
 				Description: "If set to a value greater than zero, this setting will limit the number of concurrent sessions that a single user can have. If a user attempts to create a new session when they already have the maximum number of sessions, the oldest session will be terminated. This setting is useful for preventing users from sharing their credentials with others.",
 			},
 			"sessions_scavenger_interval_ms": {
 				Type:        schema.TypeInt,
 				Optional:    true,
-				Default:     60000,
 				Description: "The number of milliseconds between session scavenger passes.",
 			},
 			"sessions_timeout_mins": {
 				Type:        schema.TypeInt,
 				Optional:    true,
-				Default:     30,
 				Description: "The number of minutes that a user session can sit idle before it is eligible to expire.",
 			},
 			// TLS Options ------------------------
 			"tls_client_auth_enabled": {
 				Type:        schema.TypeBool,
 				Optional:    true,
-				Default:     false,
 				Description: "Should the listener for this module require incoming connections to authenticate using TLS Client Authentication?",
 			},
 			"tls_enabled": {
 				Type:        schema.TypeBool,
 				Optional:    true,
-				Default:     false,
 				Description: "Should the listener for this module require TLS (i.e. SSL or HTTPS) encryption for incoming connections?",
 			},
 			"tls_keystore_filename": {
@@ -502,14 +460,14 @@ func resourceSmartOutboundSecurity() *schema.Resource {
 				Description: "The filename for the TLS KeyStore used to hold private keys for TLS connections. This can be in the format classpath:path/to/file.p12 or file:///path/to/file.p12. Valid file extensions are .jks (Java Keystore) or .p12 (PKCS#12 store).",
 			},
 			"tls_keystore_key_alias": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Default:  "The alias for the specific key within the KeyStore that should be selected for incoming TLS connections.",
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The alias for the specific key within the KeyStore that should be selected for incoming TLS connections.",
 			},
 			"tls_keystore_key_password": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Default:  "The password for the specific key within the KeyStore (leave blank if the key has no password).",
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The password for the specific key within the KeyStore (leave blank if the key has no password).",
 			},
 			"tls_keystore_password": {
 				Type:        schema.TypeString,
@@ -551,7 +509,6 @@ func resourceSmartOutboundSecurity() *schema.Resource {
 			"dependency_local_inbound_security": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Default:     "SECURITY_IN_UP",
 				Description: "The inbound security module to use for authenticating and authorizing users to this module where authentication requires a username and password.",
 			},
 			"dependency_fhir_persistence_module": {
@@ -634,13 +591,9 @@ func smartOutboundSecurityResourceToModuleConfig(d *schema.ResourceData) (*smile
 	}
 	// HTTP Access Log Options ------------------------
 	if v, ok := d.GetOk("http_access_log_appenders"); ok {
-		var theValue string = ""
-		for _, appender := range v.([]interface{}) {
-			theValue = theValue + appender.(string) + "\n"
-		}
 		moduleConfig.Options = append(moduleConfig.Options, smilecdr.ModuleOption{
 			Key:   "access_log.appenders",
-			Value: theValue,
+			Value: v.(string),
 		})
 	}
 	// HTTP Listener Options ------------------------
@@ -1230,19 +1183,18 @@ func resourceSmartOutboundSecurityRead(ctx context.Context, d *schema.ResourceDa
 	}
 	val, ok = moduleConfig.LookupOptionOk("anonymous.access.enabled")
 	if ok {
-		boolVal, err := strconv.ParseBool(val)
-		if err != nil {
-			return diag.FromErr(err)
+		if (val == "true") || (val == "false") {
+			boolVal, _ := strconv.ParseBool(val)
+			d.Set("anonymous_access_enabled", boolVal)
 		}
-		d.Set("anonymous_access_enabled", boolVal)
 	}
+
 	val, ok = moduleConfig.LookupOptionOk("saml.enabled")
 	if ok {
-		boolVal, err := strconv.ParseBool(val)
-		if err != nil {
-			return diag.FromErr(err)
+		if (val == "true") || (val == "false") {
+			boolVal, _ := strconv.ParseBool(val)
+			d.Set("saml_authentication_enabled", boolVal)
 		}
-		d.Set("saml_authentication_enabled", boolVal)
 	}
 	val, ok = moduleConfig.LookupOptionOk("cors.allowed_headers")
 	if ok {
@@ -1250,11 +1202,10 @@ func resourceSmartOutboundSecurityRead(ctx context.Context, d *schema.ResourceDa
 	}
 	val, ok = moduleConfig.LookupOptionOk("cors.enable")
 	if ok {
-		boolVal, err := strconv.ParseBool(val)
-		if err != nil {
-			return diag.FromErr(err)
+		if (val == "true") || (val == "false") {
+			boolVal, _ := strconv.ParseBool(val)
+			d.Set("cors_enabled", boolVal)
 		}
-		d.Set("cors_enabled", boolVal)
 	}
 	val, ok = moduleConfig.LookupOptionOk("cors.origins")
 	if ok {
@@ -1263,17 +1214,15 @@ func resourceSmartOutboundSecurityRead(ctx context.Context, d *schema.ResourceDa
 	// Da Vinci Options ------------------------
 	val, ok = moduleConfig.LookupOptionOk("davinci.consent_handling")
 	if ok {
-		boolVal, err := strconv.ParseBool(val)
-		if err != nil {
-			return diag.FromErr(err)
+		if (val == "true") || (val == "false") {
+			boolVal, _ := strconv.ParseBool(val)
+			d.Set("davinci_native_consent_handling", boolVal)
 		}
-		d.Set("davinci_native_consent_handling", boolVal)
 	}
 	// HTTP Access Log Options ------------------------
 	val, ok = moduleConfig.LookupOptionOk("access_log.appenders")
 	if ok {
-		appenders := strings.Split(val, "\n")
-		d.Set("http_access_log_appenders", appenders)
+		d.Set("http_access_log_appenders", val)
 	}
 	// HTTP Listener Options ------------------------
 	val, ok = moduleConfig.LookupOptionOk("bind_address")
@@ -1291,92 +1240,81 @@ func resourceSmartOutboundSecurityRead(ctx context.Context, d *schema.ResourceDa
 	val, ok = moduleConfig.LookupOptionOk("endpoint_health.status_code_if_unhealthy")
 	if ok {
 		intVal, err := strconv.Atoi(val)
-		if err != nil {
-			return diag.FromErr(err)
+		if err == nil {
+			d.Set("http_listener_unhealthy_response_code", intVal)
 		}
-		d.Set("http_listener_unhealthy_response_code", intVal)
 	}
 	val, ok = moduleConfig.LookupOptionOk("https_forwarding_assumed")
 	if ok {
-		boolVal, err := strconv.ParseBool(val)
-		if err != nil {
-			return diag.FromErr(err)
+		if (val == "true") || (val == "false") {
+			boolVal, _ := strconv.ParseBool(val)
+			d.Set("http_listener_https_forwarding_assumed", boolVal)
 		}
-		d.Set("http_listener_https_forwarding_assumed", boolVal)
 	}
 	val, ok = moduleConfig.LookupOptionOk("port")
 	if ok {
 		intVal, err := strconv.Atoi(val)
-		if err != nil {
-			return diag.FromErr(err)
+		if err == nil {
+			d.Set("http_listener_port", intVal)
 		}
-		d.Set("http_listener_port", intVal)
 	}
 	val, ok = moduleConfig.LookupOptionOk("respect_forward_headers")
 	if ok {
-		boolVal, err := strconv.ParseBool(val)
-		if err != nil {
-			return diag.FromErr(err)
+		if (val == "true") || (val == "false") {
+			boolVal, _ := strconv.ParseBool(val)
+			d.Set("http_listener_respect_forward_headers", boolVal)
 		}
-		d.Set("http_listener_respect_forward_headers", boolVal)
 	}
 	// HTTP Request Pool Options ------------------------
 	val, ok = moduleConfig.LookupOptionOk("max_header_size.request.kb")
 	if ok {
 		intVal, err := strconv.Atoi(val)
-		if err != nil {
-			return diag.FromErr(err)
+		if err == nil {
+			d.Set("http_request_maximum_request_header_size", intVal)
 		}
-		d.Set("http_request_maximum_request_header_size", intVal)
 	}
 	val, ok = moduleConfig.LookupOptionOk("max_header_size.response.kb")
 	if ok {
 		intVal, err := strconv.Atoi(val)
-		if err != nil {
-			return diag.FromErr(err)
+		if err == nil {
+			d.Set("http_request_maximum_response_header_size", intVal)
 		}
-		d.Set("http_request_maximum_response_header_size", intVal)
 	}
 	val, ok = moduleConfig.LookupOptionOk("read_idle_timeout.millis")
 	if ok {
 		intVal, err := strconv.Atoi(val)
-		if err != nil {
-			return diag.FromErr(err)
+		if err == nil {
+			d.Set("http_request_read_idle_timeout", intVal)
 		}
-		d.Set("http_request_read_idle_timeout", intVal)
 	}
 	val, ok = moduleConfig.LookupOptionOk("thread_pool.accept_queue_size")
 	if ok {
 		intVal, err := strconv.Atoi(val)
-		if err != nil {
-			return diag.FromErr(err)
+		if err == nil {
+			d.Set("http_request_thread_pool_accept_queue_size", intVal)
 		}
-		d.Set("http_request_thread_pool_accept_queue_size", intVal)
 	}
 	val, ok = moduleConfig.LookupOptionOk("threadpool.max")
 	if ok {
 		intVal, err := strconv.Atoi(val)
-		if err != nil {
-			return diag.FromErr(err)
+		if err == nil {
+			d.Set("http_request_thread_pool_max_size", intVal)
 		}
-		d.Set("http_request_thread_pool_max_size", intVal)
 	}
 	val, ok = moduleConfig.LookupOptionOk("threadpool.min")
 	if ok {
 		intVal, err := strconv.Atoi(val)
-		if err != nil {
-			return diag.FromErr(err)
+		if err == nil {
+			d.Set("http_request_thread_pool_min_size", intVal)
 		}
-		d.Set("http_request_thread_pool_min_size", intVal)
 	}
 	// HTTP Security Options --------------------------------
 	val, ok = moduleConfig.LookupOptionOk("block_http_head")
 	if ok {
-		boolVal, err := strconv.ParseBool(val)
-		if err != nil {
-			return diag.FromErr(err)
+		if (val == "true") || (val == "false") {
+			boolVal, _ := strconv.ParseBool(val)
+			d.Set("http_security_block_http_head", boolVal)
 		}
-		d.Set("http_security_block_http_head", boolVal)
 	}
 	val, ok = moduleConfig.LookupOptionOk("custom_response_headers")
 	if ok {
@@ -1393,28 +1331,25 @@ func resourceSmartOutboundSecurityRead(ctx context.Context, d *schema.ResourceDa
 	}
 	val, ok = moduleConfig.LookupOptionOk("suppress_error_details")
 	if ok {
-		boolVal, err := strconv.ParseBool(val)
-		if err != nil {
-			return diag.FromErr(err)
+		if (val == "true") || (val == "false") {
+			boolVal, _ := strconv.ParseBool(val)
+			d.Set("http_security_suppress_error_details", boolVal)
 		}
-		d.Set("http_security_suppress_error_details", boolVal)
 	}
 	val, ok = moduleConfig.LookupOptionOk("suppress_platform_info")
 	if ok {
-		boolVal, err := strconv.ParseBool(val)
-		if err != nil {
-			return diag.FromErr(err)
+		if (val == "true") || (val == "false") {
+			boolVal, _ := strconv.ParseBool(val)
+			d.Set("http_security_suppress_platform_info", boolVal)
 		}
-		d.Set("http_security_suppress_platform_info", boolVal)
 	}
 	// JavaScript Execution Environment Options ------------------------
 	val, ok = moduleConfig.LookupOptionOk("debug.debug_enabled")
 	if ok {
-		boolVal, err := strconv.ParseBool(val)
-		if err != nil {
-			return diag.FromErr(err)
+		if (val == "true") || (val == "false") {
+			boolVal, _ := strconv.ParseBool(val)
+			d.Set("javascript_debug_enabled", boolVal)
 		}
-		d.Set("javascript_debug_enabled", boolVal)
 	}
 	val, ok = moduleConfig.LookupOptionOk("debug.host_address")
 	if ok {
@@ -1427,26 +1362,23 @@ func resourceSmartOutboundSecurityRead(ctx context.Context, d *schema.ResourceDa
 	val, ok = moduleConfig.LookupOptionOk("debug.port")
 	if ok {
 		intVal, err := strconv.Atoi(val)
-		if err != nil {
-			return diag.FromErr(err)
+		if err == nil {
+			d.Set("javascript_debug_port", intVal)
 		}
-		d.Set("javascript_debug_port", intVal)
 	}
 	val, ok = moduleConfig.LookupOptionOk("debug.secure")
 	if ok {
-		boolVal, err := strconv.ParseBool(val)
-		if err != nil {
-			return diag.FromErr(err)
+		if (val == "true") || (val == "false") {
+			boolVal, _ := strconv.ParseBool(val)
+			d.Set("javascript_debug_secure", boolVal)
 		}
-		d.Set("javascript_debug_secure", boolVal)
 	}
 	val, ok = moduleConfig.LookupOptionOk("debug.suspend")
 	if ok {
-		boolVal, err := strconv.ParseBool(val)
-		if err != nil {
-			return diag.FromErr(err)
+		if (val == "true") || (val == "false") {
+			boolVal, _ := strconv.ParseBool(val)
+			d.Set("javascript_debug_suspend", boolVal)
 		}
-		d.Set("javascript_debug_suspend", boolVal)
 	}
 	// JWKS Options --------------------------------
 	val, ok = moduleConfig.LookupOptionOk("openid.signing.keystore_id")
@@ -1457,10 +1389,9 @@ func resourceSmartOutboundSecurityRead(ctx context.Context, d *schema.ResourceDa
 	val, ok = moduleConfig.LookupOptionOk("introspection_client.jwks_cache.mins")
 	if ok {
 		intVal, err := strconv.Atoi(val)
-		if err != nil {
-			return diag.FromErr(err)
+		if err == nil {
+			d.Set("oidc_http_client_jwks_cache_timeout", intVal)
 		}
-		d.Set("oidc_http_client_jwks_cache_timeout", intVal)
 	}
 	val, ok = moduleConfig.LookupOptionOk("introspection_client.truststore.file")
 	if ok {
@@ -1473,27 +1404,24 @@ func resourceSmartOutboundSecurityRead(ctx context.Context, d *schema.ResourceDa
 	// OpenID Connect (OIDC) Options ------------------------
 	val, ok = moduleConfig.LookupOptionOk("pkce.required")
 	if ok {
-		boolVal, err := strconv.ParseBool(val)
-		if err != nil {
-			return diag.FromErr(err)
+		if (val == "true") || (val == "false") {
+			boolVal, _ := strconv.ParseBool(val)
+			d.Set("oidc_pkce_required", boolVal)
 		}
-		d.Set("oidc_pkce_required", boolVal)
 	}
 	val, ok = moduleConfig.LookupOptionOk("pkce.plain_challenge_supported")
 	if ok {
-		boolVal, err := strconv.ParseBool(val)
-		if err != nil {
-			return diag.FromErr(err)
+		if (val == "true") || (val == "false") {
+			boolVal, _ := strconv.ParseBool(val)
+			d.Set("oidc_pkce_plain_challenge_supported", boolVal)
 		}
-		d.Set("oidc_pkce_plain_challenge_supported", boolVal)
 	}
 	val, ok = moduleConfig.LookupOptionOk("cache.authorized_tokens.millis")
 	if ok {
 		intVal, err := strconv.Atoi(val)
-		if err != nil {
-			return diag.FromErr(err)
+		if err == nil {
+			d.Set("oidc_cache_authorization_tokens", intVal)
 		}
-		d.Set("oidc_cache_authorization_tokens", intVal)
 	}
 	val, ok = moduleConfig.LookupOptionOk("client_secret.encoding")
 	if ok {
@@ -1502,10 +1430,9 @@ func resourceSmartOutboundSecurityRead(ctx context.Context, d *schema.ResourceDa
 	val, ok = moduleConfig.LookupOptionOk("client_secret.expiry_duration_days")
 	if ok {
 		intVal, err := strconv.Atoi(val)
-		if err != nil {
-			return diag.FromErr(err)
+		if err == nil {
+			d.Set("oidc_client_secret_expiry_duration", intVal)
 		}
-		d.Set("oidc_client_secret_expiry_duration", intVal)
 	}
 	val, ok = moduleConfig.LookupOptionOk("issuer.url")
 	if ok {
@@ -1513,11 +1440,10 @@ func resourceSmartOutboundSecurityRead(ctx context.Context, d *schema.ResourceDa
 	}
 	val, ok = moduleConfig.LookupOptionOk("rotate_refresh_token_after_use")
 	if ok {
-		boolVal, err := strconv.ParseBool(val)
-		if err != nil {
-			return diag.FromErr(err)
+		if (val == "true") || (val == "false") {
+			boolVal, _ := strconv.ParseBool(val)
+			d.Set("oidc_rotate_token_after_use", boolVal)
 		}
-		d.Set("oidc_rotate_token_after_use", boolVal)
 	}
 	val, ok = moduleConfig.LookupOptionOk("smart_capabilities_list")
 	if ok {
@@ -1527,11 +1453,10 @@ func resourceSmartOutboundSecurityRead(ctx context.Context, d *schema.ResourceDa
 	// OAuth2/OIDC Federation Options ------------------------
 	val, ok = moduleConfig.LookupOptionOk("federate_mode.enabled")
 	if ok {
-		boolVal, err := strconv.ParseBool(val)
-		if err != nil {
-			return diag.FromErr(err)
+		if (val == "true") || (val == "false") {
+			boolVal, _ := strconv.ParseBool(val)
+			d.Set("oauth2_federation_enabled", boolVal)
 		}
-		d.Set("oauth2_federation_enabled", boolVal)
 	}
 	// SMART Callback Script Options ------------------------
 	val, ok = moduleConfig.LookupOptionOk("post_authorize_script.file")
@@ -1553,11 +1478,10 @@ func resourceSmartOutboundSecurityRead(ctx context.Context, d *schema.ResourceDa
 	}
 	val, ok = moduleConfig.LookupOptionOk("codap.enabled")
 	if ok {
-		boolVal, err := strconv.ParseBool(val)
-		if err != nil {
-			return diag.FromErr(err)
+		if (val == "true") || (val == "false") {
+			boolVal, _ := strconv.ParseBool(val)
+			d.Set("codap_enabled", boolVal)
 		}
-		d.Set("codap_enabled", boolVal)
 	}
 	// SMART Login Skin Options ------------------------
 	val, ok = moduleConfig.LookupOptionOk("skin.approve_page.template")
@@ -1632,11 +1556,10 @@ func resourceSmartOutboundSecurityRead(ctx context.Context, d *schema.ResourceDa
 	}
 	val, ok = moduleConfig.LookupOptionOk("enforce_approved_scopes_to_restrict_permissions")
 	if ok {
-		boolVal, err := strconv.ParseBool(val)
-		if err != nil {
-			return diag.FromErr(err)
+		if (val == "true") || (val == "false") {
+			boolVal, _ := strconv.ParseBool(val)
+			d.Set("smart_authorization_enforce_approved_scopes", boolVal)
 		}
-		d.Set("smart_authorization_enforce_approved_scopes", boolVal)
 	}
 	val, ok = moduleConfig.LookupOptionOk("smart_configuration.scopes_supported")
 	if ok {
@@ -1654,52 +1577,46 @@ func resourceSmartOutboundSecurityRead(ctx context.Context, d *schema.ResourceDa
 	// Sessions Options ------------------------
 	val, ok = moduleConfig.LookupOptionOk("sessions.inmemory")
 	if ok {
-		boolVal, err := strconv.ParseBool(val)
-		if err != nil {
-			return diag.FromErr(err)
+		if (val == "true") || (val == "false") {
+			boolVal, _ := strconv.ParseBool(val)
+			d.Set("sessions_in_memory", boolVal)
 		}
-		d.Set("sessions_in_memory", boolVal)
 	}
 	val, ok = moduleConfig.LookupOptionOk("sessions.maximum_concurrent")
 	if ok {
 		intVal, err := strconv.Atoi(val)
-		if err != nil {
-			return diag.FromErr(err)
+		if err == nil {
+			d.Set("sessions_max_concurrent_sessions_per_user", intVal)
 		}
-		d.Set("sessions_max_concurrent_sessions_per_user", intVal)
 	}
 	val, ok = moduleConfig.LookupOptionOk("sessions.scavenger.interval.millis")
 	if ok {
 		intVal, err := strconv.Atoi(val)
-		if err != nil {
-			return diag.FromErr(err)
+		if err == nil {
+			d.Set("sessions_scavenger_interval_ms", intVal)
 		}
-		d.Set("sessions_scavenger_interval_ms", intVal)
 	}
 	val, ok = moduleConfig.LookupOptionOk("sessions.timeout.mins")
 	if ok {
 		intVal, err := strconv.Atoi(val)
-		if err != nil {
-			return diag.FromErr(err)
+		if err == nil {
+			d.Set("sessions_timeout_mins", intVal)
 		}
-		d.Set("sessions_timeout_mins", intVal)
 	}
 	// TLS Options --------------------------------
 	val, ok = moduleConfig.LookupOptionOk("tls.clientauth.enabled")
 	if ok {
-		boolVal, err := strconv.ParseBool(val)
-		if err != nil {
-			return diag.FromErr(err)
+		if (val == "true") || (val == "false") {
+			boolVal, _ := strconv.ParseBool(val)
+			d.Set("tls_client_auth_enabled", boolVal)
 		}
-		d.Set("tls_client_auth_enabled", boolVal)
 	}
 	val, ok = moduleConfig.LookupOptionOk("tls.enabled")
 	if ok {
-		boolVal, err := strconv.ParseBool(val)
-		if err != nil {
-			return diag.FromErr(err)
+		if (val == "true") || (val == "false") {
+			boolVal, _ := strconv.ParseBool(val)
+			d.Set("tls_enabled", boolVal)
 		}
-		d.Set("tls_enabled", boolVal)
 	}
 	val, ok = moduleConfig.LookupOptionOk("tls.keystore.file")
 	if ok {
