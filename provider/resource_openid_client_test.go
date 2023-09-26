@@ -27,7 +27,6 @@ func TestSmileCdrOpenIdClientBasic(t *testing.T) {
 	})
 }
 
-/*
 func TestSmileCdrOpenIdClientConfidential(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
@@ -41,7 +40,7 @@ func TestSmileCdrOpenIdClientConfidential(t *testing.T) {
 			},
 		},
 	})
-} */
+}
 
 func testOpenIdClientConfig_basic() string {
 

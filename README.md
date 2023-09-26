@@ -33,3 +33,10 @@ terraform init && terraform apply
 ```
 
 [Badge-License]: https://img.shields.io/badge/license-apache%202.0-60C060.svg
+
+
+## Running Acceptance Tests
+
+```code
+make testacc
+```
