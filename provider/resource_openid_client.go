@@ -403,6 +403,8 @@ func resourceOpenIdClientRead(ctx context.Context, d *schema.ResourceData, m int
 
 func resourceOpenIdClientUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 
+	fmt.Println("Updating OpenIdClient")
+
 	c := m.(*smilecdr.Client)
 
 	client, mErr := resourceDataToOpenIdClient(d)
@@ -411,14 +413,6 @@ func resourceOpenIdClientUpdate(ctx context.Context, d *schema.ResourceData, m i
 	}
 
 	d.SetId(client.ClientId)
-
-	if d.HasChange("client_secrets") {
-		_, newValue := d.GetChange("client_secrets")
-		if newValue.(*schema.Set).Len() == 0 {
-			fmt.Println("Removing client secret")
-			client.ClientSecrets = []smilecdr.ClientSecret{}
-		}
-	}
 
 	_, err := c.PutOpenIdClient(*client)
 
@@ -435,6 +429,8 @@ func resourceOpenIdClientDelete(ctx context.Context, d *schema.ResourceData, m i
 	fmt.Println("Deleting OpenIdClient")
 
 	var diags diag.Diagnostics
+
+	d.Set("client_secrets", []interface{}{}) // empty the client secrets
 
 	d.Set("archived_at", time.Now().Format(time.RFC3339))
 
