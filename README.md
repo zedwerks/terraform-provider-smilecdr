@@ -37,6 +37,15 @@ terraform init && terraform apply
 
 ## Running Acceptance Tests
 
+To run acceptance tests you will need the following environment variables set so that the acceptance tests can connect to a dev/test instance of Smile CDR:
+
+- `SMILECDR_USERNAME`, which is an admin user, that has full access to Admin APIs.
+
+- `SMILECDR_PASSWORD`, the password for the user.
+
+- `SMILECDR_BASE_URL`, which is the base URL of the Smile CDR Admin APIs
+
+
 ```code
 make testacc
 ```
