@@ -1,11 +1,4 @@
-/** ====================================================================================================================
- * See SMART Callback Scripts for details at: 
- * @see https://smilecdr.com/docs/smart/smart_on_fhir_outbound_security_module.html#smart-callback-script
- *
- * This script is invoked after the user has successfully authenticated with the OAuth2/OIDC server.
- * Applies to: SMART on FHIR Outbound Security Module
- * ===================================================================================================================== 
- */
+ 
 
 /**
  * This function is called immediately after the user has authenticated in order to determine whether a session

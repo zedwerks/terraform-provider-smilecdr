@@ -8,7 +8,7 @@
 // It may obtain all required information by inspecting the access token details, 
 // or it may make additional service calls to fetch information.
 
-println("federationAuthScript.js");
+println("on_auth_success.js");
 
 function onAuthenticationSuccess(theOutcome, theOutcomeFactory, theContext) {
     

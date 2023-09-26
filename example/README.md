@@ -4,7 +4,7 @@ This deploys a single openid client.
 
 ## Before you run
 
-Since this provider is not yet registered with hashicorp, you need to override the provider isntallation
+Since this provider is not yet registered with hashicorp, you need to override the provider installation
 to allow it to find the compiled provider.
 
 Make something like this be your .terraformrc or terraform.rc file:
