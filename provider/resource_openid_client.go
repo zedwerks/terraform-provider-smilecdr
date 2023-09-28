@@ -342,7 +342,12 @@ func resourceOpenIdClientCreate(ctx context.Context, d *schema.ResourceData, m i
 	o, err := c.PostOpenIdClient(*client)
 
 	if err != nil {
-		return diag.FromErr(err)
+		diags := diag.FromErr(err)
+		diags = append(diags, diag.Diagnostic{
+			Severity: diag.Warning,
+			Summary:  "Error creating openid client",
+		})
+		return diags
 	}
 
 	d.SetId(client.ClientId) // the primary resource identifier. must be unique.
@@ -364,7 +369,12 @@ func resourceOpenIdClientRead(ctx context.Context, d *schema.ResourceData, m int
 	openIdClient, err := c.GetOpenIdClient(nodeId, moduleId, client_id)
 
 	if err != nil {
-		return diag.FromErr(err)
+		diags := diag.FromErr(err)
+		diags = append(diags, diag.Diagnostic{
+			Severity: diag.Warning,
+			Summary:  "Error reading openid client",
+		})
+		return diags
 	}
 
 	d.SetId(openIdClient.ClientId)
@@ -417,7 +427,12 @@ func resourceOpenIdClientUpdate(ctx context.Context, d *schema.ResourceData, m i
 	_, err := c.PutOpenIdClient(*client)
 
 	if err != nil {
-		return diag.FromErr(err)
+		diags := diag.FromErr(err)
+		diags = append(diags, diag.Diagnostic{
+			Severity: diag.Warning,
+			Summary:  "Error updating openid client",
+		})
+		return diags
 	}
 
 	return resourceOpenIdClientRead(ctx, d, m)

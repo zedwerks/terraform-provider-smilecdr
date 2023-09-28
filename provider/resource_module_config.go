@@ -133,7 +133,12 @@ func resourceModuleConfigRead(ctx context.Context, d *schema.ResourceData, m int
 	moduleConfig, err := c.GetModuleConfig(nodeId, moduleId)
 
 	if err != nil {
-		return diag.FromErr(err)
+		diags := diag.FromErr(err)
+		diags = append(diags, diag.Diagnostic{
+			Severity: diag.Warning,
+			Summary:  "Error reading module config",
+		})
+		return diags
 	}
 	d.Set("module_id", moduleConfig.ModuleId)
 	d.Set("module_type", moduleConfig.ModuleType)
@@ -175,7 +180,12 @@ func resourceModuleConfigUpdate(ctx context.Context, d *schema.ResourceData, m i
 	_, err := c.PutModuleConfig(nodeId, *moduleConfig)
 
 	if err != nil {
-		return diag.FromErr(err)
+		diags := diag.FromErr(err)
+		diags = append(diags, diag.Diagnostic{
+			Severity: diag.Warning,
+			Summary:  "Error updating module config",
+		})
+		return diags
 	}
 
 	return resourceModuleConfigRead(ctx, d, m)
@@ -190,7 +200,12 @@ func resourceModuleConfigDelete(ctx context.Context, d *schema.ResourceData, m i
 	err := c.DeleteModuleConfig(nodeId, moduleId)
 
 	if err != nil {
-		return diag.FromErr(err)
+		diags := diag.FromErr(err)
+		diags = append(diags, diag.Diagnostic{
+			Severity: diag.Warning,
+			Summary:  "Error deleting module config",
+		})
+		return diags
 	}
 	d.SetId("") // This is unset when the resource is deleted
 

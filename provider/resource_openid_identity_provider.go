@@ -149,7 +149,12 @@ func resourceOpenIdIdentityProviderCreate(ctx context.Context, d *schema.Resourc
 	o, err := c.PostOpenIdIdentityProvider(*idp)
 
 	if err != nil {
-		return diag.FromErr(err)
+		diags := diag.FromErr(err)
+		diags = append(diags, diag.Diagnostic{
+			Severity: diag.Warning,
+			Summary:  "Error creating identity provider",
+		})
+		return diags
 	}
 
 	d.Set("federation_registration_id", o.FederationRegistrationId) // set the computed value
@@ -202,16 +207,26 @@ func resourceOpenIdIdentityProviderUpdate(ctx context.Context, d *schema.Resourc
 
 	c := m.(*smilecdr.Client)
 
-	provider, mErr := resource2OpenIdIdentityProvider(d)
-	if mErr != nil {
-		return diag.FromErr(mErr)
+	provider, cErr := resource2OpenIdIdentityProvider(d)
+	if cErr != nil {
+		diags := diag.FromErr(cErr)
+		diags = append(diags, diag.Diagnostic{
+			Severity: diag.Warning,
+			Summary:  "Error converting identity provider resource information to data model",
+		})
+		return diags
 	}
 	d.SetId(provider.Issuer)
 
 	_, err := c.PutOpenIdIdentityProvider(*provider)
 
 	if err != nil {
-		return diag.FromErr(err)
+		diags := diag.FromErr(err)
+		diags = append(diags, diag.Diagnostic{
+			Severity: diag.Warning,
+			Summary:  "Error updating identity provider",
+		})
+		return diags
 	}
 
 	return resourceOpenIdIdentityProviderRead(ctx, d, m)

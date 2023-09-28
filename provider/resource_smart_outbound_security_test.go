@@ -36,7 +36,7 @@ func testSmartOutboundConfig() string {
 		node_id                               = "Master"
 		http_listener_context_path            = "/auth"
 		http_listener_unhealthy_response_code = 503
-		http_listener_port                    = 9201
+		http_listener_port                    = 9999
 		oidc_issuer_url                       = "http://keycloak:8080/auth/realms/lra"
 		oidc_federate_mode_enabled            = true
 		smart_authorization_enforce_approved_scopes = true
