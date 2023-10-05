@@ -116,7 +116,7 @@ resource "smilecdr_smart_outbound_security" "smart_auth_outbound" {
   smart_authorization_allowed_audience_list   = "lra"
   smart_authorization_email_from_address      = "noreply@phsa.ca"
   smart_authorization_enforce_approved_scopes = true
-  smart_authorization_scopes_supported = "launch, fhirUser, openid, profile, patient/*.read, patient/*.write, patient/*.*"
+  smart_authorization_scopes_supported = "launch fhirUser openid profile patient/*.read"
   // openid_connect_server_pre_seed_file = "openid_connect_server_pre_seed.json"
   // openid_connect_client_pre_seed_file = "openid_connect_client_pre_seed.json"
   sessions_in_memory = false
