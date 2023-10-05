@@ -8,17 +8,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 )
 
-var (
-	smileCdrGrantTypes = map[string]bool{
-		"AUTHORIZATION_CODE": true,
-		"IMPLICIT":           true,
-		"REFRESH_TOKEN":      true,
-		"CLIENT_CREDENTIALS": true,
-		"PASSWORD":           true,
-		"JWT_BEARER":         true,
-	}
-)
-
 func IsValidClientID(i interface{}, k cty.Path) diag.Diagnostics {
 	value, ok := i.(string)
 	if !ok {

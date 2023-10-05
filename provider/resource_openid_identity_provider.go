@@ -7,9 +7,10 @@ import (
 	"context"
 	"time"
 
+	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	"github.com/zedwerks/terraform-smilecdr/provider/helper/validations"
 	"github.com/zedwerks/terraform-smilecdr/smilecdr"
 )
 
@@ -30,20 +31,19 @@ func resourceOpenIdIdentityProvider() *schema.Resource {
 				Default:  "An OpenID Identity Provider",
 			},
 			"issuer": {
-				Type:     schema.TypeString,
-				Required: true,
+				Type:             schema.TypeString,
+				Required:         true,
+				ValidateDiagFunc: validations.ValidateDiagFunc(validation.IsURLWithHTTPorHTTPS),
 			},
 			"token_introspection_client_id": {
-				Type:     schema.TypeString,
-				Required: false,
-				//ValidateDiagFunc: validations.IsValidClientID,
-				ValidateFunc: validation.All(
-					validation.StringIsNotWhiteSpace,
-					validation.StringDoesNotContainAny(" \t\n\r")),
+				Type:             schema.TypeString,
+				Optional:         true,
+				ValidateDiagFunc: validations.ValidateDiagFunc(validation.StringIsNotWhiteSpace),
 			},
 			"token_introspection_client_secret": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:             schema.TypeString,
+				Optional:         true,
+				ValidateDiagFunc: validations.ValidateDiagFunc(validation.StringLenBetween(9, 512)),
 			},
 			"node_id": {
 				Type:     schema.TypeString,
@@ -73,21 +73,24 @@ func resourceOpenIdIdentityProvider() *schema.Resource {
 				Default:  "openid profile",
 			},
 			"federation_authorization_url": {
-				Type:     schema.TypeString,
-				Required: true,
+				Type:             schema.TypeString,
+				Required:         true,
+				ValidateDiagFunc: validations.ValidateDiagFunc(validation.IsURLWithHTTPorHTTPS),
 			},
 			"federation_token_url": {
-				Type:     schema.TypeString,
-				Required: true,
+				Type:             schema.TypeString,
+				Required:         true,
+				ValidateDiagFunc: validations.ValidateDiagFunc(validation.IsURLWithHTTPorHTTPS),
 			},
 			"federation_user_info_url": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:             schema.TypeString,
+				Optional:         true,
+				ValidateDiagFunc: validations.ValidateDiagFunc(validation.IsURLWithHTTPorHTTPS),
 			},
 			"federation_jwk_set_url": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				ValidateFunc: validation.IsURLWithHTTPorHTTPS,
+				Type:             schema.TypeString,
+				Optional:         true,
+				ValidateDiagFunc: validations.ValidateDiagFunc(validation.IsURLWithHTTPorHTTPS),
 			},
 			"federation_auth_script_text": {
 				Type:     schema.TypeString,
@@ -98,9 +101,8 @@ func resourceOpenIdIdentityProvider() *schema.Resource {
 				Optional: true,
 			},
 			"archived_at": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				ValidateFunc: validation.IsRFC3339Time,
+				Type:     schema.TypeString,
+				Optional: true,
 			},
 		},
 		Importer: &schema.ResourceImporter{
@@ -147,7 +149,12 @@ func resourceOpenIdIdentityProviderCreate(ctx context.Context, d *schema.Resourc
 	o, err := c.PostOpenIdIdentityProvider(*idp)
 
 	if err != nil {
-		return diag.FromErr(err)
+		diags := diag.FromErr(err)
+		diags = append(diags, diag.Diagnostic{
+			Severity: diag.Warning,
+			Summary:  "Error creating identity provider",
+		})
+		return diags
 	}
 
 	d.Set("federation_registration_id", o.FederationRegistrationId) // set the computed value
@@ -172,7 +179,7 @@ func resourceOpenIdIdentityProviderRead(ctx context.Context, d *schema.ResourceD
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	d.SetId(provider.Issuer)
+	d.SetId(provider.Issuer) // Issuer must be unique in the system
 
 	d.Set("pid", provider.Pid)
 	d.Set("name", provider.Name)
@@ -200,16 +207,26 @@ func resourceOpenIdIdentityProviderUpdate(ctx context.Context, d *schema.Resourc
 
 	c := m.(*smilecdr.Client)
 
-	provider, mErr := resource2OpenIdIdentityProvider(d)
-	if mErr != nil {
-		return diag.FromErr(mErr)
+	provider, cErr := resource2OpenIdIdentityProvider(d)
+	if cErr != nil {
+		diags := diag.FromErr(cErr)
+		diags = append(diags, diag.Diagnostic{
+			Severity: diag.Warning,
+			Summary:  "Error converting identity provider resource information to data model",
+		})
+		return diags
 	}
 	d.SetId(provider.Issuer)
 
 	_, err := c.PutOpenIdIdentityProvider(*provider)
 
 	if err != nil {
-		return diag.FromErr(err)
+		diags := diag.FromErr(err)
+		diags = append(diags, diag.Diagnostic{
+			Severity: diag.Warning,
+			Summary:  "Error updating identity provider",
+		})
+		return diags
 	}
 
 	return resourceOpenIdIdentityProviderRead(ctx, d, m)

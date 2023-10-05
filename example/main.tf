@@ -5,7 +5,7 @@ terraform {
   required_providers {
     smilecdr = {
       source  = "local.providers/zedwerks/smilecdr"
-      version = "0.3.0"
+      version = "~> 0.9.0"
     }
   }
 }

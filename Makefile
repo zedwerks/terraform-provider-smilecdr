@@ -3,31 +3,35 @@ HOSTNAME=zedwerks
 NAME=smilecdr
 OUTPUT_DIR=./bin
 BINARY=${OUTPUT_DIR}/terraform-provider-${NAME}_v${VERSION}
-VERSION=0.3.2
-OS_ARCH=darwin_arm64
+VERSION=$$(git describe --tags)
+OS_ARCH?=darwin_arm64
 
-default: install
+default: install docs
 
-build:
+build: show-version
 	mkdir -p ${OUTPUT_DIR}
+	echo "Building ${BINARY}"
 	go build -o ${BINARY}
 
-release:
-	GOOS=darwin GOARCH=amd64 go build -o ./bin/${BINARY}_${VERSION}_darwin_amd64
-	GOOS=darwin GOARCH=arm64 go build -o ./bin/${BINARY}_${VERSION}_darwin_arm64
-	GOOS=freebsd GOARCH=386 go build -o ./bin/${BINARY}_${VERSION}_freebsd_386
-	GOOS=freebsd GOARCH=amd64 go build -o ./bin/${BINARY}_${VERSION}_freebsd_amd64
-	GOOS=freebsd GOARCH=arm go build -o ./bin/${BINARY}_${VERSION}_freebsd_arm
-	GOOS=linux GOARCH=386 go build -o ./bin/${BINARY}_${VERSION}_linux_386
-	GOOS=linux GOARCH=amd64 go build -o ./bin/${BINARY}_${VERSION}_linux_amd64
-	GOOS=linux GOARCH=arm go build -o ./bin/${BINARY}_${VERSION}_linux_arm
-	GOOS=openbsd GOARCH=386 go build -o ./bin/${BINARY}_${VERSION}_openbsd_386
-	GOOS=openbsd GOARCH=amd64 go build -o ./bin/${BINARY}_${VERSION}_openbsd_amd64
-	GOOS=solaris GOARCH=amd64 go build -o ./bin/${BINARY}_${VERSION}_solaris_amd64
-	GOOS=windows GOARCH=386 go build -o ./bin/${BINARY}_${VERSION}_windows_386
-	GOOS=windows GOARCH=amd64 go build -o ./bin/${BINARY}_${VERSION}_windows_amd64
+docs:
+	go run github.com/hashicorp/terraform-plugin-docs/cmd/tfplugindocs
 
-install: build
+show-version:
+	git describe --tags
+
+
+release: build
+	GOOS=darwin GOARCH=amd64 go build -o ./bin/${BINARY}_darwin_amd64
+	GOOS=darwin GOARCH=arm64 go build -o ./bin/${BINARY}_darwin_arm64
+	GOOS=freebsd GOARCH=amd64 go build -o ./bin/${BINARY}_freebsd_amd64
+	GOOS=freebsd GOARCH=arm go build -o ./bin/${BINARY}_freebsd_arm
+	GOOS=linux GOARCH=amd64 go build -o ./bin/${BINARY}_linux_amd64
+	GOOS=linux GOARCH=arm go build -o ./bin/${BINARY}_linux_arm
+	GOOS=openbsd GOARCH=amd64 go build -o ./bin/${BINARY}_openbsd_amd64
+	GOOS=solaris GOARCH=amd64 go build -o ./bin/${BINARY}_solaris_amd64
+	GOOS=windows GOARCH=amd64 go build -o ./bin/${BINARY}_windows_amd64
+
+install: build 
 	mkdir -p ~/.terraform.d/plugins/local.providers/${HOSTNAME}/${NAME}/${VERSION}/${OS_ARCH}
 	mv ${BINARY} ~/.terraform.d/plugins/local.providers/${HOSTNAME}/${NAME}/${VERSION}/${OS_ARCH}
 
