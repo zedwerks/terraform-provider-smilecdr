@@ -7,7 +7,7 @@ BINARY=${OUTPUT_DIR}/terraform-provider-${NAME}_${VERSION}
 VERSION=$$(git describe --tags)
 OS_ARCH?=darwin_arm64
 
-default: install docs
+default: docs build
 
 build: show-version
 	mkdir -p ${OUTPUT_DIR}
@@ -15,6 +15,7 @@ build: show-version
 	go build -o ${BINARY}
 
 docs:
+	echo "Generating docs"
 	go run github.com/hashicorp/terraform-plugin-docs/cmd/tfplugindocs
 
 show-version:
