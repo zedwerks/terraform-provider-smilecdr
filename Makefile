@@ -2,6 +2,7 @@ TEST?=$$(go list ./... | grep -v 'vendor')
 HOSTNAME=zedwerks
 NAME=smilecdr
 OUTPUT_DIR=./bin
+DIST_DIR=./dist
 BINARY=${OUTPUT_DIR}/terraform-provider-${NAME}_v${VERSION}
 VERSION=$$(git describe --tags)
 OS_ARCH?=darwin_arm64
@@ -45,6 +46,7 @@ testacc:
 
 clean:
 	rm -rf ${OUTPUT_DIR}
+	rm -rf ${DIST_DIR}
 
 dist: clean build
 	goreleaser release
