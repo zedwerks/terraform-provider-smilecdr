@@ -45,3 +45,6 @@ testacc:
 
 clean:
 	rm -rf ${OUTPUT_DIR}
+
+dist: clean build
+	goreleaser release
