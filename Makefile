@@ -3,7 +3,7 @@ HOSTNAME=zedwerks
 NAME=smilecdr
 OUTPUT_DIR=./bin
 DIST_DIR=./dist
-BINARY=${OUTPUT_DIR}/terraform-provider-${NAME}_v${VERSION}
+BINARY=${OUTPUT_DIR}/terraform-provider-${NAME}_${VERSION}
 VERSION=$$(git describe --tags)
 OS_ARCH?=darwin_arm64
 
