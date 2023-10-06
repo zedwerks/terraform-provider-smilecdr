@@ -43,3 +43,4 @@ terraform
 
 .vscode/
 .idea/
+dist/
