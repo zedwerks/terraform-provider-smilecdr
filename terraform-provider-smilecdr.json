@@ -21,10 +21,6 @@
     },
     {
       "os": "linux",
-      "arch": "arm"
-    },
-    {
-      "os": "linux",
       "arch": "amd64"
     },
     {
