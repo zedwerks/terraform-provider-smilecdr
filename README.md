@@ -98,10 +98,8 @@ In order to run the full suite of Acceptance tests, run `make testacc`.
 
 ## Using Goreleaser
 
-This project uses goreleaser (goreleaser.com) to manage publishing signed release binaries to Git. From there they are published to the Terraform Registry (terraform.io)
+This project uses [goreleaser](goreleaser.com) to manage publishing signed release binaries to Git. From there they are published to the Terraform Registry (terraform.io)
 
 See ```goreleaser.com/quick-start```
-
-
 
 [Badge-License]: https://img.shields.io/badge/license-apache%202.0-60C060.svg
