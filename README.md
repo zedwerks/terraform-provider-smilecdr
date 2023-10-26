@@ -102,7 +102,6 @@ This project uses [goreleaser](goreleaser.com) to manage publishing signed relea
 
 See ```goreleaser.com/quick-start```
 
-
 ## Creating a New Release with GitActions setup (as per this repo)
 
 1. Merge from working branch to main.
