@@ -19,26 +19,38 @@ builds:
       - -trimpath
     ldflags:
       - '-s -w -X main.version={{.Version}} -X main.commit={{.Commit}}'
-    goos:
-      - darwin
-      - freebsd
-      - linux
-      - openbsd
-      - solaris
-      - windows
-    goarch:
-      - amd64
-      - arm
-      - arm64
-    binary: '{{ .ProjectName }}_v{{ .Version }}'
+  - id: b1
+    binary: b1
+    goos: [linux, darwin]
+    goarch: [amd64, arm64]
+  - id: b2
+    binary: b2
+    goos: [freebsd]
+    goarch: [amd64, arm]
+  - id: b3
+    binary: b3
+    goos: [openbsd, solaris]
+    goarch: [amd64]
+  - id: b4
+    goos: [windows]
+    goarch: [amd64]
 archives:
   - id: a1
-  - format: tar.gz
+    builds: [b1]
     name_template: '{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}'
-    # use zip for windows archives
-    format_overrides:
-      - goos: windows
-        format: zip
+    format: tar.gz
+  - id: a2
+    builds: [b2]
+    name_template: '{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}'
+    format: tar.gz
+  - id: a3
+    builds: [b3]
+    name_template: '{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}'
+    format: tar.gz
+  - id: a4
+    builds: [b4]
+    format: zip
+    name_template: '{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}'
 checksum:
   name_template: '{{ .ProjectName }}_{{ .Version }}_SHA256SUMS'
   algorithm: sha256
