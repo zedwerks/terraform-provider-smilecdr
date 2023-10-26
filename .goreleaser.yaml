@@ -38,14 +38,20 @@ builds:
         goarch: arm
       - goos: openbsd
         goarch: arm64
+      - goos: windows
+        goarch: arm64
+      - goos: windows
+        goarch: arm
     binary: '{{ .ProjectName }}_v{{ .Version }}'
 archives:
+  - id: a1
   - format: tar.gz
     name_template: '{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}'
     # use zip for windows archives
     format_overrides:
       - goos: windows
         format: zip
+    allow_different_binary_count: true
 checksum:
   name_template: '{{ .ProjectName }}_{{ .Version }}_SHA256SUMS'
   algorithm: sha256
