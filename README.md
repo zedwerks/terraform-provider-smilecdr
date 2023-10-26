@@ -102,4 +102,18 @@ This project uses [goreleaser](goreleaser.com) to manage publishing signed relea
 
 See ```goreleaser.com/quick-start```
 
+
+## Creating a New Release with GitActions setup (as per this repo)
+
+1. Merge from working branch to main.
+2. Tag a new release in form "vx.y.z" e.g. v1.0.1. OPtionally add a message with -m
+
+```shell
+git tag -a v1.0.2 -m "Release 1.0.2" 
+git push origin v1.0.2
+```
+
+3. This triggers the GitAction to run a deployment.
+4. Monitor the GitAction progress at Github.com
+
 [Badge-License]: https://img.shields.io/badge/license-apache%202.0-60C060.svg
