@@ -25,7 +25,7 @@ show-version:
 	git describe --tags
 
 release:
-	goreleaser release --rm-dist --snapshot --skip-publish  --skip-sign
+	goreleaser release --clean --snapshot --skip=publish  --skip=sign
 
 binaries: build
 	GOOS=darwin GOARCH=amd64 go build -o ${OUTPUT_DIR}/${BINARY}_darwin_amd64
