@@ -1,5 +1,9 @@
 # terraform-provider-smilecdr Change Log
 
+## v1.0.4 (Nov 15, 2025)
+
+- attempt to fix goreleaser build for binaries to resolve not found errors.
+
 ## v1.0.2 (Oct 26, 2023)
 
 - updated introductory documentation
