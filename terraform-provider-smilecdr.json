@@ -1,6 +1,6 @@
 {
   "name": "smilecdr",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "protocols": ["5.0"],
   "platforms": [
     {
