@@ -38,15 +38,15 @@ archives:
   - id: a1
     builds: [b1]
     name_template: '{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}'
-    format: tar.gz
+    format: zip
   - id: a2
     builds: [b2]
     name_template: '{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}'
-    format: tar.gz
+    format: zip
   - id: a3
     builds: [b3]
     name_template: '{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}'
-    format: tar.gz
+    format: zip
   - id: a4
     builds: [b4]
     format: zip
