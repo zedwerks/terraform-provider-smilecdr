@@ -19,36 +19,53 @@ builds:
       - -trimpath
     ldflags:
       - '-s -w -X main.version={{.Version}} -X main.commit={{.Commit}}'
-  - id: b1
-    binary: b1
-    goos: [linux, darwin]
+  - id: linux
+    binary: linux_binary
+    goos: [linux]
     goarch: [amd64, arm64]
-  - id: b2
-    binary: b2
+  - id: macos
+    binary: macos_binary
+    goos: [darwin]
+    goarch: [amd64, arm64]
+  - id: freebsd
+    binary: freebsd_binary
     goos: [freebsd]
     goarch: [amd64, arm]
-  - id: b3
-    binary: b3
-    goos: [openbsd, solaris]
+  - id: openbsd
+    binary: openbsd_binary
+    goos: [openbsd]
     goarch: [amd64]
-  - id: b4
+  - id: solaris
+    binary: solaris_binary
+    goos: [solaris]
+    goarch: [amd64]
+  - id: windows
+    binary: windows_binary
     goos: [windows]
     goarch: [amd64]
 archives:
-  - id: a1
-    builds: [b1]
+  - id: linux_zip
+    builds: [linux_binary]
     name_template: '{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}'
     format: zip
-  - id: a2
-    builds: [b2]
+  - id: macos_zip
+    builds: [macos_binary]
     name_template: '{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}'
     format: zip
-  - id: a3
-    builds: [b3]
+  - id: freebsd_zip
+    builds: [freebsd_binary]
     name_template: '{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}'
     format: zip
-  - id: a4
-    builds: [b4]
+  - id: openbsd_zip
+    builds: [openbsd_binary]  
+    name_template: '{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}'
+    format: zip
+  - id: solaris_zip
+    builds: [solaris_binary]
+    format: zip
+    name_template: '{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}'
+  - id: windows_zip 
+    builds: [windows_binary]
     format: zip
     name_template: '{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}'
 checksum:
