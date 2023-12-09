@@ -1163,19 +1163,23 @@ func resourceSmartOutboundSecurityCreate(ctx context.Context, d *schema.Resource
 
 }
 
-func resourceSmartOutboundSecurityRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceSmartOutboundSecurityRead(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 
-	c := m.(*smilecdr.Client)
+	smileClient := meta.(*smilecdr.Client)
 
-	moduleId := d.Get("module_id").(string)
-	nodeId := d.Get("node_id").(string)
-	moduleConfig, err := c.GetModuleConfig(nodeId, moduleId)
+	moduleId := data.Get("module_id").(string)
+	nodeId := data.Get("node_id").(string)
+	moduleConfig, err := smileClient.GetModuleConfig(nodeId, moduleId)
 
 	// map from moduleConfig to resourceData
 	if err != nil {
 		return diag.FromErr(err)
 	}
+	err = setSmartOutboundSecurityData(ctx, data, &moduleConfig)
+	return diag.FromErr(err)
+}
 
+func setSmartOutboundSecurityData(ctx context.Context, d *schema.ResourceData, moduleConfig *smilecdr.ModuleConfig) error {
 	// User Authentication Options ------------------------
 	val, ok := moduleConfig.LookupOptionOk("anonymous.access.account_username")
 	if ok {

@@ -41,7 +41,9 @@ func Provider() *schema.Provider {
 			"smilecdr_smart_inbound_security":   resourceSmartInboundSecurity(),
 			"smilecdr_module_config":            resourceModuleConfig(),
 		},
-		DataSourcesMap:       map[string]*schema.Resource{},
+		DataSourcesMap: map[string]*schema.Resource{
+			"smilecdr_smart_outbound_security": dataSourceSmartOutboundSecurity(),
+		},
 		ConfigureContextFunc: providerConfigure,
 	}
 }
