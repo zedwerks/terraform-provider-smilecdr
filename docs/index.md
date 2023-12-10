@@ -24,7 +24,7 @@ The authentication currently supported to access Smile CDR Admin APIs uses Basic
 
 ## Assigning User Roles
 
-Assign the user acount to the permission of Superuser (```ROLE_SUPERUSER```). You can also try reducing the user access by setting the permissions:
+Assign the user account to the permission of Superuser (```ROLE_SUPERUSER```). You can also try reducing the user access by setting the permissions:
 
  - ```ACCESS_ADMIN_JSON```
  - ```ACCESS_ADMIN_WEB```
