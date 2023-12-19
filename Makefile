@@ -2,13 +2,13 @@ TEST?=$$(go list ./... | grep -v 'vendor')
 HOSTNAME=zedwerks
 NAME=smilecdr
 OUTPUT_DIR=./bin
-BINARY=${OUTPUT_DIR}/terraform-provider-${NAME}_v${VERSION}
-VERSION=$$(git describe --tags)
+VERSION:=$(shell git describe --tags --abbrev=0 | sed 's/^v//')
+BINARY=${OUTPUT_DIR}/terraform-provider-${NAME}_${VERSION}
 OS_ARCH?=darwin_arm64
 DIST_DIR=./dist
 BINARY=terraform-provider-${NAME}_${VERSION}
-VERSION=$$(git describe --tags)
 OS_ARCH?=darwin_arm64
+LOCAL_DEPLOY_DIR=~/.terraform.d/plugins/local.providers/${HOSTNAME}/${NAME}/${VERSION}/${OS_ARCH}
 
 default: docs build
 
@@ -22,7 +22,7 @@ docs:
 	go run github.com/hashicorp/terraform-plugin-docs/cmd/tfplugindocs
 
 show-version:
-	git describe --tags
+	@echo "Version: ${VERSION}"
 
 release:
 	goreleaser release --clean --snapshot --skip=publish  --skip=sign
@@ -38,9 +38,9 @@ binaries: build
 	GOOS=solaris GOARCH=amd64 go build -o ${OUTPUT_DIR}/${BINARY}_solaris_amd64
 	GOOS=windows GOARCH=amd64 go build -o ${OUTPUT_DIR}/${BINARY}_windows_amd64
 
-install: build 
-	mkdir -p ~/.terraform.d/plugins/local.providers/${HOSTNAME}/${NAME}/${VERSION}/${OS_ARCH}
-	mv ${BINARY} ~/.terraform.d/plugins/local.providers/${HOSTNAME}/${NAME}/${VERSION}/${OS_ARCH}
+install: show-version build
+	mkdir -p ${LOCAL_DEPLOY_DIR}
+	cp ${OUTPUT_DIR}/${BINARY} ${LOCAL_DEPLOY_DIR}
 
 
 test: 
