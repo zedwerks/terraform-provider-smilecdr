@@ -8,7 +8,7 @@ description: |-
 
 # smilecdr_smart_inbound_security (Resource)
 
-
+This is a resource to manage your Local Inbound Security module. You can import the existing one in order to manage its configuration using this resource.
 
 
 

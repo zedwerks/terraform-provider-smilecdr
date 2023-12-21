@@ -2,13 +2,14 @@
 
 ![Badge-License]
 
-An initial cut at creating a Terraform provider for Smile CDR. Focus early days on security module configurations:
+A a Terraform provider for Smile CDR. Focus on security module configurations:
 
 - OpenID Identity Providers
 - OIDC Clients
 - Authorization and Permissions.
-
-Then later on, add more comprehensive configurations for Smile CDR.
+- User Accounts
+- SMART Outbound Security Modules
+- SMART Inbound Security Module
 
 ## Requirements
 
@@ -42,6 +43,9 @@ make build
 ```
 
 ## Using the Provider
+
+Documentation for this Terraform provider can be found [here](./docs).
+
 
 1. Have Smile CDR installed, possibly locally. See the smilecdr-product/docker-compose.yml, if you have a docker image for a release of Smile CDR and you wish to run locally.
 2. Install the provider
@@ -108,8 +112,8 @@ See ```goreleaser.com/quick-start```
 2. Tag a new release in form "vx.y.z" e.g. v1.0.1. OPtionally add a message with -m
 
 ```shell
-git tag -a v1.0.2 -m "Release 1.0.2" 
-git push origin v1.0.2
+git tag -a v1.0.5 -m "Release 1.0.5" 
+git push origin v1.0.5
 ```
 
 3. This triggers the GitAction to run a deployment.

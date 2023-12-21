@@ -59,7 +59,7 @@ description: |-
 
 Required:
 
-- `secret` (String, Sensitive)
+- `secret` (String)
 
 Optional:
 
