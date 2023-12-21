@@ -1,4 +1,4 @@
-package smilecdr
+package helper
 
 import (
 	"log"
