@@ -49,4 +49,7 @@ resource "smilecdr_openid_client" "client1" {
       permission = "FHIR_WRITE_ALL_IN_COMPARTMENT"
       argument   = "Patient/123"
   }
+  lifecycle {
+    ignore_changes = ["client_secrets"]
+  }
 }
