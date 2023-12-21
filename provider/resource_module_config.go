@@ -5,7 +5,9 @@ package provider
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -20,6 +22,9 @@ func resourceModuleConfig() *schema.Resource {
 		ReadContext:   resourceModuleConfigRead,
 		UpdateContext: resourceModuleConfigUpdate,
 		DeleteContext: resourceModuleConfigDelete,
+		Importer: &schema.ResourceImporter{
+			StateContext: resourceModuleConfigImport,
+		},
 		Schema: map[string]*schema.Schema{
 			"node_id": {
 				Type:     schema.TypeString,
@@ -68,9 +73,6 @@ func resourceModuleConfig() *schema.Resource {
 				},
 			},
 		},
-		Importer: &schema.ResourceImporter{
-			StateContext: schema.ImportStatePassthroughContext,
-		},
 	}
 }
 
@@ -111,7 +113,7 @@ func resourceModuleConfigCreate(ctx context.Context, d *schema.ResourceData, m i
 		return diag.FromErr(mErr)
 	}
 
-	_, err := c.PostModuleConfig(nodeId, *moduleConfig)
+	_, err := c.PostModuleConfig(ctx, nodeId, *moduleConfig)
 
 	if err != nil {
 		return diag.FromErr(err)
@@ -130,7 +132,7 @@ func resourceModuleConfigRead(ctx context.Context, d *schema.ResourceData, m int
 	moduleId := d.Get("module_id").(string)
 	nodeId := d.Get("node_id").(string)
 
-	moduleConfig, err := c.GetModuleConfig(nodeId, moduleId)
+	moduleConfig, err := c.GetModuleConfig(ctx, nodeId, moduleId)
 
 	if err != nil {
 		diags := diag.FromErr(err)
@@ -177,7 +179,7 @@ func resourceModuleConfigUpdate(ctx context.Context, d *schema.ResourceData, m i
 
 	d.SetId(moduleConfig.ModuleId)
 
-	_, err := c.PutModuleConfig(nodeId, *moduleConfig)
+	_, err := c.PutModuleConfig(ctx, nodeId, *moduleConfig)
 
 	if err != nil {
 		diags := diag.FromErr(err)
@@ -197,7 +199,7 @@ func resourceModuleConfigDelete(ctx context.Context, d *schema.ResourceData, m i
 	moduleId := d.Get("module_id").(string)
 	nodeId := d.Get("node_id").(string)
 
-	err := c.DeleteModuleConfig(nodeId, moduleId)
+	err := c.DeleteModuleConfig(ctx, nodeId, moduleId)
 
 	if err != nil {
 		diags := diag.FromErr(err)
@@ -210,4 +212,28 @@ func resourceModuleConfigDelete(ctx context.Context, d *schema.ResourceData, m i
 	d.SetId("") // This is unset when the resource is deleted
 
 	return nil
+}
+
+func resourceModuleConfigImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+	c := meta.(*smilecdr.Client)
+
+	parts := strings.Split(d.Id(), "/")
+	if len(parts) != 2 {
+		return nil, fmt.Errorf("invalid import. supported import formats: {{nodeId}}/{{moduleId}}")
+	}
+
+	_, err := c.GetModuleConfig(ctx, parts[0], parts[1])
+	if err != nil {
+		return nil, err
+	}
+
+	d.Set("node_id", parts[0])
+	d.Set("module_id", parts[1])
+
+	diagnostics := resourceModuleConfigRead(ctx, d, meta)
+	if diagnostics.HasError() {
+		return nil, errors.New(diagnostics[0].Summary)
+	}
+
+	return []*schema.ResourceData{d}, nil
 }

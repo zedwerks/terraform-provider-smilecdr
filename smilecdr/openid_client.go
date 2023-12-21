@@ -4,6 +4,7 @@
 package smilecdr
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 )
@@ -51,9 +52,9 @@ type OpenIdClient struct {
 	ArchivedAt                  string           `json:"archivedAt,omitempty"`
 }
 
-func (smilecdr *Client) GetOpenIdClients() ([]OpenIdClient, error) {
+func (smilecdr *Client) GetOpenIdClients(ctx context.Context) ([]OpenIdClient, error) {
 	var clients []OpenIdClient
-	jsonBody, getErr := smilecdr.Get("/openid-connect-clients")
+	jsonBody, getErr := smilecdr.Get(ctx, "/openid-connect-clients")
 	if getErr != nil {
 		return clients, getErr
 	}
@@ -63,11 +64,11 @@ func (smilecdr *Client) GetOpenIdClients() ([]OpenIdClient, error) {
 	return clients, err
 }
 
-func (smilecdr *Client) GetOpenIdClient(nodeId string, moduleId string, clientId string) (OpenIdClient, error) {
+func (smilecdr *Client) GetOpenIdClient(ctx context.Context, nodeId string, moduleId string, clientId string) (OpenIdClient, error) {
 	var client OpenIdClient
 	var err error
 	var endpoint = fmt.Sprintf("/openid-connect-clients/%s/%s/%s", nodeId, moduleId, clientId)
-	jsonBody, err := smilecdr.Get(endpoint)
+	jsonBody, err := smilecdr.Get(ctx, endpoint)
 	if err != nil {
 		fmt.Println("error during Get in GetOpenIdClient:", err)
 		return client, err
@@ -83,7 +84,7 @@ func (smilecdr *Client) GetOpenIdClient(nodeId string, moduleId string, clientId
 	return client, err
 }
 
-func (smilecdr *Client) PostOpenIdClient(client OpenIdClient) (OpenIdClient, error) {
+func (smilecdr *Client) PostOpenIdClient(ctx context.Context, client OpenIdClient) (OpenIdClient, error) {
 	var newClient OpenIdClient
 	var nodeId = client.NodeId
 	var moduleId = client.ModuleId
@@ -93,7 +94,7 @@ func (smilecdr *Client) PostOpenIdClient(client OpenIdClient) (OpenIdClient, err
 
 	fmt.Println("POST Request jsonBody:", string(jsonBody))
 
-	jsonBody, postErr := smilecdr.Post(endpoint, jsonBody)
+	jsonBody, postErr := smilecdr.Post(ctx, endpoint, jsonBody)
 	if postErr != nil {
 		fmt.Println("error during Post in PostOpenIdClient:", postErr)
 		return newClient, postErr
@@ -107,7 +108,7 @@ func (smilecdr *Client) PostOpenIdClient(client OpenIdClient) (OpenIdClient, err
 	return newClient, err
 }
 
-func (smilecdr *Client) PutOpenIdClient(client OpenIdClient) (OpenIdClient, error) {
+func (smilecdr *Client) PutOpenIdClient(ctx context.Context, client OpenIdClient) (OpenIdClient, error) {
 	var nodeId = client.NodeId
 	var moduleId = client.ModuleId
 	var clientId = client.ClientId
@@ -116,7 +117,7 @@ func (smilecdr *Client) PutOpenIdClient(client OpenIdClient) (OpenIdClient, erro
 
 	jsonBody, _ := json.Marshal(client)
 
-	resp, err := smilecdr.Put(endpoint, jsonBody)
+	resp, err := smilecdr.Put(ctx, endpoint, jsonBody)
 	if err != nil {
 		fmt.Println("error during Put in PutOpenIdClient:", err)
 		fmt.Println("ResponseBody:", string(resp))
@@ -126,9 +127,9 @@ func (smilecdr *Client) PutOpenIdClient(client OpenIdClient) (OpenIdClient, erro
 	return client, nil
 }
 
-func (smilecdr *Client) DeleteOpenIdClient(nodeId string, moduleId string, clientId string) error {
+func (smilecdr *Client) DeleteOpenIdClient(ctx context.Context, nodeId string, moduleId string, clientId string) error {
 	var endpoint = fmt.Sprintf("/openid-connect-clients/%s/%s/%s", nodeId, moduleId, clientId)
-	_, err := smilecdr.Delete(endpoint)
+	_, err := smilecdr.Delete(ctx, endpoint)
 
 	return err
 }

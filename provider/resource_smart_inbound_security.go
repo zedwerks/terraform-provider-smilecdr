@@ -5,7 +5,10 @@ package provider
 
 import (
 	"context"
+	"errors"
+	"fmt"
 	"strconv"
+	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -20,6 +23,9 @@ func resourceSmartInboundSecurity() *schema.Resource {
 		ReadContext:   resourceSmartInboundSecurityRead,
 		UpdateContext: resourceSmartInboundSecurityUpdate,
 		DeleteContext: resourceSmartInboundSecurityDelete,
+		Importer: &schema.ResourceImporter{
+			StateContext: resourceSmartInboundSecurityImport,
+		},
 		Schema: map[string]*schema.Schema{
 			"module_id": {
 				Type:             schema.TypeString,
@@ -181,9 +187,6 @@ func resourceSmartInboundSecurity() *schema.Resource {
 					},
 				},
 			},
-		},
-		Importer: &schema.ResourceImporter{
-			StateContext: schema.ImportStatePassthroughContext,
 		},
 	}
 }
@@ -359,7 +362,7 @@ func resourceSmartInboundSecurityCreate(ctx context.Context, d *schema.ResourceD
 		return diag.FromErr(err)
 	}
 
-	module, err := c.PostModuleConfig(nodeId, *moduleConfig)
+	module, err := c.PostModuleConfig(ctx, nodeId, *moduleConfig)
 
 	if err != nil {
 		return diag.FromErr(err)
@@ -374,7 +377,7 @@ func resourceSmartInboundSecurityRead(ctx context.Context, d *schema.ResourceDat
 
 	moduleId := d.Get("module_id").(string)
 	nodeId := d.Get("node_id").(string)
-	moduleConfig, err := c.GetModuleConfig(nodeId, moduleId)
+	moduleConfig, err := c.GetModuleConfig(ctx, nodeId, moduleId)
 
 	// map from moduleConfig to resourceData
 	if err != nil {
@@ -515,7 +518,7 @@ func resourceSmartInboundSecurityUpdate(ctx context.Context, d *schema.ResourceD
 	}
 	d.SetId(moduleConfig.ModuleId) // the primary resource identifier. must be unique.
 
-	_, pErr := c.PutModuleConfig(nodeId, *moduleConfig)
+	_, pErr := c.PutModuleConfig(ctx, nodeId, *moduleConfig)
 
 	if pErr != nil {
 		return diag.FromErr(pErr)
@@ -530,7 +533,7 @@ func resourceSmartInboundSecurityDelete(ctx context.Context, d *schema.ResourceD
 	moduleId := d.Get("module_id").(string)
 	nodeId := d.Get("node_id").(string)
 
-	err := c.DeleteModuleConfig(nodeId, moduleId)
+	err := c.DeleteModuleConfig(ctx, nodeId, moduleId)
 
 	if err != nil {
 		return diag.FromErr(err)
@@ -538,4 +541,28 @@ func resourceSmartInboundSecurityDelete(ctx context.Context, d *schema.ResourceD
 	d.SetId("") // This is unset when the resource is deleted
 
 	return nil
+}
+
+func resourceSmartInboundSecurityImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+	c := meta.(*smilecdr.Client)
+
+	parts := strings.Split(d.Id(), "/")
+	if len(parts) != 2 {
+		return nil, fmt.Errorf("invalid import. supported import formats: {{nodeId}}/{{moduleId}}")
+	}
+
+	_, err := c.GetModuleConfig(ctx, parts[0], parts[1])
+	if err != nil {
+		return nil, err
+	}
+
+	d.Set("node_id", parts[0])
+	d.Set("module_id", parts[1])
+
+	diagnostics := resourceSmartInboundSecurityRead(ctx, d, meta)
+	if diagnostics.HasError() {
+		return nil, errors.New(diagnostics[0].Summary)
+	}
+
+	return []*schema.ResourceData{d}, nil
 }

@@ -110,13 +110,6 @@ func testOpenIdClientConfig_confidential() string {
 		remember_approved_scopes  = false
 		attestation_accepted      = false
 		jwks_url                  = "http://example-client1.com/jwks"	
-
-		# ignore secrets masking by smile cdr
-		lifecycle {
-			ignore_changes = [
-				client_secrets,
-			]
-		}
 	}`, clientId)
 }
 

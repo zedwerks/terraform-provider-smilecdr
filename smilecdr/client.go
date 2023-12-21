@@ -5,30 +5,42 @@ package smilecdr
 
 import (
 	"bytes"
+	"context"
 	"encoding/base64"
 	"fmt"
 	"io"
 	"net/http"
+	"os"
+
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 )
 
 type Client struct {
 	baseUrl    string
 	authHeader string
 	httpClient *http.Client
+	debug      bool
 }
 
-func NewClient(baseUrl string, username string, password string) *Client {
+func NewClient(ctx context.Context, baseUrl string, username string, password string) *Client {
 	credentials := username + ":" + password
 	auth := "Basic " + base64.StdEncoding.EncodeToString([]byte(credentials))
 
-	return &Client{
+	if baseUrl == "" {
+		tflog.Warn(ctx, "Missing SmileCDR Admin API Base Url.")
+	}
+	tfLog, _ := os.LookupEnv("TF_LOG")
+
+	smilecdrClient := Client{
 		baseUrl:    baseUrl,
 		authHeader: auth,
 		httpClient: &http.Client{},
+		debug:      (tfLog == "DEBUG"),
 	}
+	return &smilecdrClient
 }
 
-func (c *Client) Get(endpoint string) ([]byte, error) {
+func (c *Client) Get(ctx context.Context, endpoint string) ([]byte, error) {
 	uri := c.baseUrl + endpoint
 	req, err := http.NewRequest(http.MethodGet, uri, nil)
 	if err != nil {
@@ -37,35 +49,43 @@ func (c *Client) Get(endpoint string) ([]byte, error) {
 	req.Header.Add("Authorization", c.authHeader)
 	req.Header.Add("Accept", "application/json")
 
-	fmt.Println("GET Request URI: ", uri)
+	logArgs := map[string]interface{}{
+		"uri": uri,
+	}
+
+	tflog.Debug(ctx, "Http GET Request URI:\n", logArgs)
 
 	resp, err := c.httpClient.Do(req)
 	if err != nil {
-		fmt.Println("error making HTTP Get Request: ", err)
+		errMsg := fmt.Sprintf("Http GET: error during request: %s", err.Error())
+		tflog.Error(ctx, errMsg)
 		return nil, err
 	}
 
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		fmt.Println("Http GET: received non-200 OK status code:", resp.StatusCode)
-		// Handle the error condition here
+		errMsg := fmt.Sprintf("Http GET: received non-200 OK status code: %d", resp.StatusCode)
+		tflog.Error(ctx, errMsg)
 		return nil, err
 	}
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		fmt.Println("Http GET: error reading Response Body:", err)
+		errMsg := fmt.Sprintf("Http GET: error reading Response Body: %s", err.Error())
+		tflog.Error(ctx, errMsg)
 		return nil, err
 	}
 
 	return body, nil
 }
 
-func (c *Client) Post(endpoint string, body []byte) ([]byte, error) {
+func (c *Client) Post(ctx context.Context, endpoint string, body []byte) ([]byte, error) {
 	uri := c.baseUrl + endpoint
 	req, err := http.NewRequest(http.MethodPost, uri, bytes.NewBuffer(body))
 	if err != nil {
+		errMsg := fmt.Sprintf("Http POST: error creating request: %s", err.Error())
+		tflog.Error(ctx, errMsg)
 		return nil, err
 	}
 	req.Header.Add("Authorization", c.authHeader)
@@ -74,27 +94,30 @@ func (c *Client) Post(endpoint string, body []byte) ([]byte, error) {
 
 	resp, err := c.httpClient.Do(req)
 	if err != nil {
-		fmt.Println("Http Post: error during request: ", err)
+		errMsg := fmt.Sprintf("Http POST: error during request: %s", err.Error())
+		tflog.Error(ctx, errMsg)
 		return nil, err
 	}
 
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusCreated && resp.StatusCode != http.StatusNoContent {
-		fmt.Println("Post(): Did not receive 200, 201 or 204. Received this status code:", resp.StatusCode)
+		errMsg := fmt.Sprintf("Http POST: Expecting 200, 201 or 204. Received: %d", resp.StatusCode)
+		tflog.Info(ctx, errMsg)
 		return nil, err
 	}
 
 	body, err = io.ReadAll(resp.Body)
 	if err != nil {
-		fmt.Println("error reading HTTP Post Response Body:", err)
+		errMsg := fmt.Sprintf("Http POST: Error reading Response Body: %s", err)
+		tflog.Info(ctx, errMsg)
 		return nil, err
 	}
 
 	return body, nil
 }
 
-func (c *Client) Put(endpoint string, body []byte) ([]byte, error) {
+func (c *Client) Put(ctx context.Context, endpoint string, body []byte) ([]byte, error) {
 	uri := c.baseUrl + endpoint
 	req, err := http.NewRequest(http.MethodPut, uri, bytes.NewBuffer(body))
 	if err != nil {
@@ -109,27 +132,28 @@ func (c *Client) Put(endpoint string, body []byte) ([]byte, error) {
 
 	resp, err := c.httpClient.Do(req)
 	if err != nil {
+		fmt.Printf("[ERROR] Http PUT: error during request: %s", err.Error())
 		return nil, err
 	}
 
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		fmt.Println("received non-200 OK status code:", resp.StatusCode)
+		fmt.Printf("[WARN] Http PUT: Received non-200 status code: %d", resp.StatusCode)
 		// Handle the error condition here
 		return nil, err
 	}
 
 	body, err = io.ReadAll(resp.Body)
 	if err != nil {
-		fmt.Println("error reading HTTP Put Response Body:", err)
+		fmt.Printf("[ERROR] Http PUT: Error reading Response Body: %s", err.Error())
 		return nil, err
 	}
 
 	return body, nil
 }
 
-func (c *Client) Delete(endpoint string) ([]byte, error) {
+func (c *Client) Delete(ctx context.Context, endpoint string) ([]byte, error) {
 	uri := c.baseUrl + endpoint
 	req, err := http.NewRequest(http.MethodDelete, uri, nil)
 	if err != nil {
@@ -142,20 +166,20 @@ func (c *Client) Delete(endpoint string) ([]byte, error) {
 
 	resp, err := c.httpClient.Do(req)
 	if err != nil {
-		fmt.Println("error making HTTP Delete Request: ", err)
+		fmt.Printf("[ERROR] Http DELETE Error during Request: %s", err.Error())
 		return nil, err
 	}
 
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusNoContent {
-		fmt.Println("Expected 200, or 204, instead received status code:", resp.StatusCode)
+		fmt.Printf("[WARN] Http DELETE: Expected 200, or 204, instead received status code: %d", resp.StatusCode)
 		return nil, err
 	}
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		fmt.Println("error reading HTTP Delete Response Body:", err)
+		fmt.Println("[ERROR] Http DELETE: Error reading Response Body:", err)
 		return nil, err
 	}
 

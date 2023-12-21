@@ -40,6 +40,7 @@ func Provider() *schema.Provider {
 			"smilecdr_smart_outbound_security":  resourceSmartOutboundSecurity(),
 			"smilecdr_smart_inbound_security":   resourceSmartInboundSecurity(),
 			"smilecdr_module_config":            resourceModuleConfig(),
+			"smilecdr_user":                     resourceUser(),
 		},
 		DataSourcesMap:       map[string]*schema.Resource{},
 		ConfigureContextFunc: providerConfigure,
@@ -56,7 +57,7 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}
 	baseUrl = d.Get("base_url").(string)
 
 	if (baseUrl != "") && (username != "") && (password != "") {
-		c := smilecdr.NewClient(baseUrl, username, password)
+		c := smilecdr.NewClient(ctx, baseUrl, username, password)
 
 		return c, diags
 	}

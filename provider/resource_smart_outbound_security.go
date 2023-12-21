@@ -5,6 +5,8 @@ package provider
 
 import (
 	"context"
+	"errors"
+	"fmt"
 	"strconv"
 	"strings"
 
@@ -21,6 +23,9 @@ func resourceSmartOutboundSecurity() *schema.Resource {
 		ReadContext:   resourceSmartOutboundSecurityRead,
 		UpdateContext: resourceSmartOutboundSecurityUpdate,
 		DeleteContext: resourceSmartOutboundSecurityDelete,
+		Importer: &schema.ResourceImporter{
+			StateContext: resourceSmartOutboundSecurityImport,
+		},
 		Schema: map[string]*schema.Schema{
 			"module_id": {
 				Type:        schema.TypeString,
@@ -528,9 +533,6 @@ func resourceSmartOutboundSecurity() *schema.Resource {
 				Description: "This can be supplied to some interactive modules in order to support self-registration of users.",
 			},
 		},
-		Importer: &schema.ResourceImporter{
-			StateContext: schema.ImportStatePassthroughContext,
-		},
 	}
 }
 
@@ -846,7 +848,7 @@ func smartOutboundSecurityResourceToModuleConfig(d *schema.ResourceData) (*smile
 		})
 	}
 	// OAuth2/OIDC Federation Options ------------------------
-	if v, ok := d.GetOk("oauth2_federation_enabled"); ok {
+	if v, ok := d.GetOk("oidc_federate_mode_enabled"); ok {
 		moduleConfig.Options = append(moduleConfig.Options, smilecdr.ModuleOption{
 			Key:   "federate_mode.enabled",
 			Value: strconv.FormatBool(v.(bool)),
@@ -1152,7 +1154,7 @@ func resourceSmartOutboundSecurityCreate(ctx context.Context, d *schema.Resource
 		return diag.FromErr(err)
 	}
 
-	module, err := c.PostModuleConfig(nodeId, *moduleConfig)
+	module, err := c.PostModuleConfig(ctx, nodeId, *moduleConfig)
 
 	if err != nil {
 		return diag.FromErr(err)
@@ -1169,7 +1171,7 @@ func resourceSmartOutboundSecurityRead(ctx context.Context, d *schema.ResourceDa
 
 	moduleId := d.Get("module_id").(string)
 	nodeId := d.Get("node_id").(string)
-	moduleConfig, err := c.GetModuleConfig(nodeId, moduleId)
+	moduleConfig, err := c.GetModuleConfig(ctx, nodeId, moduleId)
 
 	// map from moduleConfig to resourceData
 	if err != nil {
@@ -1455,7 +1457,7 @@ func resourceSmartOutboundSecurityRead(ctx context.Context, d *schema.ResourceDa
 	if ok {
 		if (val == "true") || (val == "false") {
 			boolVal, _ := strconv.ParseBool(val)
-			d.Set("oauth2_federation_enabled", boolVal)
+			d.Set("oidc_federate_mode_enabled", boolVal)
 		}
 	}
 	// SMART Callback Script Options ------------------------
@@ -1691,7 +1693,7 @@ func resourceSmartOutboundSecurityUpdate(ctx context.Context, d *schema.Resource
 	}
 	d.SetId(moduleConfig.ModuleId) // the primary resource identifier. must be unique.
 
-	_, pErr := c.PutModuleConfig(nodeId, *moduleConfig)
+	_, pErr := c.PutModuleConfig(ctx, nodeId, *moduleConfig)
 
 	if pErr != nil {
 		return diag.FromErr(pErr)
@@ -1706,7 +1708,7 @@ func resourceSmartOutboundSecurityDelete(ctx context.Context, d *schema.Resource
 	moduleId := d.Get("module_id").(string)
 	nodeId := d.Get("node_id").(string)
 
-	err := c.DeleteModuleConfig(nodeId, moduleId)
+	err := c.DeleteModuleConfig(ctx, nodeId, moduleId)
 
 	if err != nil {
 		return diag.FromErr(err)
@@ -1714,4 +1716,28 @@ func resourceSmartOutboundSecurityDelete(ctx context.Context, d *schema.Resource
 	d.SetId("") // This is unset when the resource is deleted
 
 	return nil
+}
+
+func resourceSmartOutboundSecurityImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+	c := meta.(*smilecdr.Client)
+
+	parts := strings.Split(d.Id(), "/")
+	if len(parts) != 2 {
+		return nil, fmt.Errorf("invalid import. supported import formats: {{nodeId}}/{{moduleId}}")
+	}
+
+	_, err := c.GetModuleConfig(ctx, parts[0], parts[1])
+	if err != nil {
+		return nil, err
+	}
+
+	d.Set("node_id", parts[0])
+	d.Set("module_id", parts[1])
+
+	diagnostics := resourceSmartOutboundSecurityRead(ctx, d, meta)
+	if diagnostics.HasError() {
+		return nil, errors.New(diagnostics[0].Summary)
+	}
+
+	return []*schema.ResourceData{d}, nil
 }

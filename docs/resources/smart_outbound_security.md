@@ -120,3 +120,14 @@ description: |-
 
 - `id` (String) The ID of this resource.
 - `module_type` (String) The module type of the module to be configured.
+
+## Import
+
+Existing SMART Outbound Security Modules can be imported using the format `{{node_id}}/{{module_id}}`, where the `module_id` is the unique Module Identifier in the node.
+This value can be found by logging into the SmileCDR Admin console.
+
+Example:
+
+```bash
+terraform import smilecdr_smart_outbound_security.smart_auth  "Master/smart_auth"
+```

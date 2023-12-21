@@ -3,14 +3,17 @@ HOSTNAME=zedwerks
 NAME=smilecdr
 OUTPUT_DIR=./bin
 VERSION:=$(shell git describe --tags --abbrev=0 | sed 's/^v//')
-BINARY=${OUTPUT_DIR}/terraform-provider-${NAME}_${VERSION}
 OS_ARCH?=darwin_arm64
 DIST_DIR=./dist
-BINARY=terraform-provider-${NAME}_${VERSION}
+BINARY=terraform-provider-${NAME}_v${VERSION}
 OS_ARCH?=darwin_arm64
 LOCAL_DEPLOY_DIR=~/.terraform.d/plugins/local.providers/${HOSTNAME}/${NAME}/${VERSION}/${OS_ARCH}
 
 default: docs build
+
+update:
+	go get -u
+	go mod tidy
 
 build: show-version
 	mkdir -p ${OUTPUT_DIR}
@@ -40,7 +43,7 @@ binaries: build
 
 install: show-version build
 	mkdir -p ${LOCAL_DEPLOY_DIR}
-	cp ${OUTPUT_DIR}/${BINARY} ${LOCAL_DEPLOY_DIR}
+	cp -R ${OUTPUT_DIR}/${BINARY} ${LOCAL_DEPLOY_DIR}
 
 
 test: 
@@ -49,7 +52,8 @@ test:
 
 testacc:
 	@echo "Running acceptance tests"
-	TF_ACC=1 go test $(TEST) -v $(TESTARGS) -timeout 120m   
+	clear
+	TF_ACC=1 TF_LOG=INFO go test $(TEST) -v $(TESTARGS) -timeout 120m   
 
 clean:
 	rm -rf ${OUTPUT_DIR}

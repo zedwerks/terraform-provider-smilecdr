@@ -5,7 +5,9 @@ package provider
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -21,6 +23,9 @@ func resourceOpenIdClient() *schema.Resource {
 		ReadContext:   resourceOpenIdClientRead,
 		UpdateContext: resourceOpenIdClientUpdate,
 		DeleteContext: resourceOpenIdClientDelete,
+		Importer: &schema.ResourceImporter{
+			StateContext: resourceOpenIdClientImport,
+		},
 		Schema: map[string]*schema.Schema{
 			"pid": {
 				Type:     schema.TypeInt,
@@ -102,13 +107,14 @@ func resourceOpenIdClient() *schema.Resource {
 				Default:  false,
 			},
 			"client_secrets": {
-				Type:     schema.TypeList,
+				Type:     schema.TypeSet,
 				Optional: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"secret": {
 							Type:             schema.TypeString,
 							Required:         true,
+							Sensitive:        true,
 							ValidateDiagFunc: validations.ValidateDiagFunc(validation.StringLenBetween(10, 256)),
 						},
 						"description": {
@@ -204,10 +210,12 @@ func resourceOpenIdClient() *schema.Resource {
 				ValidateDiagFunc: validations.ValidateDiagFunc(validation.IsRFC3339Time),
 			},
 		},
-		Importer: &schema.ResourceImporter{
-			StateContext: schema.ImportStatePassthroughContext,
-		},
 	}
+}
+
+func customDiffSuppressFunc(k, old, new string, d *schema.ResourceData) bool {
+	// Suppress the output of sensitive attributes in the plan
+	return strings.Contains(k, "password")
 }
 
 func flattenClientSecrets(clientSecrets []smilecdr.ClientSecret) []interface{} {
@@ -215,7 +223,7 @@ func flattenClientSecrets(clientSecrets []smilecdr.ClientSecret) []interface{} {
 
 	for i, s := range clientSecrets {
 		secrets[i] = map[string]interface{}{
-			"secret":      s.Secret,
+			"secret":      "", // Sensitve data is not returned
 			"description": s.Description,
 			"activation":  s.Activation,
 			"expiration":  s.Expiration,
@@ -225,9 +233,24 @@ func flattenClientSecrets(clientSecrets []smilecdr.ClientSecret) []interface{} {
 	return secrets
 }
 
+func flattenPermissions(permissions []smilecdr.UserPermission) []interface{} {
+	perms := make([]interface{}, len(permissions))
+
+	for i, p := range permissions {
+		perms[i] = map[string]interface{}{
+			"permission": p.Permission,
+			"argument":   p.Argument,
+		}
+	}
+
+	return perms
+}
+
 func resourceDataToOpenIdClient(d *schema.ResourceData) (*smilecdr.OpenIdClient, error) {
 
-	secrets := d.Get("client_secrets").([]interface{})
+	fmt.Println("In resourceDataToOpenIdClient")
+
+	secrets := d.Get("client_secrets").(*schema.Set).List()
 
 	clientSecrets := []smilecdr.ClientSecret{}
 	for _, secret := range secrets {
@@ -243,14 +266,18 @@ func resourceDataToOpenIdClient(d *schema.ResourceData) (*smilecdr.OpenIdClient,
 		}
 	}
 
-	perms := d.Get("permissions").(*schema.Set).List()
-	userPermissions := []smilecdr.UserPermission{}
-	for _, perm := range perms {
-		p := perm.(map[string]interface{})
-		userPermissions = append(userPermissions, smilecdr.UserPermission{
-			Permission: p["permission"].(string),
-			Argument:   p["argument"].(string),
-		})
+	permissions := d.Get("permissions").(*schema.Set).List()
+
+	userPermissions := make([]smilecdr.UserPermission, len(permissions))
+	for _, permission := range permissions {
+		s := permission.(map[string]interface{})
+		if s["permission"] != nil || s["permission"].(string) != "" {
+			perm := smilecdr.UserPermission{
+				Permission: s["permission"].(string),
+				Argument:   s["argument"].(string),
+			}
+			userPermissions = append(userPermissions, perm)
+		}
 	}
 
 	allowedGrantTypes := make([]string, 0)
@@ -339,7 +366,7 @@ func resourceOpenIdClientCreate(ctx context.Context, d *schema.ResourceData, m i
 		return diag.FromErr(mErr)
 	}
 
-	o, err := c.PostOpenIdClient(*client)
+	o, err := c.PostOpenIdClient(ctx, *client)
 
 	if err != nil {
 		diags := diag.FromErr(err)
@@ -358,6 +385,8 @@ func resourceOpenIdClientCreate(ctx context.Context, d *schema.ResourceData, m i
 
 func resourceOpenIdClientRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 
+	fmt.Println("In resourceOpenIdClientRead")
+
 	var diags diag.Diagnostics
 
 	c := m.(*smilecdr.Client)
@@ -366,7 +395,7 @@ func resourceOpenIdClientRead(ctx context.Context, d *schema.ResourceData, m int
 	nodeId := d.Get("node_id").(string)
 	moduleId := d.Get("module_id").(string)
 
-	openIdClient, err := c.GetOpenIdClient(nodeId, moduleId, client_id)
+	openIdClient, err := c.GetOpenIdClient(ctx, nodeId, moduleId, client_id)
 
 	if err != nil {
 		diags := diag.FromErr(err)
@@ -398,7 +427,7 @@ func resourceOpenIdClientRead(ctx context.Context, d *schema.ResourceData, m int
 	d.Set("created_by_app_sphere", openIdClient.CreatedByAppSphere)
 	d.Set("fixed_scope", openIdClient.FixedScope)
 	d.Set("jwks_url", openIdClient.JwksUrl)
-	d.Set("permissions", openIdClient.Permissions)
+	d.Set("permissions", flattenPermissions(openIdClient.Permissions))
 	d.Set("public_jwks", openIdClient.PublicJwks)
 	d.Set("refresh_token_validity_seconds", openIdClient.RefreshTokenValiditySeconds)
 	d.Set("registered_redirect_uris", openIdClient.RegisteredRedirectUris)
@@ -424,7 +453,7 @@ func resourceOpenIdClientUpdate(ctx context.Context, d *schema.ResourceData, m i
 
 	d.SetId(client.ClientId)
 
-	_, err := c.PutOpenIdClient(*client)
+	_, err := c.PutOpenIdClient(ctx, *client)
 
 	if err != nil {
 		diags := diag.FromErr(err)
@@ -454,4 +483,29 @@ func resourceOpenIdClientDelete(ctx context.Context, d *schema.ResourceData, m i
 	d.SetId("")
 
 	return diags
+}
+
+func resourceOpenIdClientImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+	c := meta.(*smilecdr.Client)
+
+	parts := strings.Split(d.Id(), "/")
+	if len(parts) != 3 {
+		return nil, fmt.Errorf("invalid import. supported import formats: {{nodeId}}/{{moduleId}}/{{clientId}}")
+	}
+
+	_, err := c.GetOpenIdClient(ctx, parts[0], parts[1], parts[3])
+	if err != nil {
+		return nil, err
+	}
+
+	d.Set("node_id", parts[0])
+	d.Set("module_id", parts[1])
+	d.Set("client_id", parts[2])
+
+	diagnostics := resourceOpenIdClientRead(ctx, d, meta)
+	if diagnostics.HasError() {
+		return nil, errors.New(diagnostics[0].Summary)
+	}
+
+	return []*schema.ResourceData{d}, nil
 }

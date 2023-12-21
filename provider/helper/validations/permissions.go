@@ -9,6 +9,15 @@ import (
 
 var (
 	smileCdrUserPermissionTypes = map[string]bool{
+		"ROLE_ANONYMOUS":                    true,
+		"ROLE_FHIR_CLIENT":                  true,
+		"ROLE_FHIR_CLIENT_SUPERUSER":        true,
+		"ROLE_FHIR_CLIENT_SUPERUSER_RO":     true,
+		"ROLE_FHIR_TERMINOLOGY_READ_CLIENT": true,
+		"ROLE_SUPERUSER":                    true,
+		"ROLE_SYSTEM":                       true,
+		"ROLE_SYSTEM_INITIALIZATION":        true,
+		// Next are the permissions
 		"ACCESS_ADMIN_JSON":                               true,
 		"ACCESS_ADMIN_WEB":                                true,
 		"ACCESS_FHIRWEB":                                  true,
@@ -131,14 +140,6 @@ var (
 		"PACKAGE_REGISTRY_READ":                           true,
 		"PACKAGE_REGISTRY_WRITE":                          true,
 		"REINSTATE_MODULE":                                true,
-		"ROLE_ANONYMOUS":                                  true,
-		"ROLE_FHIR_CLIENT":                                true,
-		"ROLE_FHIR_CLIENT_SUPERUSER":                      true,
-		"ROLE_FHIR_CLIENT_SUPERUSER_RO":                   true,
-		"ROLE_FHIR_TERMINOLOGY_READ_CLIENT":               true,
-		"ROLE_SUPERUSER":                                  true,
-		"ROLE_SYSTEM":                                     true,
-		"ROLE_SYSTEM_INITIALIZATION":                      true,
 		"SAVE_USER":                                       true,
 		"START_STOP_MODULE":                               true,
 		"SUBMIT_ATTACHMENT":                               true,

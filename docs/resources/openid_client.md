@@ -80,3 +80,14 @@ Required:
 Optional:
 
 - `argument` (String)
+
+## Import
+
+Existing Inbound Security Modules can be imported using the format `{{node_id}}/{{module_id}}/{{client_id}}`, where the `client_id` is the unique Client Identifier.
+This value can be found by logging into the SmileCDR Admin console.
+
+Example:
+
+```bash
+terraform import smilecdr_openid_client.client1  "Master/smart_auth/client1"
+```

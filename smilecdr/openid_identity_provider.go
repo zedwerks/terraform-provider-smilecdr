@@ -4,6 +4,7 @@
 package smilecdr
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/url"
@@ -31,9 +32,9 @@ type OpenIdIdentityProvider struct {
 	ArchivedAt                      string `json:"archivedAt,omitempty"`
 }
 
-func (smilecdr *Client) GetOpenIdIdentityProviders() ([]OpenIdIdentityProvider, error) {
+func (smilecdr *Client) GetOpenIdIdentityProviders(ctx context.Context) ([]OpenIdIdentityProvider, error) {
 	var providers []OpenIdIdentityProvider
-	jsonBody, getErr := smilecdr.Get("/openid-connect-servers")
+	jsonBody, getErr := smilecdr.Get(ctx, "/openid-connect-servers")
 	if getErr != nil {
 		return providers, getErr
 	}
@@ -43,11 +44,11 @@ func (smilecdr *Client) GetOpenIdIdentityProviders() ([]OpenIdIdentityProvider, 
 	return providers, err
 }
 
-func (smilecdr *Client) GetOpenIdIdentityProvider(nodeId string, moduleId string, issuerUrl string) (OpenIdIdentityProvider, error) {
+func (smilecdr *Client) GetOpenIdIdentityProvider(ctx context.Context, nodeId string, moduleId string, issuerUrl string) (OpenIdIdentityProvider, error) {
 
 	var provider OpenIdIdentityProvider
 	var endpoint = fmt.Sprintf("/openid-connect-servers/%s/%s/?issuer_url=%s", nodeId, moduleId, url.PathEscape(issuerUrl))
-	jsonBody, getErr := smilecdr.Get(endpoint)
+	jsonBody, getErr := smilecdr.Get(ctx, endpoint)
 	if getErr != nil {
 		fmt.Println("error during GET in GetOpenIdIdentityProvider:", getErr)
 		return provider, getErr
@@ -58,7 +59,7 @@ func (smilecdr *Client) GetOpenIdIdentityProvider(nodeId string, moduleId string
 	return provider, err
 }
 
-func (smilecdr *Client) PostOpenIdIdentityProvider(provider OpenIdIdentityProvider) (OpenIdIdentityProvider, error) {
+func (smilecdr *Client) PostOpenIdIdentityProvider(ctx context.Context, provider OpenIdIdentityProvider) (OpenIdIdentityProvider, error) {
 	var newProvider OpenIdIdentityProvider
 	var nodeId = provider.NodeId
 	var moduleId = provider.ModuleId
@@ -66,7 +67,7 @@ func (smilecdr *Client) PostOpenIdIdentityProvider(provider OpenIdIdentityProvid
 	var endpoint = fmt.Sprintf("/openid-connect-servers/%s/%s", nodeId, moduleId)
 	jsonBody, _ := json.Marshal(provider)
 
-	jsonBody, postErr := smilecdr.Post(endpoint, jsonBody)
+	jsonBody, postErr := smilecdr.Post(ctx, endpoint, jsonBody)
 	if postErr != nil {
 		fmt.Println("error during POST in PostOpenIdIdentityProvider:", postErr)
 		return newProvider, postErr
@@ -77,7 +78,7 @@ func (smilecdr *Client) PostOpenIdIdentityProvider(provider OpenIdIdentityProvid
 	return newProvider, err
 }
 
-func (smilecdr *Client) PutOpenIdIdentityProvider(provider OpenIdIdentityProvider) (OpenIdIdentityProvider, error) {
+func (smilecdr *Client) PutOpenIdIdentityProvider(ctx context.Context, provider OpenIdIdentityProvider) (OpenIdIdentityProvider, error) {
 	var nodeId = provider.NodeId
 	var moduleId = provider.ModuleId
 	var pid = provider.Pid
@@ -85,7 +86,7 @@ func (smilecdr *Client) PutOpenIdIdentityProvider(provider OpenIdIdentityProvide
 	var endpoint = fmt.Sprintf("/openid-connect-servers/%s/%s/%s", nodeId, moduleId, strconv.Itoa(pid))
 	jsonBody, _ := json.Marshal(provider)
 
-	resp, putErr := smilecdr.Put(endpoint, jsonBody)
+	resp, putErr := smilecdr.Put(ctx, endpoint, jsonBody)
 	if putErr != nil {
 		fmt.Println("error during PUT in PutOpenIdIdentityProvider:", putErr)
 		fmt.Println("ResponseBody:", string(resp))

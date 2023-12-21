@@ -5,6 +5,9 @@ package provider
 
 import (
 	"context"
+	"errors"
+	"fmt"
+	"strings"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
@@ -20,6 +23,9 @@ func resourceOpenIdIdentityProvider() *schema.Resource {
 		ReadContext:   resourceOpenIdIdentityProviderRead,
 		UpdateContext: resourceOpenIdIdentityProviderUpdate,
 		DeleteContext: resourceOpenIdIdentityProviderDelete,
+		Importer: &schema.ResourceImporter{
+			StateContext: resourceOpenIdIdentityProviderImport,
+		},
 		Schema: map[string]*schema.Schema{
 			"pid": {
 				Type:     schema.TypeInt,
@@ -105,9 +111,6 @@ func resourceOpenIdIdentityProvider() *schema.Resource {
 				Optional: true,
 			},
 		},
-		Importer: &schema.ResourceImporter{
-			StateContext: schema.ImportStatePassthroughContext,
-		},
 	}
 }
 
@@ -146,7 +149,7 @@ func resourceOpenIdIdentityProviderCreate(ctx context.Context, d *schema.Resourc
 		return diag.FromErr(mErr)
 	}
 
-	o, err := c.PostOpenIdIdentityProvider(*idp)
+	o, err := c.PostOpenIdIdentityProvider(ctx, *idp)
 
 	if err != nil {
 		diags := diag.FromErr(err)
@@ -174,7 +177,7 @@ func resourceOpenIdIdentityProviderRead(ctx context.Context, d *schema.ResourceD
 	moduleId := d.Get("module_id").(string)
 	issuerUrl := d.Get("issuer").(string)
 
-	provider, err := c.GetOpenIdIdentityProvider(nodeId, moduleId, issuerUrl)
+	provider, err := c.GetOpenIdIdentityProvider(ctx, nodeId, moduleId, issuerUrl)
 
 	if err != nil {
 		return diag.FromErr(err)
@@ -218,7 +221,7 @@ func resourceOpenIdIdentityProviderUpdate(ctx context.Context, d *schema.Resourc
 	}
 	d.SetId(provider.Issuer)
 
-	_, err := c.PutOpenIdIdentityProvider(*provider)
+	_, err := c.PutOpenIdIdentityProvider(ctx, *provider)
 
 	if err != nil {
 		diags := diag.FromErr(err)
@@ -244,4 +247,34 @@ func resourceOpenIdIdentityProviderDelete(ctx context.Context, d *schema.Resourc
 	d.SetId("")
 
 	return diags
+}
+
+func resourceOpenIdIdentityProviderImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+	c := meta.(*smilecdr.Client)
+
+	parts := strings.Split(d.Id(), "?issuer_url=")
+	if len(parts) != 2 {
+		return nil, fmt.Errorf("invalid import. supported import formats: {{nodeId}}/{{moduleId}}?issuer_url={{issuerUrl}}")
+	}
+
+	moduleParts := strings.Split(parts[0], "/")
+	if len(moduleParts) != 2 {
+		return nil, fmt.Errorf("invalid import. supported import formats: {{nodeId}}/{{moduleId}}?issuer_url={{issuerUrl}}")
+	}
+
+	_, err := c.GetOpenIdIdentityProvider(ctx, moduleParts[0], moduleParts[1], parts[2])
+	if err != nil {
+		return nil, err
+	}
+
+	d.Set("node_id", moduleParts[0])
+	d.Set("module_id", moduleParts[1])
+	d.Set("issuer", parts[2])
+
+	diagnostics := resourceOpenIdIdentityProviderRead(ctx, d, meta)
+	if diagnostics.HasError() {
+		return nil, errors.New(diagnostics[0].Summary)
+	}
+
+	return []*schema.ResourceData{d}, nil
 }

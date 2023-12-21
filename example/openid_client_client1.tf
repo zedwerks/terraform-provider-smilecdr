@@ -22,7 +22,7 @@ resource "smilecdr_openid_client" "client1" {
   }
   client_secrets {
     secret = "secret23456789aabb"
-  }
+  } 
   fixed_scope                    = false
   refresh_token_validity_seconds = 86400
   registered_redirect_uris       = ["http://example-client1.com:6000", "http://example-client1.com:6001"]
@@ -46,10 +46,7 @@ resource "smilecdr_openid_client" "client1" {
   attestation_accepted      = false
   jwks_url                  = "http://example-client1.com/jwks"
   permissions {
-    permission = "FHIR_WRITE_ALL_IN_COMPARTMENT"
-    argument   = "Patient/123"
-  }
-  permissions {
-    permission = "ROLE_FHIR_CLIENT"
+      permission = "FHIR_WRITE_ALL_IN_COMPARTMENT"
+      argument   = "Patient/123"
   }
 }

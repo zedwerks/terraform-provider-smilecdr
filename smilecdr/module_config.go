@@ -4,6 +4,7 @@
 package smilecdr
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 )
@@ -37,9 +38,9 @@ func (moduleConfig *ModuleConfig) LookupOptionOk(key string) (string, bool) {
 	return "", false
 }
 
-func (smilecdr *Client) GetModuleConfigs() ([]ModuleConfig, error) {
+func (smilecdr *Client) GetModuleConfigs(ctx context.Context) ([]ModuleConfig, error) {
 	var modules []ModuleConfig
-	jsonBody, getErr := smilecdr.Get("/module-config")
+	jsonBody, getErr := smilecdr.Get(ctx, "/module-config")
 	if getErr != nil {
 		return modules, getErr
 	}
@@ -49,10 +50,10 @@ func (smilecdr *Client) GetModuleConfigs() ([]ModuleConfig, error) {
 	return modules, err
 }
 
-func (smilecdr *Client) GetModuleConfig(nodeId string, moduleId string) (ModuleConfig, error) {
+func (smilecdr *Client) GetModuleConfig(ctx context.Context, nodeId string, moduleId string) (ModuleConfig, error) {
 	var module ModuleConfig
 	var endpoint = fmt.Sprintf("/module-config/%s/%s", nodeId, moduleId)
-	jsonBody, getErr := smilecdr.Get(endpoint)
+	jsonBody, getErr := smilecdr.Get(ctx, endpoint)
 	if getErr != nil {
 		fmt.Println("error during Get in GetModuleConfig:", getErr)
 		return module, getErr
@@ -66,7 +67,7 @@ func (smilecdr *Client) GetModuleConfig(nodeId string, moduleId string) (ModuleC
 	return module, err
 }
 
-func (smilecdr *Client) PostModuleConfig(nodeId string, module ModuleConfig) (ModuleConfig, error) {
+func (smilecdr *Client) PostModuleConfig(ctx context.Context, nodeId string, module ModuleConfig) (ModuleConfig, error) {
 	var newModule ModuleConfig
 	var moduleId = module.ModuleId
 
@@ -75,7 +76,7 @@ func (smilecdr *Client) PostModuleConfig(nodeId string, module ModuleConfig) (Mo
 
 	fmt.Println("PostModuleConfig: ", string(jsonBody))
 
-	jsonBody, postErr := smilecdr.Post(endpoint, jsonBody)
+	jsonBody, postErr := smilecdr.Post(ctx, endpoint, jsonBody)
 	if postErr != nil {
 		fmt.Println("error during Post in PostOpenIdClient:", postErr)
 		return newModule, postErr
@@ -89,13 +90,13 @@ func (smilecdr *Client) PostModuleConfig(nodeId string, module ModuleConfig) (Mo
 	return newModule, err
 }
 
-func (smilecdr *Client) PutModuleConfig(nodeId string, module ModuleConfig) (ModuleConfig, error) {
+func (smilecdr *Client) PutModuleConfig(ctx context.Context, nodeId string, module ModuleConfig) (ModuleConfig, error) {
 	var moduleId = module.ModuleId
 
 	var endpoint = fmt.Sprintf("/module-config/%s/%s/set", nodeId, moduleId)
 	jsonBody, _ := json.Marshal(module)
 
-	resp, putErr := smilecdr.Put(endpoint, jsonBody)
+	resp, putErr := smilecdr.Put(ctx, endpoint, jsonBody)
 	if putErr != nil {
 		fmt.Println("error during Put in PutModuleConfig:", putErr)
 		fmt.Println("ResponseBody:", string(resp))
@@ -105,8 +106,8 @@ func (smilecdr *Client) PutModuleConfig(nodeId string, module ModuleConfig) (Mod
 	return module, nil
 }
 
-func (smilecdr *Client) DeleteModuleConfig(nodeId string, moduleId string) error {
+func (smilecdr *Client) DeleteModuleConfig(ctx context.Context, nodeId string, moduleId string) error {
 	var endpoint = fmt.Sprintf("/module-config/%s/%s/archive", nodeId, moduleId)
-	_, err := smilecdr.Delete(endpoint)
+	_, err := smilecdr.Delete(ctx, endpoint)
 	return err
 }
