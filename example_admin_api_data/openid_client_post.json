@@ -1,0 +1,40 @@
+{
+  "nodeId": "Master",
+  "moduleId": "smart_auth",
+  "clientId": "cc_zmelbrtric",
+  "clientName": "Client2",
+  "enabled": true,
+  "accessTokenValiditySeconds": 300,
+  "allowedGrantTypes": ["CLIENT_CREDENTIALS", "REFRESH_TOKEN"],
+  "autoApproveScopes": [
+    "openid",
+    "launch",
+    "launch/patient",
+    "profile",
+    "fhirUser"
+  ],
+  "autoGrantScopes": ["openid", "offline_access"],
+  "canIntrospectAnyTokens": true,
+  "clientSecrets": [
+    {
+      "secret": "secret1234569900",
+      "activation": "2023-08-05T00:09:53.702+00:00"
+    }
+  ],
+  "jwksUrl": "http://example-client1.com/jwks",
+  "refreshTokenValiditySeconds": 86400,
+  "registeredRedirectUris": [
+    "http://example-client1.com:6000",
+    "http://example-client1.com:6001"
+  ],
+  "scopes": [
+    "patient/*.read",
+    "openid",
+    "launch",
+    "launch/patient",
+    "offline_access",
+    "profile",
+    "fhirUser"
+  ],
+  "secretRequired": true
+}

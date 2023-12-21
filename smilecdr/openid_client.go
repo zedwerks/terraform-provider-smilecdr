@@ -10,6 +10,7 @@ import (
 )
 
 type ClientSecret struct {
+	Pid         int    `json:"pid,omitempty"`
 	Secret      string `json:"secret,omitempty"`
 	Description string `json:"description,omitempty"`
 	Expiration  string `json:"expiration,omitempty"`

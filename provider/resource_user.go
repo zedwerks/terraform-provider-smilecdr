@@ -14,6 +14,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/zedwerks/terraform-smilecdr/provider/helper/validations"
+
 	"github.com/zedwerks/terraform-smilecdr/smilecdr"
 )
 
@@ -27,6 +28,10 @@ func resourceUser() *schema.Resource {
 			StateContext: resourceUserImport,
 		},
 		Schema: map[string]*schema.Schema{
+			"created": {
+				Type:     schema.TypeBool,
+				Computed: true,
+			},
 			"pid": {
 				Type:     schema.TypeInt,
 				Computed: true,
@@ -50,8 +55,12 @@ func resourceUser() *schema.Resource {
 				Type:             schema.TypeString,
 				Required:         true,
 				Sensitive:        true,
-				DiffSuppressFunc: smilecdr.suppressSensitiveDataDiff,
 				ValidateDiagFunc: validations.ValidateDiagFunc(validation.StringLenBetween(8, 512)),
+				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+					created := d.Get("created").(bool) || false
+					// Suppress the output of changes to the 'password' attribute in the plan
+					return created && k == "password"
+				},
 			},
 			"family_name": {
 				Type:     schema.TypeString,
@@ -185,6 +194,8 @@ func resourceUserCreate(ctx context.Context, d *schema.ResourceData, m interface
 		})
 		return diags
 	}
+	// Set the 'created' state variable to true after the initial creation
+	d.Set("created", true)
 	d.Set("pid", o.Pid)
 	d.SetId(strconv.Itoa(o.Pid)) // the primary resource identifier. must be unique.
 
@@ -219,7 +230,7 @@ func resourceUserRead(ctx context.Context, d *schema.ResourceData, m interface{}
 	d.Set("node_id", user.NodeId)
 	d.Set("module_id", user.ModuleId)
 	d.Set("username", user.Username)
-	d.Set("password", "") // Sensitive Data not returned by Smile CDR
+	d.Set("password", user.Password)
 	d.Set("family_name", user.FamilyName)
 	d.Set("given_name", user.GivenName)
 	d.Set("account_locked", user.AccountLocked)
@@ -243,6 +254,11 @@ func resourceUserUpdate(ctx context.Context, d *schema.ResourceData, m interface
 	user, mErr := resourceDataToUser(d)
 	if mErr != nil {
 		return diag.FromErr(mErr)
+	}
+
+	if d.HasChange("password") {
+		old, new := d.GetChange("password")
+		fmt.Printf("Sensitive data 'password' has changed from '%s' to '%s'\n", old, new)
 	}
 
 	d.SetId(strconv.Itoa(user.Pid))

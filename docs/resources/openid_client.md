@@ -32,7 +32,7 @@ description: |-
 - `can_introspect_any_tokens` (Boolean)
 - `can_introspect_own_tokens` (Boolean)
 - `can_reissue_tokens` (Boolean)
-- `client_secrets` (Block List) (see [below for nested schema](#nestedblock--client_secrets))
+- `client_secrets` (Block Set) (see [below for nested schema](#nestedblock--client_secrets))
 - `enabled` (Boolean)
 - `fixed_scope` (Boolean)
 - `jwks_url` (String)
@@ -49,6 +49,7 @@ description: |-
 
 ### Read-Only
 
+- `created` (Boolean)
 - `created_by_app_sphere` (Boolean)
 - `id` (String) The ID of this resource.
 - `pid` (Number)
@@ -58,7 +59,7 @@ description: |-
 
 Required:
 
-- `secret` (String)
+- `secret` (String, Sensitive)
 
 Optional:
 
@@ -68,6 +69,7 @@ Optional:
 Read-Only:
 
 - `description` (String)
+- `pid` (Number)
 
 
 <a id="nestedblock--permissions"></a>
@@ -80,14 +82,3 @@ Required:
 Optional:
 
 - `argument` (String)
-
-## Import
-
-Existing Inbound Security Modules can be imported using the format `{{node_id}}/{{module_id}}/{{client_id}}`, where the `client_id` is the unique Client Identifier.
-This value can be found by logging into the SmileCDR Admin console.
-
-Example:
-
-```bash
-terraform import smilecdr_openid_client.client1  "Master/smart_auth/client1"
-```

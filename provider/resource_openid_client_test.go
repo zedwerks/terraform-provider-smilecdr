@@ -86,7 +86,7 @@ func testOpenIdClientConfig_confidential() string {
   		client_name       = "Client2"
   		client_secrets {
 			secret     = "secret1234569900"
-			activation = "2023-08-05T00:09:53.702+00:00"
+			activation = "2023-12-05T00:09:53.702+00:00"
 		}
 		fixed_scope                    = false
 		refresh_token_validity_seconds = 86400
@@ -109,7 +109,10 @@ func testOpenIdClientConfig_confidential() string {
 		can_reissue_tokens        = false
 		remember_approved_scopes  = false
 		attestation_accepted      = false
-		jwks_url                  = "http://example-client1.com/jwks"	
+		jwks_url                  = "http://example-client1.com/jwks"
+		lifecycle {
+			ignore_changes = ["client_secrets"]
+		}	
 	}`, clientId)
 }
 

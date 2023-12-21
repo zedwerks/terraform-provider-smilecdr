@@ -27,6 +27,10 @@ func resourceOpenIdClient() *schema.Resource {
 			StateContext: resourceOpenIdClientImport,
 		},
 		Schema: map[string]*schema.Schema{
+			"created": {
+				Type:     schema.TypeBool,
+				Computed: true,
+			},
 			"pid": {
 				Type:     schema.TypeInt,
 				Computed: true,
@@ -111,11 +115,24 @@ func resourceOpenIdClient() *schema.Resource {
 				Optional: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
+						"pid": {
+							Type:     schema.TypeInt,
+							Computed: true,
+						},
 						"secret": {
 							Type:             schema.TypeString,
 							Required:         true,
-							Sensitive:        true,
-							ValidateDiagFunc: validations.ValidateDiagFunc(validation.StringLenBetween(10, 256)),
+							Sensitive:        false,
+							ValidateDiagFunc: validations.ValidateDiagFunc(validation.StringLenBetween(8, 256)),
+							DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+								created := d.Get("created").(bool) || false
+								// Suppress the output of changes to the 'secret' attribute in the plan
+								if created {
+									fmt.Printf("k = %s, old = %s, new = %s\n", k, old, new)
+									fmt.Println("Suppressing diff for sensitive attribute 'secret'")
+								}
+								return created
+							},
 						},
 						"description": {
 							Type:     schema.TypeString,
@@ -141,7 +158,6 @@ func resourceOpenIdClient() *schema.Resource {
 			"fixed_scope": {
 				Type:     schema.TypeBool,
 				Optional: true,
-				Default:  false,
 			},
 			"jwks_url": {
 				Type:             schema.TypeString,
@@ -161,7 +177,6 @@ func resourceOpenIdClient() *schema.Resource {
 						"argument": {
 							Type:     schema.TypeString,
 							Optional: true,
-							Default:  "",
 						},
 					},
 				},
@@ -186,7 +201,6 @@ func resourceOpenIdClient() *schema.Resource {
 			"remember_approved_scopes": {
 				Type:     schema.TypeBool,
 				Optional: true,
-				Default:  false,
 			},
 			"scopes": {
 				Type:     schema.TypeSet,
@@ -196,26 +210,18 @@ func resourceOpenIdClient() *schema.Resource {
 			"secret_client_can_change": {
 				Type:     schema.TypeBool,
 				Optional: true,
-				Default:  false,
 			},
 			"secret_required": {
 				Type:     schema.TypeBool,
 				Optional: true,
-				Default:  false,
 			},
 			"archived_at": {
 				Type:             schema.TypeString,
 				Optional:         true,
-				Default:          "",
 				ValidateDiagFunc: validations.ValidateDiagFunc(validation.IsRFC3339Time),
 			},
 		},
 	}
-}
-
-func customDiffSuppressFunc(k, old, new string, d *schema.ResourceData) bool {
-	// Suppress the output of sensitive attributes in the plan
-	return strings.Contains(k, "password")
 }
 
 func flattenClientSecrets(clientSecrets []smilecdr.ClientSecret) []interface{} {
@@ -223,7 +229,8 @@ func flattenClientSecrets(clientSecrets []smilecdr.ClientSecret) []interface{} {
 
 	for i, s := range clientSecrets {
 		secrets[i] = map[string]interface{}{
-			"secret":      "", // Sensitve data is not returned
+			"pid":         s.Pid,
+			"secret":      s.Secret,
 			"description": s.Description,
 			"activation":  s.Activation,
 			"expiration":  s.Expiration,
@@ -255,8 +262,9 @@ func resourceDataToOpenIdClient(d *schema.ResourceData) (*smilecdr.OpenIdClient,
 	clientSecrets := []smilecdr.ClientSecret{}
 	for _, secret := range secrets {
 		s := secret.(map[string]interface{})
-		if s["secret"] != nil || s["secret"].(string) != "" {
+		if s["secret"] != nil {
 			secret := smilecdr.ClientSecret{
+				Pid:         s["pid"].(int),
 				Secret:      s["secret"].(string),
 				Description: s["description"].(string),
 				Activation:  s["activation"].(string),
@@ -357,9 +365,12 @@ func resourceDataToOpenIdClient(d *schema.ResourceData) (*smilecdr.OpenIdClient,
 
 func resourceOpenIdClientCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 
+	fmt.Println("In resourceOpenIdClientCreate")
+
 	c := m.(*smilecdr.Client)
 
 	d.Set("created_by_app_sphere", false) // If we create a client, it is not created by AppSphere
+	d.Set("created", true)
 
 	client, mErr := resourceDataToOpenIdClient(d)
 	if mErr != nil {
@@ -377,6 +388,7 @@ func resourceOpenIdClientCreate(ctx context.Context, d *schema.ResourceData, m i
 		return diags
 	}
 
+	d.Set("created", true)   // Set the 'created' state variable to true after the initial creation
 	d.SetId(client.ClientId) // the primary resource identifier. must be unique.
 	d.Set("pid", o.Pid)      // the pid is needed for Put requests
 
@@ -474,11 +486,27 @@ func resourceOpenIdClientDelete(ctx context.Context, d *schema.ResourceData, m i
 
 	var diags diag.Diagnostics
 
-	d.Set("client_secrets", []interface{}{}) // empty the client secrets
-
 	d.Set("archived_at", time.Now().Format(time.RFC3339))
 
-	resourceOpenIdClientUpdate(ctx, d, m)
+	c := m.(*smilecdr.Client)
+
+	client, mErr := resourceDataToOpenIdClient(d)
+	if mErr != nil {
+		return diag.FromErr(mErr)
+	}
+
+	d.SetId(client.ClientId)
+
+	_, err := c.PutOpenIdClient(ctx, *client)
+
+	if err != nil {
+		diags := diag.FromErr(err)
+		diags = append(diags, diag.Diagnostic{
+			Severity: diag.Warning,
+			Summary:  "Error updating openid client",
+		})
+		return diags
+	}
 
 	d.SetId("")
 

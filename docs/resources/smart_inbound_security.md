@@ -59,14 +59,3 @@ Required:
 
 - `module_id` (String)
 - `type` (String)
-
-## Import
-
-Existing Inbound Security Modules can be imported using the format `{{node_id}}/{{module_id}}`, where the `module_id` is the unique Module Identifier in the node.
-This value can be found by logging into the SmileCDR Admin console.
-
-Example:
-
-```bash
-terraform import smilecdr_smart_inbound_security.local_security  "Master/local_security"
-```

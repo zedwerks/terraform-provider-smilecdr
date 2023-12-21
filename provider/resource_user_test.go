@@ -51,13 +51,6 @@ func testUserConfig_basic() string {
 	    authorities {
 		   permission = "ROLE_FHIR_CLIENT"
 	    }
-
-		# ignore password masking by smile cdr
-		lifecycle {
-			ignore_changes = [
-				password,
-			]
-		}
 	}`, username)
 }
 
