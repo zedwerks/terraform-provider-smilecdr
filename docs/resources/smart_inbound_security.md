@@ -59,3 +59,13 @@ Required:
 
 - `module_id` (String)
 - `type` (String)
+
+## Import
+
+Existing Inbound Security Modules (module Type of ```SECURITY_IN_SMART```) can be imported with the following resource ID structure: `{{nodeId}}/{{moduleId}}`, where ```moduleId``` is the unique module identifier.
+
+Example:
+
+```bash
+$ terraform import smilecdr_smart_inbound_security.local_security "Master/local_security"
+```

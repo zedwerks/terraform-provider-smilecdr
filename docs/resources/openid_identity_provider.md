@@ -8,7 +8,7 @@ description: |-
 
 # smilecdr_openid_identity_provider (Resource)
 
-
+This resource manages what Smile CDR refers to as an  "Open ID Connect Server", which in OAuth 2.0 terminology is an external Identity Provider or IdP.
 
 
 
@@ -42,3 +42,13 @@ description: |-
 - `federation_registration_id` (String)
 - `id` (String) The ID of this resource.
 - `pid` (Number)
+
+## Import
+
+Identity providers can be imported with the following identifier structure: `{{nodeId}}/{{moduleId}}?issuer_url={{issuerUrl}}`, where `issuerUrl` is the unique identity provider issuer url.
+
+Example:
+
+```bash
+$ terraform import smilecdr_openid_identity_provider.test "Master/smart_auth?issuer_url=http://localhost:8080/realms/test"
+```

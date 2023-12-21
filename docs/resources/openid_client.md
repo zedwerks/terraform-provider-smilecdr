@@ -73,6 +73,7 @@ Read-Only:
 
 
 <a id="nestedblock--permissions"></a>
+
 ### Nested Schema for `permissions`
 
 Required:
@@ -82,3 +83,14 @@ Required:
 Optional:
 
 - `argument` (String)
+
+## Import
+
+OIDC Clients can be imported with the following identifier structure: `{{nodeId}}/{{moduleId}}/{{clientId}}`, where `clientId` is the unique client id.
+
+Example:
+
+```bash
+$ terraform import smilecdr_openid_identity_provider.test "Master/smart_auth/client1"
+```
+

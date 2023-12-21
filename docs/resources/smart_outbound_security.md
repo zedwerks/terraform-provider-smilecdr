@@ -118,3 +118,13 @@ This resource represents a Smile CDR SMART Outbound Security Module. Since Smile
 
 - `id` (String) The ID of this resource.
 - `module_type` (String) The module type of the module to be configured.
+
+## Import
+
+Existing SMART Outbound Security Modules (module Type of ```SECURITY_OUT_SMART```) can be imported with the following resource ID structure: `{{nodeId}}/{{moduleId}}`, where ```moduleId``` is the unique module identifier.
+
+Example:
+
+```bash
+$ terraform import smilecdr_smart_outbound_security.smart_auth "Master/smart_auth"
+```
