@@ -27,6 +27,21 @@ func TestSmartOutboundSecurity(t *testing.T) {
 	})
 }
 
+func TestSmartOutboundSecurityWitScript(t *testing.T) {
+	resource.Test(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t) },
+		Providers: testAccProviders,
+		Steps: []resource.TestStep{
+			{
+				Config: testSmartOutboundConfigWithJavaScript(),
+				Check: resource.ComposeTestCheckFunc(
+					testAccSmartOutboundModuleExists("smilecdr_smart_outbound_security.testacc2"),
+				),
+			},
+		},
+	})
+}
+
 func testSmartOutboundConfig() string {
 
 	moduleName := "smart_" + acctest.RandString(8)
@@ -43,6 +58,26 @@ func testSmartOutboundConfig() string {
 		smart_authorization_scopes_supported        = "launch fhirUser openid profile patient/*.read"
 		sessions_max_concurrent_sessions_per_user   = 3
 		dependency_fhir_persistence_module          = "PERSISTENCE_ALL"
+}`, moduleName)
+}
+
+func testSmartOutboundConfigWithJavaScript() string {
+	moduleName := "smart_" + acctest.RandString(8)
+
+	return fmt.Sprintf(`resource "smilecdr_smart_outbound_security" "testacc2" {
+		module_id                             = "%s"
+		node_id                               = "Master"
+		http_listener_context_path            = "/auth"
+		http_listener_unhealthy_response_code = 503
+		http_listener_port                    = 9999
+		oidc_issuer_url                       = "http://smilecdr:9000/auth"
+		oidc_federate_mode_enabled            = true
+		smart_authorization_enforce_approved_scopes = true
+		smart_authorization_scopes_supported        = "launch fhirUser openid profile patient/*.read"
+		sessions_max_concurrent_sessions_per_user   = 3
+		dependency_fhir_persistence_module          = "PERSISTENCE_ALL"
+		smart_callback_post_authorize_script_text =  "Log.info('Authorization Callback Script goes here');"
+
 }`, moduleName)
 }
 
