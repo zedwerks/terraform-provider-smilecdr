@@ -519,7 +519,6 @@ func resourceSmartOutboundSecurity() *schema.Resource {
 			"dependency_fhir_persistence_module": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Default:     "PERSISTANCE_ALL",
 				Description: "The FHIR Storage module to associate with this module.",
 			},
 			"dependency_saml_authentication_module": {
@@ -862,6 +861,7 @@ func smartOutboundSecurityResourceToModuleConfig(d *schema.ResourceData) (*smile
 		})
 	}
 	if v, ok := d.GetOk("smart_callback_post_authorize_script_text"); ok {
+		fmt.Printf("smart_callback_post_authorize_script_text: %s\n", v.(string))
 		moduleConfig.Options = append(moduleConfig.Options, smilecdr.ModuleOption{
 			Key:   "post_authorize_script.text",
 			Value: v.(string),

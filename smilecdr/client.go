@@ -70,14 +70,15 @@ func (c *Client) Get(ctx context.Context, endpoint string) ([]byte, error) {
 		return nil, err
 	}
 
-	body, err := io.ReadAll(resp.Body)
+	rBody, err := io.ReadAll(resp.Body)
+
 	if err != nil {
 		errMsg := fmt.Sprintf("Http GET: error reading Response Body: %s", err.Error())
 		tflog.Error(ctx, errMsg)
 		return nil, err
 	}
 
-	return body, nil
+	return rBody, nil
 }
 
 func (c *Client) Post(ctx context.Context, endpoint string, body []byte) ([]byte, error) {
@@ -107,14 +108,16 @@ func (c *Client) Post(ctx context.Context, endpoint string, body []byte) ([]byte
 		return nil, err
 	}
 
-	body, err = io.ReadAll(resp.Body)
+	var rBody []byte = nil
+
+	rBody, err = io.ReadAll(resp.Body)
 	if err != nil {
 		errMsg := fmt.Sprintf("Http POST: Error reading Response Body: %s", err)
 		tflog.Info(ctx, errMsg)
 		return nil, err
 	}
 
-	return body, nil
+	return rBody, nil
 }
 
 func (c *Client) Put(ctx context.Context, endpoint string, body []byte) ([]byte, error) {
@@ -144,13 +147,15 @@ func (c *Client) Put(ctx context.Context, endpoint string, body []byte) ([]byte,
 		return nil, err
 	}
 
-	body, err = io.ReadAll(resp.Body)
+	var rBody []byte = nil
+
+	rBody, err = io.ReadAll(resp.Body)
 	if err != nil {
 		fmt.Printf("[ERROR] Http PUT: Error reading Response Body: %s", err.Error())
 		return nil, err
 	}
 
-	return body, nil
+	return rBody, nil
 }
 
 func (c *Client) Delete(ctx context.Context, endpoint string) ([]byte, error) {
@@ -177,11 +182,11 @@ func (c *Client) Delete(ctx context.Context, endpoint string) ([]byte, error) {
 		return nil, err
 	}
 
-	body, err := io.ReadAll(resp.Body)
+	rBody, err := io.ReadAll(resp.Body)
 	if err != nil {
 		fmt.Println("[ERROR] Http DELETE: Error reading Response Body:", err)
 		return nil, err
 	}
 
-	return body, nil
+	return rBody, nil
 }

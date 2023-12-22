@@ -26,6 +26,20 @@ type ModuleConfig struct {
 	Dependencies []ModuleDependency `json:"dependencies,omitempty"`
 }
 
+func printModuleConfig(moduleConfig ModuleConfig) {
+	fmt.Println("ModuleConfig:")
+	fmt.Println("  ModuleId: ", moduleConfig.ModuleId)
+	fmt.Println("  ModuleType: ", moduleConfig.ModuleType)
+	fmt.Println("  Options:")
+	for _, kv := range moduleConfig.Options {
+		fmt.Println("    ", kv.Key, ": ", kv.Value)
+	}
+	fmt.Println("  Dependencies:")
+	for _, dep := range moduleConfig.Dependencies {
+		fmt.Println("    ", dep.ModuleId, ": ", dep.Type)
+	}
+}
+
 func (moduleConfig *ModuleConfig) LookupOptionOk(key string) (string, bool) {
 
 	moduleConfigOptions := moduleConfig.Options
@@ -94,9 +108,19 @@ func (smilecdr *Client) PutModuleConfig(ctx context.Context, nodeId string, modu
 	var moduleId = module.ModuleId
 
 	var endpoint = fmt.Sprintf("/module-config/%s/%s/set", nodeId, moduleId)
-	jsonBody, _ := json.Marshal(module)
+
+	printModuleConfig(module) // DEBUG
+
+	jsonBody, error := json.Marshal(module)
+	if error != nil {
+		fmt.Println("error marshalling moduleConfig:", error)
+		return module, error
+	}
+
+	fmt.Println("PutModuleConfig: ", string(jsonBody))
 
 	resp, putErr := smilecdr.Put(ctx, endpoint, jsonBody)
+
 	if putErr != nil {
 		fmt.Println("error during Put in PutModuleConfig:", putErr)
 		fmt.Println("ResponseBody:", string(resp))

@@ -22,5 +22,4 @@ resource "smilecdr_smart_outbound_security" "smart_auth" {
   davinci_native_consent_handling           = false
   smart_callback_post_authorize_script_text = local.post_authorize_callback
   dependency_local_inbound_security         = "SECURITY_IN_UP"
-  dependency_fhir_persistence_module        = "PERSISTENCE_ALL"
 }
