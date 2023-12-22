@@ -66,6 +66,9 @@ func testOpenIdClientConfig_basic() string {
 			"launch",
 			"offline_access"
 		]
+		permissions {
+			permission = "ROLE_FHIR_CLIENT"
+		}
 		secret_required           = false
 		enabled                   = true
 	}`, clientId)

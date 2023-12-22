@@ -276,10 +276,10 @@ func resourceDataToOpenIdClient(d *schema.ResourceData) (*smilecdr.OpenIdClient,
 
 	permissions := d.Get("permissions").(*schema.Set).List()
 
-	userPermissions := make([]smilecdr.UserPermission, len(permissions))
+	userPermissions := make([]smilecdr.UserPermission, 0)
 	for _, permission := range permissions {
 		s := permission.(map[string]interface{})
-		if s["permission"] != nil || s["permission"].(string) != "" {
+		if s["permission"] != nil {
 			perm := smilecdr.UserPermission{
 				Permission: s["permission"].(string),
 				Argument:   s["argument"].(string),
